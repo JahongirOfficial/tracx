@@ -1,0 +1,61 @@
+# docker-compose.prod.yml — Tracx production infrastructure
+# PostgreSQL on host port 5433 + Redis on host port 6380
+# (unique ports to avoid conflicts with other projects on the same VPS)
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# Required env vars (set in shell before running):
+#   TRACX_DB_PASSWORD    — PostgreSQL password
+#   TRACX_REDIS_PASSWORD — Redis password
+
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: tracx_postgres_prod
+    restart: always
+    environment:
+      POSTGRES_DB:       tracx
+      POSTGRES_USER:     tracx_user
+      POSTGRES_PASSWORD: ${TRACX_DB_PASSWORD}
+      PGDATA:            /var/lib/postgresql/data/pgdata
+    volumes:
+      - tracx_postgres_data:/var/lib/postgresql/data
+    ports:
+      # 5433 on host → 5432 in container (unique, no conflict with other projects)
+      - "127.0.0.1:5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tracx_user -d tracx"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: tracx_redis_prod
+    restart: always
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --requirepass ${TRACX_REDIS_PASSWORD}
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - tracx_redis_data:/data
+    ports:
+      # 6380 on host → 6379 in container (unique, no conflict with other projects)
+      - "127.0.0.1:6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${TRACX_REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  tracx_postgres_data:
+    driver: local
+  tracx_redis_data:
+    driver: local

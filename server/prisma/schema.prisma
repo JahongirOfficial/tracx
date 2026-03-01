@@ -1,0 +1,269 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model SuperAdmin {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  role      String   @default("super_admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Businessman {
+  id                   String               @id @default(uuid())
+  username             String               @unique
+  password             String
+  fullName             String?
+  phone                String?
+  companyName          String?
+  role                 String               @default("business")
+  isActive             Boolean              @default(true)
+  plan                 String               @default("trial")
+  subscriptionStart    DateTime             @default(now())
+  subscriptionEnd      DateTime
+  registrationDate     DateTime             @default(now())
+  balance              Decimal              @default(0) @db.Decimal(15, 2)
+  trialEndsAt          DateTime?
+  suspendedAt          DateTime?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  auditLogs            AuditLog[]
+  balanceTransactions  BalanceTransaction[]
+  drivers              Driver[]
+  flights              Flight[]
+  vehicles             Vehicle[]
+}
+
+model Driver {
+  id                String          @id @default(uuid())
+  businessmanId     String
+  username          String          @unique
+  password          String
+  fullName          String
+  phone             String?
+  role              String          @default("driver")
+  isActive          Boolean         @default(true)
+  paymentType       String          @default("per_trip")
+  baseSalary        Decimal         @default(0) @db.Decimal(15, 2)
+  perTripRate       Decimal         @default(0) @db.Decimal(5, 2)
+  status            String          @default("free")
+  currentBalance    Decimal         @default(0) @db.Decimal(15, 2)
+  lastLat           Float?
+  lastLng           Float?
+  lastSpeed         Float?
+  lastHeading       Float?
+  locationUpdatedAt DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  businessman       Businessman     @relation(fields: [businessmanId], references: [id], onDelete: Cascade)
+  expenses          Expense[]
+  flights           Flight[]
+  salaryPayments    SalaryPayment[]
+
+  @@index([businessmanId])
+  @@index([status])
+}
+
+model Vehicle {
+  id                  String           @id @default(uuid())
+  businessmanId       String
+  plateNumber         String
+  brand               String?
+  model               String?
+  year                Int?
+  color               String?
+  currentDriverId     String?
+  currentOdometer     Int              @default(0)
+  oilChangeIntervalKm Int              @default(10000)
+  lastOilChangeKm     Int              @default(0)
+  status              String           @default("normal")
+  isActive            Boolean          @default(true)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  flights             Flight[]
+  maintenanceLogs     MaintenanceLog[]
+  tires               Tire[]
+  businessman         Businessman      @relation(fields: [businessmanId], references: [id], onDelete: Cascade)
+
+  @@unique([businessmanId, plateNumber])
+  @@index([businessmanId])
+}
+
+model Tire {
+  id          String   @id @default(uuid())
+  vehicleId   String
+  position    String
+  brand       String?
+  size        String?
+  installedAt DateTime @default(now())
+  installedKm Int      @default(0)
+  vehicle     Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+}
+
+model Flight {
+  id                  String      @id @default(uuid())
+  businessmanId       String
+  driverId            String
+  vehicleId           String
+  flightType          String      @default("domestic")
+  status              String      @default("active")
+  roadMoney           Decimal     @default(0) @db.Decimal(15, 2)
+  driverProfitPercent Decimal     @default(0) @db.Decimal(5, 2)
+  startOdometer       Int?
+  endOdometer         Int?
+  startFuel           Decimal?    @db.Decimal(10, 2)
+  endFuel             Decimal?    @db.Decimal(10, 2)
+  totalIncome         Decimal     @default(0) @db.Decimal(15, 2)
+  fuelExpenses        Decimal     @default(0) @db.Decimal(15, 2)
+  tripExpenses        Decimal     @default(0) @db.Decimal(15, 2)
+  lightExpenses       Decimal     @default(0) @db.Decimal(15, 2)
+  heavyExpenses       Decimal     @default(0) @db.Decimal(15, 2)
+  totalExpenses       Decimal     @default(0) @db.Decimal(15, 2)
+  netProfit           Decimal     @default(0) @db.Decimal(15, 2)
+  driverProfitAmount  Decimal     @default(0) @db.Decimal(15, 2)
+  businessProfit      Decimal     @default(0) @db.Decimal(15, 2)
+  driverOwes          Decimal     @default(0) @db.Decimal(15, 2)
+  driverPaidAmount    Decimal     @default(0) @db.Decimal(15, 2)
+  paymentStatus       String      @default("pending")
+  driverCashInHand    Decimal     @default(0) @db.Decimal(15, 2)
+  finalBalance        Decimal     @default(0) @db.Decimal(15, 2)
+  startedAt           DateTime    @default(now())
+  completedAt         DateTime?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  expenses            Expense[]
+  businessman         Businessman @relation(fields: [businessmanId], references: [id], onDelete: Cascade)
+  driver              Driver      @relation(fields: [driverId], references: [id])
+  vehicle             Vehicle     @relation(fields: [vehicleId], references: [id])
+  legs                Leg[]
+
+  @@index([businessmanId])
+  @@index([driverId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Leg {
+  id                 String   @id @default(uuid())
+  flightId           String
+  fromCity           String
+  toCity             String
+  cargo              String?
+  weight             Decimal? @db.Decimal(10, 2)
+  payment            Decimal  @db.Decimal(15, 2)
+  paymentType        String
+  transferFeePercent Decimal  @default(0) @db.Decimal(5, 2)
+  transferFeeAmount  Decimal  @default(0) @db.Decimal(15, 2)
+  netPayment         Decimal  @db.Decimal(15, 2)
+  status             String   @default("pending")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  flight             Flight   @relation(fields: [flightId], references: [id], onDelete: Cascade)
+
+  @@index([flightId])
+}
+
+model Expense {
+  id                String   @id @default(uuid())
+  flightId          String
+  type              String
+  expenseClass      String
+  amount            Decimal  @db.Decimal(15, 2)
+  currency          String   @default("UZS")
+  exchangeRate      Decimal? @db.Decimal(10, 2)
+  amountInUZS       Decimal  @db.Decimal(15, 2)
+  description       String?
+  timing            String   @default("during")
+  addedBy           String
+  addedById         String
+  confirmedByDriver Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  driverRelId       String?
+  driver            Driver?  @relation(fields: [driverRelId], references: [id])
+  flight            Flight   @relation(fields: [flightId], references: [id], onDelete: Cascade)
+
+  @@index([flightId])
+  @@index([type])
+}
+
+model SalaryPayment {
+  id        String   @id @default(uuid())
+  driverId  String
+  amount    Decimal  @db.Decimal(15, 2)
+  note      String?
+  paidAt    DateTime @default(now())
+  createdAt DateTime @default(now())
+  driver    Driver   @relation(fields: [driverId], references: [id], onDelete: Cascade)
+}
+
+model MaintenanceLog {
+  id          String   @id @default(uuid())
+  vehicleId   String
+  type        String
+  description String?
+  cost        Decimal? @db.Decimal(15, 2)
+  odometerAt  Int?
+  performedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  vehicle     Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id            String       @id @default(uuid())
+  businessmanId String?
+  userId        String
+  userRole      String
+  action        String
+  entity        String
+  entityId      String?
+  oldData       Json?
+  newData       Json?
+  ipAddress     String?
+  createdAt     DateTime     @default(now())
+  businessman   Businessman? @relation(fields: [businessmanId], references: [id])
+
+  @@index([businessmanId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  userRole  String
+  expiresAt DateTime
+  isRevoked Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+}
+
+model BalanceTransaction {
+  id            String      @id @default(uuid())
+  businessmanId String
+  businessman   Businessman @relation(fields: [businessmanId], references: [id], onDelete: Cascade)
+  type          String      // "topup" | "daily_charge" | "trial_start" | "manual"
+  amount        Decimal     @db.Decimal(15, 2)
+  balanceBefore Decimal     @db.Decimal(15, 2)
+  balanceAfter  Decimal     @db.Decimal(15, 2)
+  vehicleCount  Int?
+  description   String
+  paymeId       String?     @unique
+  paymeState    Int?        // 1=created, 2=paid, -1=cancelled
+  paymeTime     BigInt?
+  createdAt     DateTime    @default(now())
+
+  @@index([businessmanId])
+  @@index([createdAt])
+  @@index([paymeId])
+}

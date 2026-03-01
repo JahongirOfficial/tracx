@@ -1,0 +1,36 @@
+{
+  "name": "avtojon-server",
+  "version": "1.0.0",
+  "description": "Avtojon transport management SaaS - backend",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "seed": "node src/seed/superAdmin.js"
+  },
+  "prisma": {
+    "seed": "node src/seed/superAdmin.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.10.0",
+    "@socket.io/redis-adapter": "^8.2.1",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.2.0",
+    "helmet": "^7.1.0",
+    "ioredis": "^5.3.2",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "node-cron": "^3.0.3",
+    "socket.io": "^4.7.4",
+    "winston": "^3.12.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0",
+    "prisma": "^5.10.0"
+  }
+}
