@@ -23,7 +23,10 @@ api.interceptors.response.use(
   async (error) => {
     const original = error.config;
 
-    if (error.response?.status === 401 && !original._retry) {
+    // Auth endpointlari uchun refresh qilmaymiz (login xatosi redirect loopga olib keladi)
+    const isAuthEndpoint = original?.url?.includes('/auth/');
+
+    if (error.response?.status === 401 && !original._retry && !isAuthEndpoint) {
       original._retry = true;
 
       try {

@@ -98,7 +98,7 @@ const Login = () => {
 
         {/* Bottom quote */}
         <div className="relative border-t border-white/10 pt-6">
-          <p className="text-xs text-slate-500">© 2024 Avtojon. Barcha huquqlar himoyalangan.</p>
+          <p className="text-xs text-slate-500">© 2026 Tracx. Barcha huquqlar himoyalangan.</p>
         </div>
       </div>
 

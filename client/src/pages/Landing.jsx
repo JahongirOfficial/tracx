@@ -486,7 +486,7 @@ const Landing = () => {
             {/* Copyright */}
             <div className="flex items-center gap-2 text-xs">
               <Globe size={13} />
-              <span>© 2024 Avtojon. Transport logistika platformasi.</span>
+              <span>© 2026 Tracx. Transport logistika platformasi.</span>
             </div>
           </div>
         </div>
