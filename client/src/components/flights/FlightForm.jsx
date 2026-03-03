@@ -94,6 +94,7 @@ const FlightForm = ({ isOpen, onClose }) => {
   const canSubmit = form.driverId && form.vehicleId;
 
   const selectedDriver = drivers.find(d => d.id === form.driverId);
+  const fuelUnit = (form.fuelType === 'metan' || form.fuelType === 'propan') ? 'kub' : 'litr';
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Yangi reys yaratish">
@@ -210,7 +211,7 @@ const FlightForm = ({ isOpen, onClose }) => {
               placeholder="0"
             />
             <Input
-              label="Yoqilg'i (litr)"
+              label={`Yoqilg'i (${fuelUnit})`}
               type="number"
               leftIcon={Droplets}
               value={form.startFuel}

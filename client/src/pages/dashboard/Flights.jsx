@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Plus, Plane, User, Clock, CheckCircle, AlertCircle,
-  ChevronRight, SlidersHorizontal, X,
+  ChevronRight, SlidersHorizontal, X, LayoutList, LayoutGrid,
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
@@ -51,6 +51,88 @@ const SkeletonRows = () => (
   </div>
 );
 
+/* ── Skeleton cards ───────────────────────────────────────────────── */
+const SkeletonCards = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+    {[...Array(6)].map((_, i) => (
+      <div key={i} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div className="h-[120px] skeleton-shimmer" />
+      </div>
+    ))}
+  </div>
+);
+
+/* ── Flight card (grid view) ──────────────────────────────────────── */
+const FlightCard = ({ flight, onClick }) => {
+  const navigate = useNavigate();
+  const statusInfo  = FLIGHT_STATUSES.find((s) => s.value === flight.status);
+  const paymentInfo = PAYMENT_STATUSES.find((s) => s.value === flight.paymentStatus);
+  const profit      = parseFloat(flight.netProfit || 0);
+
+  return (
+    <div
+      onClick={() => navigate(`/dashboard/flights/${flight.id}`)}
+      className={[
+        'bg-white dark:bg-slate-900 rounded-xl border shadow-sm cursor-pointer',
+        'hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-md transition-all duration-150',
+        flight.status === 'active'
+          ? 'border-primary-300 dark:border-primary-700 border-l-4 border-l-primary-500'
+          : 'border-slate-200/80 dark:border-slate-800',
+      ].join(' ')}
+    >
+      <div className="p-4">
+        {/* Header row */}
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center shrink-0">
+              <User size={14} className="text-primary-600 dark:text-primary-400" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-tight">
+                {flight.driver?.fullName || '—'}
+              </p>
+              <span className="font-mono text-[10px] font-bold bg-slate-900 dark:bg-slate-200 text-white dark:text-slate-900 px-1.5 py-0.5 rounded tracking-widest">
+                {flight.vehicle?.plateNumber || '—'}
+              </span>
+            </div>
+          </div>
+          <Badge status={flight.status} label={statusInfo?.label} dot size="xs" />
+        </div>
+
+        {/* Financials */}
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          <div>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 mb-0.5">Daromad</p>
+            <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+              {formatMoney(flight.totalIncome, 'UZS', true)}
+            </p>
+          </div>
+          <div>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 mb-0.5">Xarajat</p>
+            <p className="text-xs font-bold text-red-500 dark:text-red-400 tabular-nums">
+              {formatMoney(flight.lightExpenses, 'UZS', true)}
+            </p>
+          </div>
+          <div>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 mb-0.5">Foyda</p>
+            <p className={['text-xs font-bold tabular-nums', profit >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-500 dark:text-red-400'].join(' ')}>
+              {formatMoney(flight.netProfit, 'UZS', true)}
+            </p>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between">
+          <Badge status={flight.paymentStatus} label={paymentInfo?.label} size="xs" />
+          <span className="text-[10px] text-slate-400 dark:text-slate-500">
+            {formatDate(flight.startedAt, true)}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /* ── Main component ──────────────────────────────────────────────── */
 const Flights = () => {
   const navigate = useNavigate();
@@ -61,6 +143,7 @@ const Flights = () => {
   });
   const [drivers, setDrivers] = useState([]);
   const [vehicles, setVehicles] = useState([]);
+  const [viewMode, setViewMode] = useState(() => localStorage.getItem('flights_view') || 'table');
 
   const { flights, meta, loading, fetchFlights } = useFlightStore();
 
@@ -84,6 +167,8 @@ const Flights = () => {
   const set   = (k, v) => setFilters((prev) => ({ ...prev, [k]: v }));
   const reset = () => setFilters({ status: '', driverId: '', vehicleId: '', dateFrom: '', dateTo: '' });
   const hasFilters = Object.values(filters).some(Boolean);
+
+  const setView = (mode) => { setViewMode(mode); localStorage.setItem('flights_view', mode); };
 
   /* Derived counts */
   const activeCount    = flights.filter((f) => f.status === 'active').length;
@@ -163,6 +248,25 @@ const Flights = () => {
             >
               {showAdvanced ? 'Yig\'ish ▲' : 'Batafsil ▼'}
             </button>
+            {/* View toggle */}
+            <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setView('table')}
+                title="Jadval ko'rinishi"
+                className={['px-2 py-1.5 transition-colors', viewMode === 'table' ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'].join(' ')}
+              >
+                <LayoutList size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setView('card')}
+                title="Karta ko'rinishi"
+                className={['px-2 py-1.5 transition-colors', viewMode === 'card' ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'].join(' ')}
+              >
+                <LayoutGrid size={14} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -222,7 +326,7 @@ const Flights = () => {
 
       {/* ── Content ── */}
       {loading ? (
-        <SkeletonRows />
+        viewMode === 'card' ? <SkeletonCards /> : <SkeletonRows />
       ) : flights.length === 0 ? (
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/60 dark:border-slate-800 shadow-sm">
           <EmptyState
@@ -232,6 +336,13 @@ const Flights = () => {
             action={() => setShowForm(true)}
             actionLabel="Yangi reys"
           />
+        </div>
+      ) : viewMode === 'card' ? (
+        /* ── Card grid ── */
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          {flights.map((flight) => (
+            <FlightCard key={flight.id} flight={flight} />
+          ))}
         </div>
       ) : (
         /* ── Table ── */
@@ -268,12 +379,7 @@ const Flights = () => {
                         flight.status === 'active' ? 'border-l-2 border-l-primary-500' : '',
                       ].join(' ')}
                     >
-                      {/* # */}
-                      <td className="px-4 py-3 text-xs text-slate-400 dark:text-slate-500 tabular-nums">
-                        {idx + 1}
-                      </td>
-
-                      {/* Driver */}
+                      <td className="px-4 py-3 text-xs text-slate-400 dark:text-slate-500 tabular-nums">{idx + 1}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <div className="w-7 h-7 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center shrink-0">
@@ -284,52 +390,33 @@ const Flights = () => {
                           </span>
                         </div>
                       </td>
-
-                      {/* Vehicle plate */}
                       <td className="px-4 py-3">
                         <span className="font-mono text-[11px] font-bold bg-slate-900 dark:bg-slate-200 text-white dark:text-slate-900 px-2 py-0.5 rounded tracking-widest">
                           {flight.vehicle?.plateNumber || '—'}
                         </span>
                       </td>
-
-                      {/* Status badge */}
                       <td className="px-4 py-3">
                         <Badge status={flight.status} label={statusInfo?.label} dot size="xs" />
                       </td>
-
-                      {/* Income */}
                       <td className="px-4 py-3 text-right text-xs font-bold text-emerald-700 dark:text-emerald-400 tabular-nums whitespace-nowrap">
                         {formatMoney(flight.totalIncome, 'UZS', true)}
                       </td>
-
-                      {/* Expenses */}
                       <td className="px-4 py-3 text-right text-xs font-bold text-red-600 dark:text-red-400 tabular-nums whitespace-nowrap">
                         {formatMoney(flight.lightExpenses, 'UZS', true)}
                       </td>
-
-                      {/* Profit */}
                       <td className="px-4 py-3 text-right text-xs font-bold tabular-nums whitespace-nowrap">
                         <span className={profit >= 0 ? 'text-blue-700 dark:text-blue-400' : 'text-red-600 dark:text-red-400'}>
                           {formatMoney(flight.netProfit, 'UZS', true)}
                         </span>
                       </td>
-
-                      {/* Payment status */}
                       <td className="px-4 py-3">
                         <Badge status={flight.paymentStatus} label={paymentInfo?.label} size="xs" />
                       </td>
-
-                      {/* Date */}
                       <td className="px-4 py-3 text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">
                         {formatDate(flight.startedAt, true)}
                       </td>
-
-                      {/* Arrow */}
                       <td className="px-2 py-3">
-                        <ChevronRight
-                          size={15}
-                          className="text-slate-300 dark:text-slate-600 group-hover:text-primary-400 transition-colors duration-100"
-                        />
+                        <ChevronRight size={15} className="text-slate-300 dark:text-slate-600 group-hover:text-primary-400 transition-colors duration-100" />
                       </td>
                     </tr>
                   );

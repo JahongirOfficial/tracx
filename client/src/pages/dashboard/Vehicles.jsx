@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Plus, Truck, CheckCircle, AlertTriangle, Clock,
   Gauge, AlertCircle, ChevronRight, Search, X, SlidersHorizontal,
+  LayoutList, LayoutGrid,
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
@@ -33,6 +34,60 @@ const SkeletonRows = () => (
     ))}
   </div>
 );
+
+/* ── Skeleton cards ── */
+const SkeletonCards = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+    {[...Array(6)].map((_, i) => (
+      <div key={i} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div className="h-[110px] skeleton-shimmer" />
+      </div>
+    ))}
+  </div>
+);
+
+/* ── Vehicle card (grid view) ── */
+const VehicleCard = ({ vehicle }) => {
+  const navigate = useNavigate();
+  const statusInfo = VEHICLE_STATUSES.find((s) => s.value === vehicle.status);
+
+  return (
+    <div
+      onClick={() => navigate(`/dashboard/vehicles/${vehicle.id}`)}
+      className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm cursor-pointer hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-md transition-all duration-150 p-4"
+    >
+      {/* Plate + brand */}
+      <div className="flex items-start justify-between gap-2 mb-3">
+        <div>
+          <span className="font-mono text-xs font-bold bg-slate-900 dark:bg-slate-200 text-white dark:text-slate-900 px-2 py-0.5 rounded tracking-widest">
+            {vehicle.plateNumber}
+          </span>
+          <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-1.5 leading-tight">
+            {vehicle.brand || '—'} {vehicle.model || ''}
+          </p>
+          {(vehicle.year || vehicle.color) && (
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              {[vehicle.year, vehicle.color].filter(Boolean).join(' · ')}
+            </p>
+          )}
+        </div>
+        <Badge status={vehicle.status} label={statusInfo?.label} dot size="xs" />
+      </div>
+
+      {/* Stats row */}
+      <div className="flex items-center justify-between mt-2">
+        <OilCell vehicle={vehicle} />
+        <div className="flex items-center gap-1 text-xs font-semibold text-slate-500 dark:text-slate-400 tabular-nums">
+          <Gauge size={12} className="text-slate-400" />
+          {formatOdometer(vehicle.currentOdometer)}
+        </div>
+        <span className="text-[11px] text-slate-400 dark:text-slate-500">
+          {vehicle._count?.flights ?? 0} reys
+        </span>
+      </div>
+    </div>
+  );
+};
 
 /* ── Oil status helper ── */
 const OilCell = ({ vehicle }) => {
@@ -73,6 +128,7 @@ const Vehicles = () => {
   const [showForm, setShowForm]   = useState(false);
   const [status, setStatus]       = useState('');
   const [search, setSearch]       = useState('');
+  const [viewMode, setViewMode]   = useState(() => localStorage.getItem('vehicles_view') || 'table');
 
   const { vehicles, meta, loading, fetchVehicles } = useVehicleStore();
 
@@ -85,6 +141,7 @@ const Vehicles = () => {
 
   const reset      = () => { setStatus(''); setSearch(''); };
   const hasFilters = status || search;
+  const setView    = (mode) => { setViewMode(mode); localStorage.setItem('vehicles_view', mode); };
 
   /* Counts */
   const excellentCount = vehicles.filter((v) => v.status === 'excellent').length;
@@ -165,12 +222,32 @@ const Vehicles = () => {
               <X size={11} /> Tozalash
             </button>
           )}
+
+          {/* View toggle */}
+          <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden ml-auto sm:ml-0">
+            <button
+              type="button"
+              onClick={() => setView('table')}
+              title="Jadval ko'rinishi"
+              className={['px-2 py-1.5 transition-colors', viewMode === 'table' ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'].join(' ')}
+            >
+              <LayoutList size={14} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setView('card')}
+              title="Karta ko'rinishi"
+              className={['px-2 py-1.5 transition-colors', viewMode === 'card' ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'].join(' ')}
+            >
+              <LayoutGrid size={14} />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* ── Content ── */}
       {loading ? (
-        <SkeletonRows />
+        viewMode === 'card' ? <SkeletonCards /> : <SkeletonRows />
       ) : vehicles.length === 0 ? (
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/60 dark:border-slate-800 shadow-sm">
           <EmptyState
@@ -181,7 +258,15 @@ const Vehicles = () => {
             actionLabel="Yangi mashina"
           />
         </div>
+      ) : viewMode === 'card' ? (
+        /* ── Card grid ── */
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          {vehicles.map((vehicle) => (
+            <VehicleCard key={vehicle.id} vehicle={vehicle} />
+          ))}
+        </div>
       ) : (
+        /* ── Table ── */
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[640px]">
@@ -192,7 +277,7 @@ const Vehicles = () => {
                   <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Brend / Model</th>
                   <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Status</th>
                   <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Moy holati</th>
-                  <th className="text-right px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Speedometr</th>
+                  <th className="text-right px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Odometr</th>
                   <th className="text-right px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Reyslar</th>
                   <th className="w-8 px-2" />
                 </tr>
@@ -207,17 +292,12 @@ const Vehicles = () => {
                       onClick={() => navigate(`/dashboard/vehicles/${vehicle.id}`)}
                       className="group border-b border-slate-50 dark:border-slate-800/50 last:border-0 hover:bg-primary-50/40 dark:hover:bg-primary-900/10 cursor-pointer transition-colors duration-100"
                     >
-                      {/* # */}
                       <td className="px-4 py-3.5 text-xs text-slate-400 dark:text-slate-500 tabular-nums">{idx + 1}</td>
-
-                      {/* Plate */}
                       <td className="px-4 py-3.5">
                         <span className="font-mono text-[11px] font-bold bg-slate-900 dark:bg-slate-200 text-white dark:text-slate-900 px-2.5 py-1 rounded tracking-widest">
                           {vehicle.plateNumber}
                         </span>
                       </td>
-
-                      {/* Brand / model / year */}
                       <td className="px-4 py-3.5">
                         <div>
                           <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-tight">
@@ -230,31 +310,21 @@ const Vehicles = () => {
                           )}
                         </div>
                       </td>
-
-                      {/* Status */}
                       <td className="px-4 py-3.5">
                         <Badge status={vehicle.status} label={statusInfo?.label} dot size="xs" />
                       </td>
-
-                      {/* Oil status */}
                       <td className="px-4 py-3.5">
                         <OilCell vehicle={vehicle} />
                       </td>
-
-                      {/* Odometer */}
                       <td className="px-4 py-3.5 text-right">
                         <span className="flex items-center justify-end gap-1 text-xs font-semibold text-slate-700 dark:text-slate-300 tabular-nums">
                           <Gauge size={12} className="text-slate-400" />
                           {formatOdometer(vehicle.currentOdometer)}
                         </span>
                       </td>
-
-                      {/* Flight count */}
                       <td className="px-4 py-3.5 text-right text-xs text-slate-500 dark:text-slate-400 tabular-nums">
                         {vehicle._count?.flights ?? '—'}
                       </td>
-
-                      {/* Arrow */}
                       <td className="px-2 py-3.5">
                         <ChevronRight size={15} className="text-slate-300 dark:text-slate-600 group-hover:text-primary-400 transition-colors duration-100" />
                       </td>

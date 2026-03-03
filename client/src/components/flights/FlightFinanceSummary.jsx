@@ -30,7 +30,6 @@ import {
   Route,
   Wallet,
   Building2,
-  Banknote,
   HandCoins,
   CircleDollarSign,
   CheckCircle2,
@@ -239,11 +238,6 @@ const FlightFinanceSummary = ({ flight, onAddPayment }) => {
             <Wallet size={11} />
             Haydovchi hisob-kitobi
           </p>
-          <Row
-            label="Yo'l puli"
-            value={formatMoney(f.roadMoney)}
-            icon={Banknote}
-          />
           <Row
             label="Haydovchi qo'lidagi pul"
             value={formatMoney(f.driverCashInHand)}

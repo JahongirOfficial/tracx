@@ -97,9 +97,9 @@ const App = () => {
             </DriverRoute>
           }
         >
-          <Route index          element={<DriverHome />} />
-          <Route path="flight"  element={<DriverFlight />} />
-          <Route path="expense" element={<DriverExpense />} />
+          <Route index               element={<DriverHome />} />
+          <Route path="flight/:id"  element={<DriverFlight />} />
+          <Route path="expense"     element={<DriverExpense />} />
         </Route>
 
         {/* SuperAdmin Panel — nested routes with dedicated layout + sidebar */}
