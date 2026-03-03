@@ -17,6 +17,7 @@ const vehicleRoutes = require('./routes/vehicle.routes');
 const flightRoutes = require('./routes/flight.routes');
 const paymentRoutes = require('./routes/payment.routes');
 const balanceRoutes = require('./routes/balance.routes');
+const employeeRoutes = require('./routes/employee.routes');
 
 const app = express();
 
@@ -52,6 +53,7 @@ app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/flights', flightRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/balance',  balanceRoutes);
+app.use('/api/employees', employeeRoutes);
 
 // 404
 app.use('*', (req, res) => {

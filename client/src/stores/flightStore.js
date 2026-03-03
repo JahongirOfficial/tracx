@@ -88,6 +88,11 @@ const useFlightStore = create((set, get) => ({
     return res.data;
   },
 
+  updateExpense: async (flightId, expId, data) => {
+    const res = await api.put(`/flights/${flightId}/expenses/${expId}`, data);
+    return res.data;
+  },
+
   deleteExpense: async (flightId, expId) => {
     await api.delete(`/flights/${flightId}/expenses/${expId}`);
   },

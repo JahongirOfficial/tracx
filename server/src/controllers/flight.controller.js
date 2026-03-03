@@ -58,7 +58,7 @@ const getFlight = catchAsync(async (req, res, next) => {
 });
 
 const createFlight = catchAsync(async (req, res, next) => {
-  const { driverId, vehicleId, flightType, roadMoney, driverProfitPercent, startOdometer, startFuel } = req.body;
+  const { driverId, vehicleId, flightType, roadMoney, fuelType, startOdometer, startFuel } = req.body;
   const businessmanId = req.user.id;
 
   const [driver, vehicle] = await Promise.all([
@@ -69,6 +69,9 @@ const createFlight = catchAsync(async (req, res, next) => {
   if (!driver) return next(new AppError('Haydovchi topilmadi', 404));
   if (!vehicle) return next(new AppError('Mashina topilmadi', 404));
 
+  // Haydovchi ulushini driver.perTripRate dan olamiz
+  const driverProfitPercent = parseFloat(driver.perTripRate) || 0;
+
   const flight = await prisma.flight.create({
     data: {
       businessmanId,
@@ -76,7 +79,7 @@ const createFlight = catchAsync(async (req, res, next) => {
       vehicleId,
       flightType: flightType || 'domestic',
       roadMoney: roadMoney || 0,
-      driverProfitPercent: driverProfitPercent || 0,
+      driverProfitPercent,
       startOdometer,
       startFuel,
     },
@@ -86,7 +89,6 @@ const createFlight = catchAsync(async (req, res, next) => {
     },
   });
 
-  // Set driver status to busy
   await prisma.driver.update({ where: { id: driverId }, data: { status: 'busy' } });
 
   await prisma.auditLog.create({
@@ -108,7 +110,7 @@ const updateFlight = catchAsync(async (req, res, next) => {
     where: { id: req.params.id, businessmanId: req.user.id },
   });
   if (!flight) return next(new AppError('Reys topilmadi', 404));
-  if (flight.status !== 'active') return next(new AppError('Faqat faol reysni o\'zgartirish mumkin', 400));
+  if (flight.status !== 'active') return next(new AppError("Faqat faol reysni o'zgartirish mumkin", 400));
 
   const { roadMoney, driverProfitPercent, flightType } = req.body;
   const data = {};
@@ -128,12 +130,12 @@ const deleteFlight = catchAsync(async (req, res, next) => {
     where: { id: req.params.id, businessmanId: req.user.id },
   });
   if (!flight) return next(new AppError('Reys topilmadi', 404));
-  if (flight.status !== 'active') return next(new AppError('Faqat faol reysni o\'chirish mumkin', 400));
+  if (flight.status !== 'active') return next(new AppError("Faqat faol reysni o'chirish mumkin", 400));
 
   await prisma.flight.delete({ where: { id: req.params.id } });
   await prisma.driver.update({ where: { id: flight.driverId }, data: { status: 'free' } });
 
-  res.json({ success: true, message: 'Reys o\'chirildi' });
+  res.json({ success: true, message: "Reys o'chirildi" });
 });
 
 const completeFlight = catchAsync(async (req, res, next) => {
@@ -159,15 +161,22 @@ const completeFlight = catchAsync(async (req, res, next) => {
     });
   }
 
-  const updated = await prisma.flight.findUnique({ where: { id: req.params.id } });
+  // Haydovchi balansiga foydani qo'shish
+  const updatedFlight = await prisma.flight.findUnique({ where: { id: req.params.id } });
+  if (updatedFlight && parseFloat(updatedFlight.driverProfitAmount) > 0) {
+    await prisma.driver.update({
+      where: { id: flight.driverId },
+      data: { currentBalance: { increment: updatedFlight.driverProfitAmount } },
+    });
+  }
 
   const io = req.app.get('io');
   if (io) {
     io.to(`driver-${flight.driverId}`).emit('flight-completed', { flightId: req.params.id });
-    io.to(`business-${flight.businessmanId}`).emit('flight-updated', { type: 'completed', flight: updated });
+    io.to(`business-${flight.businessmanId}`).emit('flight-updated', { type: 'completed', flight: updatedFlight });
   }
 
-  res.json({ success: true, data: updated });
+  res.json({ success: true, data: updatedFlight });
 });
 
 const cancelFlight = catchAsync(async (req, res, next) => {
@@ -185,16 +194,26 @@ const cancelFlight = catchAsync(async (req, res, next) => {
   res.json({ success: true, message: 'Reys bekor qilindi' });
 });
 
-// ===== LEGS =====
+// ===== LEGS (YO'NALISHLAR) =====
 const addLeg = catchAsync(async (req, res, next) => {
   const flight = await prisma.flight.findFirst({
     where: { id: req.params.id, businessmanId: req.user.id, status: 'active' },
+    include: { legs: true },
   });
   if (!flight) return next(new AppError('Faol reys topilmadi', 404));
 
   const { fromCity, toCity, cargo, weight, payment, paymentType, transferFeePercent = 0 } = req.body;
   const transferFeeAmount = (payment * transferFeePercent) / 100;
   const netPayment = payment - transferFeeAmount;
+
+  // Yangi yo'nalish qo'shilganda oldingi barcha pending yo'nalishlarni yetib bordi deb belgilash
+  const pendingLegs = flight.legs.filter(l => l.status === 'pending');
+  if (pendingLegs.length > 0) {
+    await prisma.leg.updateMany({
+      where: { flightId: flight.id, status: 'pending' },
+      data: { status: 'completed' },
+    });
+  }
 
   const leg = await prisma.leg.create({
     data: { flightId: flight.id, fromCity, toCity, cargo, weight, payment, paymentType, transferFeePercent, transferFeeAmount, netPayment },
@@ -215,7 +234,7 @@ const updateLeg = catchAsync(async (req, res, next) => {
   if (!flight) return next(new AppError('Reys topilmadi', 404));
 
   const leg = await prisma.leg.findFirst({ where: { id: req.params.legId, flightId: flight.id } });
-  if (!leg) return next(new AppError('Buyurtma topilmadi', 404));
+  if (!leg) return next(new AppError("Yo'nalish topilmadi", 404));
 
   const data = { ...req.body };
   if (data.payment !== undefined || data.transferFeePercent !== undefined) {
@@ -238,12 +257,12 @@ const deleteLeg = catchAsync(async (req, res, next) => {
   if (!flight) return next(new AppError('Reys topilmadi', 404));
 
   const leg = await prisma.leg.findFirst({ where: { id: req.params.legId, flightId: flight.id } });
-  if (!leg) return next(new AppError('Buyurtma topilmadi', 404));
+  if (!leg) return next(new AppError("Yo'nalish topilmadi", 404));
 
   await prisma.leg.delete({ where: { id: leg.id } });
   await recalculateFlightFinances(flight.id);
 
-  res.json({ success: true, message: 'Buyurtma o\'chirildi' });
+  res.json({ success: true, message: "Yo'nalish o'chirildi" });
 });
 
 const updateLegStatus = catchAsync(async (req, res, next) => {
@@ -253,7 +272,7 @@ const updateLegStatus = catchAsync(async (req, res, next) => {
   if (!flight) return next(new AppError('Reys topilmadi', 404));
 
   const leg = await prisma.leg.findFirst({ where: { id: req.params.legId, flightId: flight.id } });
-  if (!leg) return next(new AppError('Buyurtma topilmadi', 404));
+  if (!leg) return next(new AppError("Yo'nalish topilmadi", 404));
 
   const updated = await prisma.leg.update({
     where: { id: leg.id },
@@ -270,19 +289,27 @@ const addExpense = catchAsync(async (req, res, next) => {
   });
   if (!flight) return next(new AppError('Reys topilmadi', 404));
 
-  const { type, amount, currency = 'UZS', exchangeRate, description, timing = 'during' } = req.body;
+  const {
+    type, amount, currency = 'UZS', exchangeRate, description,
+    timing = 'during', fuelLiters, fuelPricePerLiter, odometerAtExpense, expenseDate,
+  } = req.body;
   const expenseClass = HEAVY_TYPES.includes(type) ? 'heavy' : 'light';
   const amountInUZS = convertToUZS(amount, currency, exchangeRate);
 
-  const expense = await prisma.expense.create({
-    data: {
-      flightId: flight.id,
-      type, expenseClass, amount, currency, exchangeRate, amountInUZS,
-      description, timing,
-      addedBy: 'businessman',
-      addedById: req.user.id,
-    },
-  });
+  const expenseData = {
+    flightId: flight.id,
+    type, expenseClass, amount, currency, exchangeRate, amountInUZS,
+    description, timing,
+    addedBy: 'businessman',
+    addedById: req.user.id,
+    expenseDate: expenseDate ? new Date(expenseDate) : new Date(),
+  };
+
+  if (fuelLiters !== undefined && fuelLiters !== null) expenseData.fuelLiters = fuelLiters;
+  if (fuelPricePerLiter !== undefined && fuelPricePerLiter !== null) expenseData.fuelPricePerLiter = fuelPricePerLiter;
+  if (odometerAtExpense !== undefined && odometerAtExpense !== null) expenseData.odometerAtExpense = odometerAtExpense;
+
+  const expense = await prisma.expense.create({ data: expenseData });
 
   await recalculateFlightFinances(flight.id);
 
@@ -303,7 +330,7 @@ const updateExpense = catchAsync(async (req, res, next) => {
   const expense = await prisma.expense.findFirst({ where: { id: req.params.expId, flightId: flight.id } });
   if (!expense) return next(new AppError('Xarajat topilmadi', 404));
 
-  const { amount, currency, exchangeRate, description, timing } = req.body;
+  const { amount, currency, exchangeRate, description, timing, fuelLiters, fuelPricePerLiter, odometerAtExpense, expenseDate } = req.body;
   const data = {};
   if (amount !== undefined) {
     data.amount = amount;
@@ -313,6 +340,10 @@ const updateExpense = catchAsync(async (req, res, next) => {
   if (exchangeRate !== undefined) data.exchangeRate = exchangeRate;
   if (description !== undefined) data.description = description;
   if (timing) data.timing = timing;
+  if (fuelLiters !== undefined) data.fuelLiters = fuelLiters;
+  if (fuelPricePerLiter !== undefined) data.fuelPricePerLiter = fuelPricePerLiter;
+  if (odometerAtExpense !== undefined) data.odometerAtExpense = odometerAtExpense;
+  if (expenseDate) data.expenseDate = new Date(expenseDate);
 
   const updated = await prisma.expense.update({ where: { id: expense.id }, data });
   await recalculateFlightFinances(flight.id);
@@ -332,7 +363,7 @@ const deleteExpense = catchAsync(async (req, res, next) => {
   await prisma.expense.delete({ where: { id: expense.id } });
   await recalculateFlightFinances(flight.id);
 
-  res.json({ success: true, message: 'Xarajat o\'chirildi' });
+  res.json({ success: true, message: "Xarajat o'chirildi" });
 });
 
 const addDriverPayment = catchAsync(async (req, res, next) => {
@@ -368,7 +399,7 @@ const getStatsSummary = catchAsync(async (req, res) => {
   const [agg, byStatus] = await Promise.all([
     prisma.flight.aggregate({
       where,
-      _sum: { totalIncome: true, lightExpenses: true, heavyExpenses: true, netProfit: true, businessProfit: true },
+      _sum: { totalIncome: true, lightExpenses: true, heavyExpenses: true, netProfit: true, businessProfit: true, driverProfitAmount: true },
       _count: true,
     }),
     prisma.flight.groupBy({
@@ -387,6 +418,7 @@ const getStatsSummary = catchAsync(async (req, res) => {
       heavyExpenses: agg._sum.heavyExpenses || 0,
       netProfit: agg._sum.netProfit || 0,
       businessProfit: agg._sum.businessProfit || 0,
+      driverProfitAmount: agg._sum.driverProfitAmount || 0,
       byStatus: byStatus.reduce((acc, s) => ({ ...acc, [s.status]: s._count }), {}),
     },
   });

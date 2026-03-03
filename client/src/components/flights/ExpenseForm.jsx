@@ -1,28 +1,22 @@
 /**
- * ExpenseForm — modal for adding an expense to a flight.
- *
- * Features:
- *   - Visual icon grid for expense type selection (emoji + label tiles).
- *   - Heavy expenses shown with dashed border and warning indicator.
- *   - Currency selector (UZS / USD) with optional exchange rate field.
- *   - Timing selector (before / during / after flight).
- *   - Works for both admin (/flights/:id/expenses) and driver (/driver/flights/:id/expenses).
+ * ExpenseForm — modal for adding/editing an expense on a flight.
  *
  * Props:
  *   isOpen, onClose — modal visibility
  *   flightId        — parent flight ID
- *   onSuccess       — callback after successful creation
+ *   onSuccess       — callback after success
  *   isDriver        — boolean, switches the API endpoint
+ *   expense         — if provided, edit mode (pre-fills form, uses PUT)
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from '../ui/Modal';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
 import Button from '../ui/Button';
 import useUiStore from '../../stores/uiStore';
 import { EXPENSE_TYPES } from '../../utils/constants';
-import { Clock, DollarSign, FileText, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Clock, DollarSign, FileText, AlertTriangle, CheckCircle2, Calendar, Gauge, Droplets } from 'lucide-react';
 
 /* Section header */
 const FormSection = ({ icon: Icon, title }) => (
@@ -42,6 +36,12 @@ const LIGHT_TYPES = EXPENSE_TYPES.filter((t) => t.class === 'light');
 /* Heavy (capital) expense types */
 const HEAVY_TYPES = EXPENSE_TYPES.filter((t) => t.class === 'heavy');
 
+/* Fuel expense type values — triggers extra fuel detail fields */
+const FUEL_EXPENSE_VALUES = ['fuel', 'fuel_metan', 'fuel_propan', 'fuel_benzin', 'fuel_diesel'];
+
+/* Returns today's date as a YYYY-MM-DD string */
+const todayStr = () => new Date().toISOString().split('T')[0];
+
 const INITIAL_FORM = {
   type: '',
   amount: '',
@@ -49,27 +49,55 @@ const INITIAL_FORM = {
   exchangeRate: '',
   description: '',
   timing: 'during',
+  fuelLiters: '',
+  fuelPricePerLiter: '',
+  odometerAtExpense: '',
+  expenseDate: todayStr(),
 };
 
-const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false }) => {
+const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false, expense = null }) => {
   const [form, setForm] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(false);
   const { addToast } = useUiStore();
+
+  const isEditMode = !!expense;
+
+  /* Pre-fill form fields when editing, reset when opening for a new expense */
+  useEffect(() => {
+    if (isOpen && expense) {
+      setForm({
+        type: expense.type || '',
+        amount: expense.amount?.toString() || '',
+        currency: expense.currency || 'UZS',
+        exchangeRate: expense.exchangeRate?.toString() || '',
+        description: expense.description || '',
+        timing: expense.timing || 'during',
+        fuelLiters: expense.fuelLiters?.toString() || '',
+        fuelPricePerLiter: expense.fuelPricePerLiter?.toString() || '',
+        odometerAtExpense: expense.odometerAtExpense?.toString() || '',
+        expenseDate: expense.expenseDate
+          ? new Date(expense.expenseDate).toISOString().split('T')[0]
+          : todayStr(),
+      });
+    } else if (isOpen && !expense) {
+      setForm({ ...INITIAL_FORM, expenseDate: todayStr() });
+    }
+  }, [isOpen, expense]);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const selectedType = EXPENSE_TYPES.find((t) => t.value === form.type);
   const isHeavy = selectedType?.class === 'heavy';
+  /* Show fuel detail fields only when a fuel-type expense is selected */
+  const isFuel = FUEL_EXPENSE_VALUES.includes(form.type);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const endpoint = isDriver
-        ? `/driver/flights/${flightId}/expenses`
-        : `/flights/${flightId}/expenses`;
       const { default: api } = await import('../../services/api');
-      await api.post(endpoint, {
+
+      const payload = {
         type: form.type,
         amount: parseFloat(form.amount),
         currency: form.currency,
@@ -79,8 +107,29 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false })
             : undefined,
         description: form.description || undefined,
         timing: form.timing,
-      });
-      addToast("Xarajat qo'shildi", 'success');
+        expenseDate: form.expenseDate,
+        /* Fuel-specific fields — only included when a fuel type is selected */
+        fuelLiters: isFuel && form.fuelLiters ? parseFloat(form.fuelLiters) : undefined,
+        fuelPricePerLiter: isFuel && form.fuelPricePerLiter ? parseFloat(form.fuelPricePerLiter) : undefined,
+        odometerAtExpense: isFuel && form.odometerAtExpense ? parseInt(form.odometerAtExpense) : undefined,
+      };
+
+      if (isEditMode) {
+        /* Edit mode — PUT to the existing expense */
+        const endpoint = isDriver
+          ? `/driver/flights/${flightId}/expenses/${expense.id}`
+          : `/flights/${flightId}/expenses/${expense.id}`;
+        await api.put(endpoint, payload);
+        addToast('Xarajat yangilandi', 'success');
+      } else {
+        /* Create mode — POST a new expense */
+        const endpoint = isDriver
+          ? `/driver/flights/${flightId}/expenses`
+          : `/flights/${flightId}/expenses`;
+        await api.post(endpoint, payload);
+        addToast("Xarajat qo'shildi", 'success');
+      }
+
       onSuccess?.();
       onClose();
       setForm(INITIAL_FORM);
@@ -91,7 +140,7 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false })
     }
   };
 
-  /* Shared tile class */
+  /* Shared tile class — selected vs. unselected, light vs. heavy */
   const tileClass = (type) =>
     [
       'flex flex-col items-center gap-1.5 p-2.5 rounded-xl border text-xs',
@@ -106,15 +155,31 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false })
     ].join(' ');
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Xarajat qo'shish" size="lg">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isEditMode ? 'Xarajatni tahrirlash' : "Xarajat qo'shish"}
+      size="lg"
+    >
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
-        {/* ── Section 1: Expense type grid ── */}
+        {/* ── Section 1: Date picker ── */}
+        <div>
+          <FormSection icon={Calendar} title="Sana" />
+          <Input
+            type="date"
+            label="Xarajat sanasi"
+            value={form.expenseDate}
+            onChange={(e) => set('expenseDate', e.target.value)}
+          />
+        </div>
+
+        {/* ── Section 2: Expense type grid ── */}
         <div>
           <FormSection icon={CheckCircle2} title="Xarajat turi" />
 
           {/* Light expenses */}
-          <p className="text-xs text-slate-400 dark:text-slate-500 mb-2 font-medium">Yengil xarajatlar</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mb-2 font-medium">Oddiy xarajatlar</p>
           <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 mb-3">
             {LIGHT_TYPES.map((type) => (
               <button
@@ -131,10 +196,10 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false })
             ))}
           </div>
 
-          {/* Heavy expenses */}
+          {/* Heavy (capital) expenses */}
           <p className="text-xs text-orange-500 dark:text-orange-400 mb-2 font-medium flex items-center gap-1">
             <AlertTriangle size={11} />
-            Og'ir xarajatlar (foydadan chiqarilmaydi)
+            Kapital xarajatlar (foydadan chiqarilmaydi)
           </p>
           <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
             {HEAVY_TYPES.map((type) => (
@@ -165,13 +230,13 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false })
               <span className="text-base">{selectedType.emoji}</span>
               <span>
                 {selectedType.label} —{' '}
-                {isHeavy ? 'Og\'ir xarajat (hisob-kitobga kirmaydi)' : 'Yengil xarajat'}
+                {isHeavy ? "Kapital xarajat (foydaga ta'sir qilmaydi)" : 'Oddiy xarajat'}
               </span>
             </div>
           )}
         </div>
 
-        {/* ── Section 2: Amount & currency ── */}
+        {/* ── Section 3: Amount & currency ── */}
         <div>
           <FormSection icon={DollarSign} title="Miqdor" />
           <div className="grid grid-cols-2 gap-3">
@@ -189,10 +254,7 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false })
                 Valyuta
               </label>
               <div className="flex gap-2">
-                {[
-                  { value: 'UZS', label: "So'm" },
-                  { value: 'USD', label: 'USD' },
-                ].map((cur) => (
+                {[{ value: 'UZS', label: "So'm" }, { value: 'USD', label: 'USD' }].map((cur) => (
                   <button
                     key={cur.value}
                     type="button"
@@ -211,7 +273,7 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false })
             </div>
           </div>
 
-          {/* USD exchange rate */}
+          {/* USD exchange rate — only shown when USD is selected */}
           {form.currency === 'USD' && (
             <div className="mt-3">
               <Input
@@ -225,7 +287,45 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false })
           )}
         </div>
 
-        {/* ── Section 3: Timing + description ── */}
+        {/* ── Section 4: Fuel detail fields — only when a fuel type is selected ── */}
+        {isFuel && (
+          <div>
+            <FormSection icon={Droplets} title="Yoqilg'i ma'lumotlari" />
+            <div className="grid grid-cols-3 gap-3">
+              <Input
+                label="Litr soni"
+                type="number"
+                leftIcon={Droplets}
+                value={form.fuelLiters}
+                onChange={(e) => set('fuelLiters', e.target.value)}
+                placeholder="0"
+              />
+              <Input
+                label="1 litr narxi (UZS)"
+                type="number"
+                value={form.fuelPricePerLiter}
+                onChange={(e) => set('fuelPricePerLiter', e.target.value)}
+                placeholder="0"
+              />
+              <Input
+                label="Odometr (km)"
+                type="number"
+                leftIcon={Gauge}
+                value={form.odometerAtExpense}
+                onChange={(e) => set('odometerAtExpense', e.target.value)}
+                placeholder="0"
+              />
+            </div>
+            {/* Computed total — shown only when both liters and price are filled */}
+            {form.fuelLiters && form.fuelPricePerLiter && (
+              <div className="mt-2 text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 rounded-lg px-3 py-2">
+                Jami: {parseFloat(form.fuelLiters) * parseFloat(form.fuelPricePerLiter)} UZS
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Section 5: Timing + description ── */}
         <div>
           <FormSection icon={Clock} title="Qo'shimcha" />
           <div className="flex flex-col gap-3">
@@ -260,7 +360,7 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false })
             loading={loading}
             disabled={!form.type || !form.amount}
           >
-            Qo'shish
+            {isEditMode ? 'Saqlash' : "Qo'shish"}
           </Button>
         </div>
       </form>

@@ -43,6 +43,14 @@ const protect = catchAsync(async (req, res, next) => {
   }
 
   if (!user) {
+    const employee = await prisma.employee.findUnique({ where: { id: decoded.id } });
+    if (employee && employee.isActive) { user = employee; }
+    else if (employee && !employee.isActive) {
+      return next(new AppError('Hisobingiz bloklangan', 403));
+    }
+  }
+
+  if (!user) {
     return next(new AppError('Foydalanuvchi topilmadi', 401));
   }
 
@@ -50,7 +58,8 @@ const protect = catchAsync(async (req, res, next) => {
     id: user.id,
     role: decoded.role,
     username: user.username,
-    businessmanId: decoded.role === 'driver' ? user.businessmanId : undefined,
+    businessmanId: (decoded.role === 'driver' || decoded.role === 'employee') ? user.businessmanId : undefined,
+    permissions: decoded.role === 'employee' ? (user.permissions || []) : undefined,
   };
   req.token = token;
 

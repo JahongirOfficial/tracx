@@ -5,7 +5,6 @@ const createFlightSchema = z.object({
   vehicleId: z.string().uuid(),
   flightType: z.enum(['domestic', 'international']).default('domestic'),
   roadMoney: z.number().min(0).default(0),
-  driverProfitPercent: z.number().min(0).max(100).default(0),
   startOdometer: z.number().int().min(0).optional(),
   startFuel: z.number().min(0).optional(),
 });
@@ -26,7 +25,7 @@ const createLegSchema = z.object({
   toCity: z.string().min(1).max(100),
   cargo: z.string().optional(),
   weight: z.number().min(0).optional(),
-  payment: z.number().positive('To\'lov musbat bo\'lishi kerak'),
+  payment: z.number().positive("To'lov musbat bo'lishi kerak"),
   paymentType: z.enum(['cash', 'peritsena', 'card', 'transfer', 'other']),
   transferFeePercent: z.number().min(0).max(100).default(0),
 });
@@ -54,6 +53,10 @@ const createExpenseSchema = z.object({
   exchangeRate: z.number().positive().optional(),
   description: z.string().optional(),
   timing: z.enum(['before', 'during', 'after']).default('during'),
+  fuelLiters: z.number().min(0).optional(),
+  fuelPricePerLiter: z.number().min(0).optional(),
+  odometerAtExpense: z.number().int().min(0).optional(),
+  expenseDate: z.string().optional(),
 });
 
 const updateExpenseSchema = z.object({
@@ -62,10 +65,15 @@ const updateExpenseSchema = z.object({
   exchangeRate: z.number().positive().optional(),
   description: z.string().optional(),
   timing: z.enum(['before', 'during', 'after']).optional(),
+  fuelLiters: z.number().min(0).optional(),
+  fuelPricePerLiter: z.number().min(0).optional(),
+  odometerAtExpense: z.number().int().min(0).optional(),
+  expenseDate: z.string().optional(),
 });
 
 const driverPaymentSchema = z.object({
   amount: z.number().positive(),
+  paidAt: z.string().optional(),
 });
 
 const flightFilterSchema = z.object({

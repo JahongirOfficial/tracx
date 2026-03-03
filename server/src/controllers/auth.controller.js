@@ -32,6 +32,14 @@ const login = catchAsync(async (req, res, next) => {
     }
   }
 
+  if (!user) {
+    const employee = await prisma.employee.findUnique({ where: { username } });
+    if (employee && employee.isActive) { user = employee; role = 'employee'; }
+    else if (employee && !employee.isActive) {
+      return next(new AppError('Hisobingiz bloklangan', 403));
+    }
+  }
+
   if (!user || !(await bcrypt.compare(password, user.password))) {
     return next(new AppError('Username yoki parol noto\'g\'ri', 401));
   }
@@ -58,6 +66,7 @@ const login = catchAsync(async (req, res, next) => {
     fullName: user.fullName || null,
     companyName: user.companyName || null,
     businessmanId: role === 'driver' ? user.businessmanId : undefined,
+    permissions: role === 'employee' ? user.permissions : undefined,
   };
 
   res.json({

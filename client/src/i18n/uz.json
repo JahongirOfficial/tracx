@@ -39,7 +39,8 @@
     "reports": "Hisobotlar",
     "balance": "Balans",
     "logout": "Chiqish",
-    "profile": "Profil"
+    "profile": "Profil",
+    "employees": "Xodimlar"
   },
   "auth": {
     "login": "Kirish",
@@ -113,12 +114,12 @@
     "cancel": "Bekor qilish",
     "tabs": {
       "general": "Umumiy",
-      "legs": "Buyurtmalar",
+      "legs": "Yo'nalishlar",
       "expenses": "Xarajatlar",
       "finance": "Moliya"
     },
-    "legs": "Buyurtmalar",
-    "addLeg": "Buyurtma qo'shish",
+    "legs": "Yo'nalishlar",
+    "addLeg": "Yo'nalish qo'shish",
     "expenses": "Xarajatlar",
     "addExpense": "Xarajat qo'shish",
     "fromCity": "Qayerdan",
@@ -136,9 +137,9 @@
     "transferFee": "Komissiya (%)",
     "netPayment": "Sof to'lov",
     "legStatus": {
-      "pending": "Kutilmoqda",
+      "pending": "Ketmoqda",
       "in_progress": "Jarayonda",
-      "completed": "Yakunlangan",
+      "completed": "Yetib bordi",
       "cancelled": "Bekor"
     },
     "driverPayment": "Haydovchi to'lovi",
@@ -278,5 +279,31 @@
     "addExpense": "Xarajat qo'shish",
     "myExpenses": "Mening xarajatlarim",
     "confirmExpense": "Xarajatni tasdiqlash"
+  },
+  "employees": {
+    "title": "Xodimlar",
+    "add": "Xodim qo'shish",
+    "fullName": "To'liq ism",
+    "username": "Foydalanuvchi nomi",
+    "phone": "Telefon",
+    "position": "Lavozim",
+    "permissions": "Ruxsatlar",
+    "delete": "Xodimni o'chirish",
+    "deleteConfirm": "Ushbu xodimni o'chirmoqchimisiz?",
+    "positions": {
+      "dispatcher": "Dispetcher",
+      "accountant": "Buxgalter",
+      "manager": "Menejer",
+      "logist": "Logist",
+      "other": "Boshqa"
+    },
+    "permissionGroups": {
+      "flights": "Reyslar",
+      "drivers": "Haydovchilar",
+      "vehicles": "Mashinalar",
+      "reports": "Hisobotlar",
+      "finance": "Moliya",
+      "employees": "Xodimlar"
+    }
   }
 }

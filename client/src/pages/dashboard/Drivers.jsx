@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Plus, Users, UserCheck, UserX, Radio,
   Phone, Banknote, ChevronRight, Search, X, SlidersHorizontal,
+  LayoutGrid, LayoutList, TrendingUp,
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
@@ -45,6 +46,66 @@ const SkeletonRows = () => (
   </div>
 );
 
+/* ── Skeleton cards ── */
+const SkeletonCards = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    {[...Array(8)].map((_, i) => (
+      <div key={i} className="h-40 skeleton-shimmer rounded-2xl border border-slate-200/80 dark:border-slate-800" />
+    ))}
+  </div>
+);
+
+/* ── Driver card for grid view ── */
+const DriverCard = ({ driver, onClick }) => {
+  const statusInfo = DRIVER_STATUSES.find((s) => s.value === driver.status);
+  const grad       = gradient(driver.fullName);
+  const ini        = initials(driver.fullName || driver.username);
+  const balance    = parseFloat(driver.currentBalance) || 0;
+
+  return (
+    <div
+      onClick={onClick}
+      className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-primary-200 dark:hover:border-primary-700 transition-all duration-150 cursor-pointer p-4 flex flex-col gap-3"
+    >
+      {/* Top: avatar + status */}
+      <div className="flex items-start justify-between">
+        <div className={['w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br shadow-sm', grad].join(' ')}>
+          <span className="text-sm font-bold text-white leading-none">{ini}</span>
+        </div>
+        <Badge status={driver.status} label={statusInfo?.label} dot size="xs" />
+      </div>
+
+      {/* Name */}
+      <div>
+        <p className="font-semibold text-slate-800 dark:text-slate-100 leading-tight">{driver.fullName}</p>
+        <p className="text-xs text-slate-400 font-mono mt-0.5">@{driver.username}</p>
+      </div>
+
+      {/* Stats row */}
+      <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-3 mt-auto">
+        <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+          <Banknote size={12} />
+          {driver.paymentType === 'per_trip' ? `${driver.perTripRate}% ulush` : 'Oylik'}
+        </div>
+        <div className={[
+          'text-xs font-bold tabular-nums',
+          balance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400',
+        ].join(' ')}>
+          <TrendingUp size={11} className="inline mr-0.5" />
+          {formatMoney(balance, 'UZS', true)}
+        </div>
+      </div>
+
+      {driver.phone && (
+        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 -mt-1">
+          <Phone size={11} />
+          {driver.phone}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const STATUS_OPTIONS = [
   { value: 'free',    label: "Bo'sh",  activeCls: 'bg-emerald-600 border-emerald-600 text-white', dot: 'bg-emerald-400' },
   { value: 'busy',    label: 'Band',   activeCls: 'bg-amber-500 border-amber-500 text-white',     dot: 'bg-amber-400' },
@@ -59,6 +120,7 @@ const Drivers = () => {
   const [search, setSearch]     = useState('');
   const [status, setStatus]     = useState('');
   const [allDrivers, setAllDrivers] = useState([]);
+  const [viewMode, setViewMode] = useState(() => localStorage.getItem('driversView') || 'table');
 
   const { drivers, meta, loading, fetchDrivers } = useDriverStore();
 
@@ -84,6 +146,11 @@ const Drivers = () => {
   const freeCount   = base.filter((d) => d.status === 'free').length;
   const busyCount   = base.filter((d) => d.status === 'busy').length;
   const offlineCount = base.filter((d) => d.status === 'offline').length;
+
+  const toggleView = (mode) => {
+    setViewMode(mode);
+    localStorage.setItem('driversView', mode);
+  };
 
   return (
     <div className="page-enter space-y-4">
@@ -156,12 +223,42 @@ const Drivers = () => {
               <X size={11} /> Tozalash
             </button>
           )}
+
+          {/* View toggle */}
+          <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5 gap-0.5">
+            <button
+              type="button"
+              onClick={() => toggleView('table')}
+              className={[
+                'p-1.5 rounded-md transition-colors',
+                viewMode === 'table'
+                  ? 'bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300',
+              ].join(' ')}
+              title="Jadval ko'rinishi"
+            >
+              <LayoutList size={14} />
+            </button>
+            <button
+              type="button"
+              onClick={() => toggleView('card')}
+              className={[
+                'p-1.5 rounded-md transition-colors',
+                viewMode === 'card'
+                  ? 'bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300',
+              ].join(' ')}
+              title="Karta ko'rinishi"
+            >
+              <LayoutGrid size={14} />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* ── Content ── */}
       {loading ? (
-        <SkeletonRows />
+        viewMode === 'card' ? <SkeletonCards /> : <SkeletonRows />
       ) : drivers.length === 0 ? (
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/60 dark:border-slate-800 shadow-sm">
           <EmptyState
@@ -172,7 +269,19 @@ const Drivers = () => {
             actionLabel="Yangi haydovchi"
           />
         </div>
+      ) : viewMode === 'card' ? (
+        /* ── Card grid ── */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {drivers.map((driver) => (
+            <DriverCard
+              key={driver.id}
+              driver={driver}
+              onClick={() => navigate(`/dashboard/drivers/${driver.id}`)}
+            />
+          ))}
+        </div>
       ) : (
+        /* ── Table ── */
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[620px]">

@@ -2,18 +2,19 @@ import { NavLink } from 'react-router-dom';
 import { useEffect } from 'react';
 import {
   LayoutDashboard, Plane, Users, Truck, BarChart3,
-  Wallet, ChevronLeft, ChevronRight, AlertTriangle,
+  Wallet, ChevronLeft, ChevronRight, AlertTriangle, UserCog,
 } from 'lucide-react';
 import useUiStore from '../../stores/uiStore';
 import useBalanceStore from '../../stores/balanceStore';
 import { formatMoney } from '../../utils/formatters';
 
 const navItems = [
-  { to: '/dashboard',          icon: LayoutDashboard, labelKey: 'nav.dashboard', end: true },
-  { to: '/dashboard/flights',  icon: Plane,           labelKey: 'nav.flights' },
-  { to: '/dashboard/drivers',  icon: Users,           labelKey: 'nav.drivers' },
-  { to: '/dashboard/vehicles', icon: Truck,           labelKey: 'nav.vehicles' },
-  { to: '/dashboard/reports',  icon: BarChart3,       labelKey: 'nav.reports' },
+  { to: '/dashboard',           icon: LayoutDashboard, labelKey: 'nav.dashboard', end: true },
+  { to: '/dashboard/flights',   icon: Plane,           labelKey: 'nav.flights' },
+  { to: '/dashboard/drivers',   icon: Users,           labelKey: 'nav.drivers' },
+  { to: '/dashboard/vehicles',  icon: Truck,           labelKey: 'nav.vehicles' },
+  { to: '/dashboard/employees', icon: UserCog,         labelKey: 'nav.employees' },
+  { to: '/dashboard/reports',   icon: BarChart3,       labelKey: 'nav.reports' },
 ];
 
 const Sidebar = () => {

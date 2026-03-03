@@ -69,3 +69,82 @@ export const MAINTENANCE_TYPES = [
   { value: 'repair', label: 'Ta\'mirlash' },
   { value: 'inspection', label: 'Tekshiruv' },
 ];
+
+export const EMPLOYEE_PERMISSION_GROUPS = [
+  {
+    group: 'Reyslar',
+    permissions: [
+      { value: 'view_flights',    label: 'Ko\'rish' },
+      { value: 'create_flight',   label: 'Yaratish' },
+      { value: 'edit_flight',     label: 'Tahrirlash' },
+      { value: 'delete_flight',   label: "O'chirish" },
+      { value: 'complete_flight', label: 'Yakunlash' },
+      { value: 'cancel_flight',   label: 'Bekor qilish' },
+    ],
+  },
+  {
+    group: "Yo'nalishlar",
+    permissions: [
+      { value: 'view_legs',  label: 'Ko\'rish' },
+      { value: 'add_leg',    label: 'Qo\'shish' },
+      { value: 'edit_leg',   label: 'Tahrirlash' },
+      { value: 'delete_leg', label: "O'chirish" },
+    ],
+  },
+  {
+    group: 'Xarajatlar',
+    permissions: [
+      { value: 'view_expenses',   label: 'Ko\'rish' },
+      { value: 'add_expense',     label: 'Qo\'shish' },
+      { value: 'edit_expense',    label: 'Tahrirlash' },
+      { value: 'delete_expense',  label: "O'chirish" },
+    ],
+  },
+  {
+    group: 'Haydovchilar',
+    permissions: [
+      { value: 'view_drivers',   label: 'Ko\'rish' },
+      { value: 'create_driver',  label: 'Yaratish' },
+      { value: 'edit_driver',    label: 'Tahrirlash' },
+      { value: 'delete_driver',  label: "O'chirish" },
+      { value: 'pay_salary',     label: 'Maosh to\'lash' },
+    ],
+  },
+  {
+    group: 'Mashinalar',
+    permissions: [
+      { value: 'view_vehicles',   label: 'Ko\'rish' },
+      { value: 'create_vehicle',  label: 'Yaratish' },
+      { value: 'edit_vehicle',    label: 'Tahrirlash' },
+      { value: 'delete_vehicle',  label: "O'chirish" },
+      { value: 'assign_driver',   label: 'Haydovchi biriktirish' },
+      { value: 'add_maintenance', label: 'Xarajat qo\'shish' },
+    ],
+  },
+  {
+    group: 'Hisobotlar & Moliya',
+    permissions: [
+      { value: 'view_reports',        label: 'Hisobotlar' },
+      { value: 'view_finance',        label: 'Moliya ko\'rish' },
+      { value: 'add_driver_payment',  label: 'To\'lov kiritish' },
+    ],
+  },
+  {
+    group: 'Xodimlar',
+    permissions: [
+      { value: 'view_employees',    label: 'Ko\'rish' },
+      { value: 'create_employee',   label: 'Yaratish' },
+      { value: 'edit_employee',     label: 'Tahrirlash' },
+      { value: 'delete_employee',   label: "O'chirish" },
+    ],
+  },
+];
+
+export const EMPLOYEE_POSITIONS = [
+  { value: 'dispatcher', label: 'Dispetcher' },
+  { value: 'accountant', label: 'Buxgalter' },
+  { value: 'manager', label: 'Menejer' },
+  { value: 'logist', label: 'Logist' },
+  { value: 'operator', label: 'Operator' },
+  { value: 'other', label: 'Boshqa' },
+];

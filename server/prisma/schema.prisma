@@ -37,6 +37,7 @@ model Businessman {
   auditLogs            AuditLog[]
   balanceTransactions  BalanceTransaction[]
   drivers              Driver[]
+  employees            Employee[]
   flights              Flight[]
   vehicles             Vehicle[]
 }
@@ -186,6 +187,10 @@ model Expense {
   confirmedByDriver Boolean  @default(false)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+  fuelLiters        Decimal? @db.Decimal(10, 3)
+  fuelPricePerLiter Decimal? @db.Decimal(10, 2)
+  odometerAtExpense Int?
+  expenseDate       DateTime @default(now())
   driverRelId       String?
   driver            Driver?  @relation(fields: [driverRelId], references: [id])
   flight            Flight   @relation(fields: [flightId], references: [id], onDelete: Cascade)
@@ -266,4 +271,22 @@ model BalanceTransaction {
   @@index([businessmanId])
   @@index([createdAt])
   @@index([paymeId])
+}
+
+model Employee {
+  id            String      @id @default(uuid())
+  businessmanId String
+  username      String      @unique
+  password      String
+  fullName      String
+  phone         String?
+  role          String      @default("employee")
+  position      String?
+  permissions   String[]
+  isActive      Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  businessman   Businessman @relation(fields: [businessmanId], references: [id], onDelete: Cascade)
+
+  @@index([businessmanId])
 }

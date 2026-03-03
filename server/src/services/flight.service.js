@@ -42,11 +42,12 @@ const recalculateFlightFinances = async (flightId) => {
   // 3. FOYDA — heavy chiqarilmaydi!
   const netProfit = totalIncome - lightExpenses;
   const driverProfitPercent = parseFloat(flight.driverProfitPercent);
-  const driverProfitAmount = (netProfit * driverProfitPercent) / 100;
-  const businessProfit = netProfit - driverProfitAmount;
-  const driverOwes = businessProfit;
+  const driverProfitAmount = netProfit > 0 ? (netProfit * driverProfitPercent) / 100 : 0;
+  const businessProfit = netProfit > 0 ? netProfit - driverProfitAmount : netProfit;
+  const driverOwes = businessProfit > 0 ? businessProfit : 0;
 
   // 4. HAYDOVCHI QOLIDAGI PUL
+  // Haydovchi qo'lida faqat mijozlardan yig'ilgan naqd/o'tkazma pul
   let cashAndTransferTotal = 0;
   for (const leg of flight.legs) {
     if (['cash', 'transfer'].includes(leg.paymentType)) {
@@ -54,7 +55,9 @@ const recalculateFlightFinances = async (flightId) => {
     }
   }
   const roadMoney = parseFloat(flight.roadMoney);
-  const driverCashInHand = cashAndTransferTotal + roadMoney - lightExpenses - driverProfitAmount;
+  // Driver cash in hand = collected cash - what driver owes business
+  const driverCashInHand = cashAndTransferTotal - driverOwes;
+  // Yo'l puli balansi = berilgan yo'l puli - sarf qilingan xarajatlar
   const finalBalance = roadMoney - lightExpenses;
 
   // 5. TO'LOV STATUSI

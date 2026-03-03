@@ -82,7 +82,7 @@ const LegForm = ({ isOpen, onClose, flightId, onSuccess, initialFromCity }) => {
         paymentType: form.paymentType,
         transferFeePercent: parseFloat(form.transferFeePercent) || 0,
       });
-      addToast("Buyurtma qo'shildi", 'success');
+      addToast("Yo'nalish qo'shildi", 'success');
       onSuccess?.();
       onClose();
     } catch (err) {
@@ -95,7 +95,7 @@ const LegForm = ({ isOpen, onClose, flightId, onSuccess, initialFromCity }) => {
   const canSubmit = form.fromCity && form.toCity && form.payment;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Buyurtma qo'shish">
+    <Modal isOpen={isOpen} onClose={onClose} title="Yo'nalish qo'shish">
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
         {/* ── Section 1: Route ── */}

@@ -33,6 +33,7 @@ import Vehicles      from './pages/dashboard/Vehicles';
 import VehicleDetail from './pages/dashboard/VehicleDetail';
 import Reports       from './pages/dashboard/Reports';
 import Balance       from './pages/dashboard/Balance';
+import Employees     from './pages/dashboard/Employees';
 
 // Driver pages
 import DriverHome    from './pages/driver/DriverHome';
@@ -84,6 +85,7 @@ const App = () => {
           <Route path="vehicles/:id" element={<VehicleDetail />} />
           <Route path="reports"      element={<Reports />} />
           <Route path="balance"      element={<Balance />} />
+          <Route path="employees"    element={<Employees />} />
         </Route>
 
         {/* Driver Panel */}

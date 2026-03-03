@@ -3,9 +3,6 @@ export const formatMoney = (amount, currency = 'UZS', short = false) => {
   if (short && num >= 1_000_000) {
     return `${(num / 1_000_000).toFixed(1)}M ${currency}`;
   }
-  if (short && num >= 1_000) {
-    return `${(num / 1_000).toFixed(0)}K ${currency}`;
-  }
   return new Intl.NumberFormat('uz-UZ').format(Math.round(num)) + ' ' + currency;
 };
 
