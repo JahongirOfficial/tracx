@@ -20,8 +20,6 @@
  */
 
 import Card from '../ui/Card';
-import Badge from '../ui/Badge';
-import Button from '../ui/Button';
 import { formatMoney } from '../../utils/formatters';
 import {
   TrendingUp,
@@ -125,7 +123,7 @@ const FlightFinanceSummary = ({ flight, onAddPayment }) => {
         <span className="text-sm font-semibold">{banner.label}</span>
         <div className="flex-1" />
         {/* Add payment button inside banner */}
-        {f.status === 'completed' && f.paymentStatus !== 'paid' && onAddPayment && (
+        {(f.status === 'completed' || f.status === 'active') && f.paymentStatus !== 'paid' && onAddPayment && (
           <button
             onClick={onAddPayment}
             className={[
