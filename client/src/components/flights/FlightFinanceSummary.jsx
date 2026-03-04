@@ -237,13 +237,6 @@ const FlightFinanceSummary = ({ flight, onAddPayment }) => {
             Haydovchi hisob-kitobi
           </p>
           <Row
-            label="Haydovchi qo'lidagi pul"
-            value={formatMoney(f.driverCashInHand)}
-            bold
-            icon={HandCoins}
-          />
-          <Divider />
-          <Row
             label="Biznesga berishi kerak"
             value={formatMoney(f.driverOwes)}
             valueClass="text-red-600 dark:text-red-400"

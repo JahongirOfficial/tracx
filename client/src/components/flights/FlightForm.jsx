@@ -81,7 +81,7 @@ const FlightForm = ({ isOpen, onClose }) => {
     .filter((d) => d.isActive)
     .map((d) => ({
       value: d.id,
-      label: `${d.fullName} (${d.status === 'free' ? "Bo'sh" : 'Band'}) — ${d.perTripRate}%`,
+      label: `${d.fullName} (${d.status === 'free' ? "Bo'sh" : 'Band'})`,
     }));
 
   const vehicleOptions = vehicles
@@ -93,7 +93,6 @@ const FlightForm = ({ isOpen, onClose }) => {
 
   const canSubmit = form.driverId && form.vehicleId;
 
-  const selectedDriver = drivers.find(d => d.id === form.driverId);
   const fuelUnit = (form.fuelType === 'metan' || form.fuelType === 'propan') ? 'kub' : 'litr';
 
   return (
@@ -112,13 +111,6 @@ const FlightForm = ({ isOpen, onClose }) => {
               placeholder="Haydovchini tanlang..."
               options={driverOptions}
             />
-            {selectedDriver && (
-              <div className="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 rounded-lg px-3 py-2 flex items-center gap-2">
-                <span>Haydovchi ulushi:</span>
-                <span className="font-semibold text-primary-600 dark:text-primary-400">{selectedDriver.perTripRate}%</span>
-                <span className="text-slate-400">(foydadan)</span>
-              </div>
-            )}
             <Combobox
               label="Mashina"
               required
@@ -203,19 +195,19 @@ const FlightForm = ({ isOpen, onClose }) => {
           <FormSection icon={Gauge} title="Boshlang'ich ko'rsatkichlar" />
           <div className="grid grid-cols-2 gap-3">
             <Input
-              label="Odometr (km)"
-              type="number"
-              leftIcon={Gauge}
-              value={form.startOdometer}
-              onChange={(e) => set('startOdometer', e.target.value)}
-              placeholder="0"
-            />
-            <Input
-              label={`Yoqilg'i (${fuelUnit})`}
+              label={fuelUnit === 'kub' ? 'Kub' : 'Litr'}
               type="number"
               leftIcon={Droplets}
               value={form.startFuel}
               onChange={(e) => set('startFuel', e.target.value)}
+              placeholder="0"
+            />
+            <Input
+              label="Odometr"
+              type="number"
+              leftIcon={Gauge}
+              value={form.startOdometer}
+              onChange={(e) => set('startOdometer', e.target.value)}
               placeholder="0"
             />
           </div>
