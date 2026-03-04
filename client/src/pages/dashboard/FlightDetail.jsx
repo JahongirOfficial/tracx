@@ -511,9 +511,9 @@ const FlightDetail = () => {
                             {hasFuel && (
                               <div className="flex items-center gap-2 mt-1.5 text-xs text-slate-500 dark:text-slate-400">
                                 <Droplets size={11} className="text-blue-400" />
-                                <span>{parseFloat(exp.fuelLiters)} litr</span>
+                                <span>{parseFloat(exp.fuelLiters)} {(exp.type === 'fuel_metan' || exp.type === 'fuel_propan') ? 'kub' : 'litr'}</span>
                                 {exp.fuelPricePerLiter && (
-                                  <span>× {formatMoney(exp.fuelPricePerLiter)}/l</span>
+                                  <span>× {formatMoney(exp.fuelPricePerLiter)}/{(exp.type === 'fuel_metan' || exp.type === 'fuel_propan') ? 'kub' : 'l'}</span>
                                 )}
                                 {exp.odometerAtExpense && (
                                   <span className="flex items-center gap-1">
