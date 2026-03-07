@@ -175,7 +175,7 @@ const FlightDetail = () => {
     e.preventDefault();
     setActionLoading(true);
     try {
-      await addDriverPayment(id, parseFloat(paymentAmount));
+      await addDriverPayment(id, parseFloat(paymentAmount), paymentDate);
       addToast("To'lov qo'shildi", 'success');
       setShowPaymentForm(false);
       setPaymentAmount('');
@@ -539,7 +539,7 @@ const FlightDetail = () => {
                           )}
                           <div className="flex items-center gap-2 mt-1.5 justify-end">
                             {/* Edit button - show for businessman's expenses */}
-                            {exp.addedBy !== 'driver' && (
+                            {flight.status === 'active' && exp.addedBy !== 'driver' && (
                               <button
                                 onClick={() => {
                                   setEditingExpense(exp);
@@ -613,7 +613,7 @@ const FlightDetail = () => {
             placeholder="0"
           />
           <Input
-            label="Yakuniy yoqilg'i (l)"
+            label={`Yakuniy yoqilg'i (${(flight.fuelType === 'metan' || flight.fuelType === 'propan') ? 'kub' : 'litr'})`}
             type="number"
             value={completeData.endFuel}
             onChange={(e) => setCompleteData((d) => ({ ...d, endFuel: e.target.value }))}

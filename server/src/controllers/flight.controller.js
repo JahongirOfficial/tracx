@@ -51,6 +51,7 @@ const getFlight = catchAsync(async (req, res, next) => {
       vehicle: { select: { id: true, plateNumber: true, brand: true, model: true } },
       legs: { orderBy: { createdAt: 'asc' } },
       expenses: { orderBy: { createdAt: 'desc' } },
+      driverPayments: { orderBy: { paidAt: 'asc' } },
     },
   });
   if (!flight) return next(new AppError('Reys topilmadi', 404));
@@ -372,14 +373,27 @@ const addDriverPayment = catchAsync(async (req, res, next) => {
   });
   if (!flight) return next(new AppError('Reys topilmadi', 404));
 
-  const { amount } = req.body;
+  const { amount, paidAt, note } = req.body;
+
+  await prisma.driverPayment.create({
+    data: {
+      flightId: flight.id,
+      amount,
+      paidAt: paidAt ? new Date(paidAt) : new Date(),
+      note: note || null,
+    },
+  });
+
   await prisma.flight.update({
     where: { id: flight.id },
     data: { driverPaidAmount: { increment: amount } },
   });
 
   await recalculateFlightFinances(flight.id);
-  const updated = await prisma.flight.findUnique({ where: { id: flight.id } });
+  const updated = await prisma.flight.findUnique({
+    where: { id: flight.id },
+    include: { driverPayments: { orderBy: { paidAt: 'asc' } } },
+  });
 
   res.json({ success: true, data: updated });
 });

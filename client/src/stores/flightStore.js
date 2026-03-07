@@ -97,8 +97,8 @@ const useFlightStore = create((set, get) => ({
     await api.delete(`/flights/${flightId}/expenses/${expId}`);
   },
 
-  addDriverPayment: async (flightId, amount) => {
-    const res = await api.post(`/flights/${flightId}/driver-payment`, { amount });
+  addDriverPayment: async (flightId, amount, paidAt) => {
+    const res = await api.post(`/flights/${flightId}/driver-payment`, { amount, paidAt });
     set((s) => ({
       currentFlight: s.currentFlight?.id === flightId ? res.data : s.currentFlight,
     }));

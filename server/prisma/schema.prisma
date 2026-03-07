@@ -140,6 +140,7 @@ model Flight {
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
   expenses            Expense[]
+  driverPayments      DriverPayment[]
   businessman         Businessman @relation(fields: [businessmanId], references: [id], onDelete: Cascade)
   driver              Driver      @relation(fields: [driverId], references: [id])
   vehicle             Vehicle     @relation(fields: [vehicleId], references: [id])
@@ -149,6 +150,18 @@ model Flight {
   @@index([driverId])
   @@index([status])
   @@index([createdAt])
+}
+
+model DriverPayment {
+  id        String   @id @default(uuid())
+  flightId  String
+  amount    Decimal  @db.Decimal(15, 2)
+  paidAt    DateTime @default(now())
+  note      String?
+  createdAt DateTime @default(now())
+  flight    Flight   @relation(fields: [flightId], references: [id], onDelete: Cascade)
+
+  @@index([flightId])
 }
 
 model Leg {
