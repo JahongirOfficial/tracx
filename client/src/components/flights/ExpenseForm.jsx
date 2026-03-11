@@ -4,7 +4,7 @@ import Input from '../ui/Input';
 import Button from '../ui/Button';
 import useUiStore from '../../stores/uiStore';
 import { EXPENSE_TYPES } from '../../utils/constants';
-import { AlertTriangle, Droplets, Gauge } from 'lucide-react';
+import { AlertTriangle, Droplets, Gauge, Wallet, Banknote } from 'lucide-react';
 
 const FUEL_TYPES = ['fuel', 'fuel_metan', 'fuel_propan', 'fuel_benzin', 'fuel_diesel'];
 const GAS_TYPES  = ['fuel_metan', 'fuel_propan'];
@@ -20,6 +20,7 @@ const INITIAL = {
   fuelLiters: '',
   odometerAtExpense: '',
   expenseDate: todayStr(),
+  paidFromOwn: false,
 };
 
 const LIGHT_TYPES = EXPENSE_TYPES.filter((t) => t.class === 'light');
@@ -45,6 +46,7 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false, e
         expenseDate: expense.expenseDate
           ? new Date(expense.expenseDate).toISOString().split('T')[0]
           : todayStr(),
+        paidFromOwn: expense.paidFromOwn || false,
       });
     } else if (isOpen && !expense) {
       setForm({ ...INITIAL, expenseDate: todayStr() });
@@ -55,6 +57,7 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false, e
 
   const selectedType = EXPENSE_TYPES.find((t) => t.value === form.type);
   const isHeavy      = selectedType?.class === 'heavy';
+  const showPaidFromOwn = !!form.type && !isHeavy;
   const isFuel       = FUEL_TYPES.includes(form.type);
   const fuelUnit     = GAS_TYPES.includes(form.type) ? 'kub' : 'litr';
 
@@ -83,6 +86,7 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false, e
         fuelPricePerLiter: pricePerUnit ?? undefined,
         odometerAtExpense:
           isFuel && form.odometerAtExpense ? parseInt(form.odometerAtExpense) : undefined,
+        paidFromOwn: !isHeavy ? !!form.paidFromOwn : false,
       };
 
       if (isEditMode) {
@@ -302,6 +306,49 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false, e
           onChange={(e) => set('description', e.target.value)}
           placeholder="Qo'shimcha ma'lumot..."
         />
+
+        {/* ── 5. To'lov manbai (faqat oddiy xarajatlar uchun) ── */}
+        {showPaidFromOwn && (
+          <div>
+            <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
+              To'lov manbai
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => set('paidFromOwn', false)}
+                className={[
+                  'flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold border transition-all duration-150',
+                  !form.paidFromOwn
+                    ? 'bg-primary-600 border-primary-600 text-white'
+                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-primary-300',
+                ].join(' ')}
+              >
+                <Banknote size={13} />
+                Yo'l pulidan
+              </button>
+              <button
+                type="button"
+                onClick={() => set('paidFromOwn', true)}
+                className={[
+                  'flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold border transition-all duration-150',
+                  form.paidFromOwn
+                    ? 'bg-amber-500 border-amber-500 text-white'
+                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-amber-300',
+                ].join(' ')}
+              >
+                <Wallet size={13} />
+                O'z cho'ntagimdan
+              </button>
+            </div>
+            {form.paidFromOwn && (
+              <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1.5 flex items-center gap-1">
+                <Wallet size={10} />
+                Ushbu xarajat haydovchi o'z cho'ntagidan to'laydi
+              </p>
+            )}
+          </div>
+        )}
 
         {/* ── Actions ── */}
         <div className="flex gap-3">

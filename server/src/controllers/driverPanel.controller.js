@@ -64,7 +64,11 @@ const addExpense = catchAsync(async (req, res, next) => {
   });
   if (!flight) return next(new AppError('Faol reys topilmadi', 404));
 
-  const { type, amount, currency = 'UZS', exchangeRate, description, timing = 'during' } = req.body;
+  const {
+    type, amount, currency = 'UZS', exchangeRate, description, timing = 'during',
+    fuelLiters, fuelPricePerLiter, odometerAtExpense, expenseDate,
+    paidFromOwn = false,
+  } = req.body;
 
   // Determine expense class
   const FUEL_TYPES = ['fuel', 'fuel_metan', 'fuel_propan', 'fuel_benzin', 'fuel_diesel'];
@@ -75,22 +79,28 @@ const addExpense = catchAsync(async (req, res, next) => {
 
   const amountInUZS = convertToUZS(amount, currency, exchangeRate);
 
-  const expense = await prisma.expense.create({
-    data: {
-      flightId: flight.id,
-      type,
-      expenseClass,
-      amount,
-      currency,
-      exchangeRate,
-      amountInUZS,
-      description,
-      timing,
-      addedBy: 'driver',
-      addedById: req.user.id,
-      driverRelId: req.user.id,
-    },
-  });
+  const expenseData = {
+    flightId: flight.id,
+    type,
+    expenseClass,
+    amount,
+    currency,
+    exchangeRate,
+    amountInUZS,
+    description,
+    timing,
+    paidFromOwn: expenseClass === 'light' ? !!paidFromOwn : false,
+    addedBy: 'driver',
+    addedById: req.user.id,
+    driverRelId: req.user.id,
+    expenseDate: expenseDate ? new Date(expenseDate) : new Date(),
+  };
+
+  if (fuelLiters !== undefined && fuelLiters !== null) expenseData.fuelLiters = fuelLiters;
+  if (fuelPricePerLiter !== undefined && fuelPricePerLiter !== null) expenseData.fuelPricePerLiter = fuelPricePerLiter;
+  if (odometerAtExpense !== undefined && odometerAtExpense !== null) expenseData.odometerAtExpense = odometerAtExpense;
+
+  const expense = await prisma.expense.create({ data: expenseData });
 
   // Recalculate finances
   const { recalculateFlightFinances } = require('../services/flight.service');

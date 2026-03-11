@@ -2,7 +2,7 @@ import Card from '../ui/Card';
 import { formatMoney, formatDate } from '../../utils/formatters';
 import {
   TrendingUp, TrendingDown, Fuel, Route, Wallet, Building2,
-  HandCoins, CircleDollarSign, CheckCircle2, Calendar, Plus,
+  HandCoins, CircleDollarSign, CheckCircle2, Calendar, Plus, Banknote,
 } from 'lucide-react';
 
 /* ── Status banner config ── */
@@ -40,10 +40,15 @@ const FlightFinanceSummary = ({ flight, onAddPayment }) => {
   if (!flight) return null;
 
   const f = flight;
-  const netProfitNum  = parseFloat(f.netProfit) || 0;
-  const remaining     = Math.max(0, parseFloat(f.driverOwes) - parseFloat(f.driverPaidAmount));
-  const payments      = f.driverPayments || [];
-  const canAddPayment = (f.status === 'active' || f.status === 'completed') && f.paymentStatus !== 'paid' && onAddPayment;
+  const netProfitNum      = parseFloat(f.netProfit) || 0;
+  const remaining         = Math.max(0, parseFloat(f.driverOwes) - parseFloat(f.driverPaidAmount));
+  const payments          = f.driverPayments || [];
+  const canAddPayment     = (f.status === 'active' || f.status === 'completed') && f.paymentStatus !== 'paid' && onAddPayment;
+  const roadMoney         = parseFloat(f.roadMoney) || 0;
+  const lightExpenses     = parseFloat(f.lightExpenses) || 0;
+  const finalBalance      = parseFloat(f.finalBalance) || 0;   // roadMoney - lightExpenses
+  const driverOwnExpenses = parseFloat(f.driverOwnExpenses) || 0;
+  const hasRoadMoney      = roadMoney > 0;
 
   const banner   = BANNER[f.paymentStatus] || BANNER.pending;
   const BIcon    = banner.icon;
@@ -80,12 +85,60 @@ const FlightFinanceSummary = ({ flight, onAddPayment }) => {
       {/* ── Expenses ── */}
       <Card>
         <SectionTitle icon={TrendingDown} label="Xarajatlar" />
+
+        {/* Yo'l puli bloki */}
+        {hasRoadMoney && (
+          <div className="mb-2 px-3 py-2.5 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/40">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-bold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
+                <Banknote size={12} /> Yo'l puli (berilgan)
+              </span>
+              <span className="text-sm font-black text-blue-700 dark:text-blue-300 tabular-nums">
+                {formatMoney(roadMoney)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-blue-500 dark:text-blue-400">Xarajatlar uchun sarflangan</span>
+              <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 tabular-nums">
+                -{formatMoney(Math.min(lightExpenses, roadMoney))}
+              </span>
+            </div>
+            <div className="h-px bg-blue-100 dark:bg-blue-800/40 my-1.5" />
+            {finalBalance >= 0 ? (
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">Yo'l puli qoldig'i</span>
+                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">+{formatMoney(finalBalance)}</span>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">Yo'l puli yetmadi (kamomad)</span>
+                <span className="text-xs font-bold text-amber-600 dark:text-amber-400 tabular-nums">-{formatMoney(Math.abs(finalBalance))}</span>
+              </div>
+            )}
+          </div>
+        )}
+
         <Row label="Yoqilg'i"          value={`-${formatMoney(f.fuelExpenses)}`}   valueClass="text-red-500 dark:text-red-400" />
         <Row label="Yo'l xarajatlari"  value={`-${formatMoney(f.tripExpenses)}`}   valueClass="text-red-500 dark:text-red-400" />
         <Divider />
         <Row label="Jami (yengil)"     value={`-${formatMoney(f.lightExpenses)}`}  valueClass="text-red-600 dark:text-red-400" bold />
         {parseFloat(f.heavyExpenses) > 0 && (
           <Row label="Kapital (hisob-kitobga kirmaydi)" value={formatMoney(f.heavyExpenses)} valueClass="text-slate-400 dark:text-slate-500" muted />
+        )}
+
+        {/* Haydovchi o'z cho'ntagidan to'lagan */}
+        {driverOwnExpenses > 0 && (
+          <>
+            <Divider />
+            <div className="flex items-center justify-between py-2 px-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/40">
+              <span className="text-xs font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
+                <Wallet size={12} /> Haydovchi o'z cho'ntagidan
+              </span>
+              <span className="text-sm font-bold text-amber-600 dark:text-amber-400 tabular-nums">
+                {formatMoney(driverOwnExpenses)}
+              </span>
+            </div>
+          </>
         )}
       </Card>
 

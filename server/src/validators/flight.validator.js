@@ -57,6 +57,7 @@ const createExpenseSchema = z.object({
   fuelPricePerLiter: z.number().min(0).optional(),
   odometerAtExpense: z.number().int().min(0).optional(),
   expenseDate: z.string().optional(),
+  paidFromOwn: z.boolean().optional().default(false),
 });
 
 const updateExpenseSchema = z.object({

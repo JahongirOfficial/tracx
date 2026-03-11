@@ -135,6 +135,7 @@ model Flight {
   paymentStatus       String      @default("pending")
   driverCashInHand    Decimal     @default(0) @db.Decimal(15, 2)
   finalBalance        Decimal     @default(0) @db.Decimal(15, 2)
+  driverOwnExpenses   Decimal     @default(0) @db.Decimal(15, 2)
   startedAt           DateTime    @default(now())
   completedAt         DateTime?
   createdAt           DateTime    @default(now())
@@ -198,6 +199,7 @@ model Expense {
   addedBy           String
   addedById         String
   confirmedByDriver Boolean  @default(false)
+  paidFromOwn       Boolean  @default(false)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   fuelLiters        Decimal? @db.Decimal(10, 3)

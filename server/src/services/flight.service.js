@@ -24,6 +24,7 @@ const recalculateFlightFinances = async (flightId) => {
   let fuelExpenses = 0;
   let tripExpenses = 0;
   let heavyExpenses = 0;
+  let driverOwnExpenses = 0;
 
   for (const expense of flight.expenses) {
     const amt = parseFloat(expense.amountInUZS);
@@ -33,6 +34,10 @@ const recalculateFlightFinances = async (flightId) => {
       heavyExpenses += amt;
     } else {
       tripExpenses += amt;
+    }
+    // Haydovchi o'z cho'ntagidan to'lagan xarajatlar (faqat light)
+    if (expense.paidFromOwn && !HEAVY_TYPES.includes(expense.type)) {
+      driverOwnExpenses += amt;
     }
   }
 
@@ -86,6 +91,7 @@ const recalculateFlightFinances = async (flightId) => {
       driverOwes,
       driverCashInHand,
       finalBalance,
+      driverOwnExpenses,
       paymentStatus,
     },
   });

@@ -293,6 +293,7 @@ const addExpense = catchAsync(async (req, res, next) => {
   const {
     type, amount, currency = 'UZS', exchangeRate, description,
     timing = 'during', fuelLiters, fuelPricePerLiter, odometerAtExpense, expenseDate,
+    paidFromOwn = false,
   } = req.body;
   const expenseClass = HEAVY_TYPES.includes(type) ? 'heavy' : 'light';
   const amountInUZS = convertToUZS(amount, currency, exchangeRate);
@@ -301,6 +302,7 @@ const addExpense = catchAsync(async (req, res, next) => {
     flightId: flight.id,
     type, expenseClass, amount, currency, exchangeRate, amountInUZS,
     description, timing,
+    paidFromOwn: expenseClass === 'light' ? !!paidFromOwn : false,
     addedBy: 'businessman',
     addedById: req.user.id,
     expenseDate: expenseDate ? new Date(expenseDate) : new Date(),
