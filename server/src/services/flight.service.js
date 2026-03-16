@@ -70,8 +70,8 @@ const recalculateFlightFinances = async (flightId) => {
     }
   }
   const roadMoney = parseFloat(flight.roadMoney);
-  // Haydovchi qo'lidagi pul = naqd yig'ilgan + naqd yo'l puli - o'z cho'ntagidan xarajatlar
-  const driverCashInHand = cashTotal + cashRoadMoney - driverOwnExpenses;
+  // Haydovchi qo'lidagi pul = naqd yig'ilgan + naqd yo'l puli - barcha yengil xarajatlar
+  const driverCashInHand = cashTotal + cashRoadMoney - lightExpenses;
   // Yo'l puli balansi = berilgan yo'l puli - sarf qilingan xarajatlar
   const finalBalance = roadMoney - lightExpenses;
 
