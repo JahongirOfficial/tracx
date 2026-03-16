@@ -273,26 +273,13 @@ const FlightFinanceSummary = ({ flight, onAddPayment, onAddRoadMoney, onRecalcul
       <Card>
         <SectionTitle icon={Wallet} label="Haydovchi hisob-kitobi" />
 
-        <Row
-          label="Qo'lidagi pul"
-          value={formatMoney(f.driverCashInHand)}
-          valueClass="text-slate-700 dark:text-slate-200"
-          bold
-        />
-        <Row
-          label="Biznesga berishi kerak"
-          value={formatMoney(f.driverOwes)}
-          valueClass="text-red-600 dark:text-red-400"
-          bold
-        />
-
         {/* Payment history */}
         {payments.length > 0 && (
           <>
             <Divider />
             <div className="mb-1">
               <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1">
-                <Calendar size={10} /> To'lovlar tarixi
+                <Calendar size={10} /> Olingan pullar tarixi
               </p>
               <div className="flex flex-col gap-1">
                 {payments.map((p) => (
@@ -305,7 +292,7 @@ const FlightFinanceSummary = ({ flight, onAddPayment, onAddRoadMoney, onRecalcul
                       {p.note && <span className="text-[10px] text-slate-400 truncate max-w-[80px]">{p.note}</span>}
                     </div>
                     <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                      +{formatMoney(p.amount)}
+                      -{formatMoney(p.amount)}
                     </span>
                   </div>
                 ))}
@@ -315,23 +302,15 @@ const FlightFinanceSummary = ({ flight, onAddPayment, onAddRoadMoney, onRecalcul
         )}
 
         <Divider />
-        <Row
-          label="Jami to'langan"
-          value={formatMoney(f.driverPaidAmount)}
-          valueClass="text-emerald-600 dark:text-emerald-400"
-          bold
-        />
-        {remaining > 0 && (
-          <div className="flex items-center justify-between py-2 px-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/40 mt-1">
-            <span className="text-sm font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
-              <CircleDollarSign size={13} />
-              Qoldiq
-            </span>
-            <span className="text-base font-black text-amber-600 dark:text-amber-400 tabular-nums">
-              {formatMoney(remaining)}
-            </span>
-          </div>
-        )}
+        <div className="flex items-center justify-between py-2 px-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+          <span className="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+            <Wallet size={13} />
+            Qo'lidagi pul
+          </span>
+          <span className={`text-base font-black tabular-nums ${parseFloat(f.driverCashInHand) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+            {formatMoney(f.driverCashInHand)}
+          </span>
+        </div>
       </Card>
     </div>
   );
