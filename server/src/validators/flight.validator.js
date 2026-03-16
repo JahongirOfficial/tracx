@@ -61,6 +61,7 @@ const createExpenseSchema = z.object({
 });
 
 const updateExpenseSchema = z.object({
+  type: z.enum(ALL_EXPENSE_TYPES).optional(),
   amount: z.number().positive().optional(),
   currency: z.enum(['UZS', 'USD']).optional(),
   exchangeRate: z.number().positive().optional(),
@@ -70,6 +71,7 @@ const updateExpenseSchema = z.object({
   fuelPricePerLiter: z.number().min(0).optional(),
   odometerAtExpense: z.number().int().min(0).optional(),
   expenseDate: z.string().optional(),
+  paidFromOwn: z.boolean().optional(),
 });
 
 const driverPaymentSchema = z.object({
