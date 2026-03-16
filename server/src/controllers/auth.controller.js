@@ -175,4 +175,48 @@ const changePassword = catchAsync(async (req, res, next) => {
   res.json({ success: true, message: 'Parol muvaffaqiyatli o\'zgartirildi' });
 });
 
-module.exports = { login, getMe, refresh, logout, getSubscription, upgradeSubscriptionHandler, changePassword };
+const register = catchAsync(async (req, res, next) => {
+  const { email, fullName, password, phone, companyName } = req.body;
+
+  const existing = await prisma.businessman.findFirst({
+    where: { OR: [{ username: email }, { email }] },
+  });
+  if (existing) return next(new AppError("Bu email allaqachon ro'yxatdan o'tgan", 400));
+
+  const hashed = await bcrypt.hash(password, 12);
+
+  const trialDays = parseInt(env.TRIAL_DAYS || '30', 10);
+  const trialEndsAt = new Date(Date.now() + trialDays * 86400000);
+
+  const businessman = await prisma.businessman.create({
+    data: {
+      username: email,
+      email,
+      password: hashed,
+      fullName,
+      phone: phone || null,
+      companyName: companyName || null,
+      plan: 'free',
+      subscriptionEnd: new Date('2099-12-31'),
+      trialEndsAt,
+    },
+  });
+
+  const { accessToken, refreshToken } = await generateTokens(businessman.id, 'business');
+
+  const userData = {
+    id: businessman.id,
+    username: businessman.username,
+    email: businessman.email,
+    role: 'business',
+    fullName: businessman.fullName,
+    companyName: businessman.companyName,
+  };
+
+  res.status(201).json({
+    success: true,
+    data: { user: userData, accessToken, refreshToken, role: 'business' },
+  });
+});
+
+module.exports = { login, register, getMe, refresh, logout, getSubscription, upgradeSubscriptionHandler, changePassword };

@@ -86,7 +86,7 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false, e
         fuelPricePerLiter: pricePerUnit ?? undefined,
         odometerAtExpense:
           isFuel && form.odometerAtExpense ? parseInt(form.odometerAtExpense) : undefined,
-        paidFromOwn: !isHeavy ? !!form.paidFromOwn : false,
+        paidFromOwn: !!form.paidFromOwn,
       };
 
       if (isEditMode) {

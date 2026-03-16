@@ -3,6 +3,7 @@ const AppError = require('../utils/AppError');
 const logger = require('../utils/logger');
 
 const DAILY_RATE_PER_VEHICLE = 1000; // UZS per vehicle per day
+const FREE_VEHICLES = 2; // First N vehicles are always free
 const TRIAL_DAYS = parseInt(process.env.TRIAL_DAYS || '30', 10);
 
 /* ── helpers ── */
@@ -42,7 +43,8 @@ const getBalanceInfo = async (businessmanId) => {
     where: { businessmanId, isActive: true },
   });
 
-  const dailyCost = vehicleCount * DAILY_RATE_PER_VEHICLE;
+  const billableVehicles = Math.max(0, vehicleCount - FREE_VEHICLES);
+  const dailyCost = billableVehicles * DAILY_RATE_PER_VEHICLE;
   const balance = toDecimal(biz.balance);
 
   // Days remaining based on balance
@@ -128,9 +130,10 @@ const dailyChargeSingle = async (businessmanId) => {
     where: { businessmanId, isActive: true },
   });
 
-  if (vehicleCount === 0) return null;
+  const billableVehicles = Math.max(0, vehicleCount - FREE_VEHICLES);
+  if (billableVehicles === 0) return null;
 
-  const charge = vehicleCount * DAILY_RATE_PER_VEHICLE;
+  const charge = billableVehicles * DAILY_RATE_PER_VEHICLE;
   const before = toDecimal(biz.balance);
   const after = before - charge;
 
@@ -150,7 +153,7 @@ const dailyChargeSingle = async (businessmanId) => {
         balanceBefore: before,
         balanceAfter: after,
         vehicleCount,
-        description: `Kunlik to'lov: ${vehicleCount} ta mashina × ${DAILY_RATE_PER_VEHICLE.toLocaleString()} UZS`,
+        description: `Kunlik to'lov: ${billableVehicles} ta mashina × ${DAILY_RATE_PER_VEHICLE.toLocaleString()} UZS (${vehicleCount} ta jami, ${FREE_VEHICLES} ta bepul)`,
       },
     }),
   ]);

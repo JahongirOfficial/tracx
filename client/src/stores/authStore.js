@@ -17,6 +17,15 @@ const useAuthStore = create((set, get) => ({
     return role;
   },
 
+  register: async (data) => {
+    const res = await api.post('/auth/register', data);
+    const { user, accessToken, refreshToken, role } = res.data;
+    localStorage.setItem('token', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+    set({ user, token: accessToken, refreshToken, role, isLoading: false });
+    return role;
+  },
+
   logout: async () => {
     try { await api.post('/auth/logout'); } catch {}
     localStorage.clear();

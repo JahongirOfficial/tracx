@@ -69,8 +69,46 @@ const getVehicle = catchAsync(async (req, res, next) => {
   res.json({ success: true, data: vehicle });
 });
 
-const createVehicle = catchAsync(async (req, res) => {
+const FREE_VEHICLES = 2;
+const EXTRA_VEHICLE_PRICE = 50000;
+
+const createVehicle = catchAsync(async (req, res, next) => {
   const { plateNumber, brand, model, year, color, currentOdometer, oilChangeIntervalKm, lastOilChangeKm } = req.body;
+
+  const vehicleCount = await prisma.vehicle.count({
+    where: { businessmanId: req.user.id, isActive: true },
+  });
+
+  if (vehicleCount >= FREE_VEHICLES) {
+    const biz = await prisma.businessman.findUnique({
+      where: { id: req.user.id },
+      select: { balance: true },
+    });
+    const balance = parseFloat(biz.balance);
+    if (balance < EXTRA_VEHICLE_PRICE) {
+      return next(new AppError(
+        `${vehicleCount + 1}-mashina qo'shish uchun ${EXTRA_VEHICLE_PRICE.toLocaleString()} UZS kerak. Hisobingizda: ${balance.toLocaleString()} UZS`,
+        400
+      ));
+    }
+
+    await prisma.$transaction([
+      prisma.businessman.update({
+        where: { id: req.user.id },
+        data: { balance: { decrement: EXTRA_VEHICLE_PRICE } },
+      }),
+      prisma.balanceTransaction.create({
+        data: {
+          businessmanId: req.user.id,
+          type: 'vehicle_unlock',
+          amount: -EXTRA_VEHICLE_PRICE,
+          balanceBefore: balance,
+          balanceAfter: balance - EXTRA_VEHICLE_PRICE,
+          description: `Qo'shimcha mashina qo'shildi (${vehicleCount + 1}-mashina)`,
+        },
+      }),
+    ]);
+  }
 
   const vehicle = await prisma.vehicle.create({
     data: {

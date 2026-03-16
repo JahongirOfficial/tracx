@@ -20,6 +20,7 @@ import { PageLoader } from './components/ui/LoadingSpinner';
 // Public pages
 import Landing    from './pages/Landing';
 import Login      from './pages/Login';
+import Register   from './pages/Register';
 import NotFound   from './pages/NotFound';
 import Payment    from './pages/Payment';
 
@@ -63,9 +64,10 @@ const App = () => {
       <ToastContainer />
       <Routes>
         {/* Public */}
-        <Route path="/"        element={<Landing />} />
-        <Route path="/login"   element={<Login />} />
-        <Route path="/payment" element={<Payment />} />
+        <Route path="/"          element={<Landing />} />
+        <Route path="/login"     element={<Login />} />
+        <Route path="/register"  element={<Register />} />
+        <Route path="/payment"   element={<Payment />} />
 
         {/* Businessman Dashboard */}
         <Route

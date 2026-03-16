@@ -19,4 +19,12 @@ const upgradeSubscriptionSchema = z.object({
   months: z.number().int().min(1).max(12).default(1),
 });
 
-module.exports = { loginSchema, changePasswordSchema, refreshSchema, upgradeSubscriptionSchema };
+const registerSchema = z.object({
+  email: z.string().email("Email noto'g'ri formatda"),
+  fullName: z.string().min(2, 'Ism kamida 2 ta belgi'),
+  password: z.string().min(8, 'Parol kamida 8 ta belgi'),
+  phone: z.string().optional(),
+  companyName: z.string().optional(),
+});
+
+module.exports = { loginSchema, changePasswordSchema, refreshSchema, upgradeSubscriptionSchema, registerSchema };
