@@ -105,6 +105,14 @@ const useFlightStore = create((set, get) => ({
     return res.data;
   },
 
+  addRoadMoneyPayment: async (flightId, amount, paidAt, note) => {
+    const res = await api.post(`/flights/${flightId}/road-money`, { amount, paidAt, note });
+    set((s) => ({
+      currentFlight: s.currentFlight?.id === flightId ? res.data : s.currentFlight,
+    }));
+    return res.data;
+  },
+
   refreshCurrentFlight: async () => {
     const id = get().currentFlight?.id;
     if (id) await get().fetchFlight(id);

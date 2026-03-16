@@ -52,16 +52,17 @@ const recalculateFlightFinances = async (flightId) => {
   const driverOwes = businessProfit > 0 ? businessProfit : 0;
 
   // 4. HAYDOVCHI QOLIDAGI PUL
-  // Haydovchi qo'lida faqat mijozlardan yig'ilgan naqd/o'tkazma pul
-  let cashAndTransferTotal = 0;
+  // Faqat NAQD (cash) to'lovlar haydovchi qo'lida bo'ladi
+  // Peritsena, karta, o'tkazma — haydovchi qo'liga tegmaydi
+  let cashTotal = 0;
   for (const leg of flight.legs) {
-    if (['cash', 'transfer'].includes(leg.paymentType)) {
-      cashAndTransferTotal += parseFloat(leg.netPayment);
+    if (leg.paymentType === 'cash') {
+      cashTotal += parseFloat(leg.netPayment);
     }
   }
   const roadMoney = parseFloat(flight.roadMoney);
-  // Driver cash in hand = collected cash - what driver owes business
-  const driverCashInHand = cashAndTransferTotal - driverOwes;
+  // Driver cash in hand = collected CASH - what driver owes business
+  const driverCashInHand = cashTotal - driverOwes;
   // Yo'l puli balansi = berilgan yo'l puli - sarf qilingan xarajatlar
   const finalBalance = roadMoney - lightExpenses;
 

@@ -36,7 +36,7 @@ const Row = ({ label, value, valueClass = 'text-slate-700 dark:text-slate-200', 
 
 const Divider = () => <div className="h-px bg-slate-100 dark:bg-slate-800 my-2" />;
 
-const FlightFinanceSummary = ({ flight, onAddPayment }) => {
+const FlightFinanceSummary = ({ flight, onAddPayment, onAddRoadMoney }) => {
   if (!flight) return null;
 
   const f = flight;
@@ -46,9 +46,13 @@ const FlightFinanceSummary = ({ flight, onAddPayment }) => {
   const canAddPayment     = (f.status === 'active' || f.status === 'completed') && f.paymentStatus !== 'paid' && onAddPayment;
   const roadMoney         = parseFloat(f.roadMoney) || 0;
   const lightExpenses     = parseFloat(f.lightExpenses) || 0;
-  const finalBalance      = parseFloat(f.finalBalance) || 0;   // roadMoney - lightExpenses
+  const heavyExpenses     = parseFloat(f.heavyExpenses) || 0;
+  const totalIncome       = parseFloat(f.totalIncome) || 0;
   const driverOwnExpenses = parseFloat(f.driverOwnExpenses) || 0;
   const hasRoadMoney      = roadMoney > 0;
+  const qolganPul         = (totalIncome + roadMoney) - (lightExpenses + heavyExpenses);
+  const roadPayments      = f.roadMoneyPayments || [];
+  const canAddRoadMoney   = f.status === 'active' && onAddRoadMoney;
 
   const banner   = BANNER[f.paymentStatus] || BANNER.pending;
   const BIcon    = banner.icon;
@@ -66,7 +70,7 @@ const FlightFinanceSummary = ({ flight, onAddPayment }) => {
             onClick={onAddPayment}
             className="flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold border border-current opacity-80 hover:opacity-100 transition-opacity"
           >
-            <Plus size={11} /> To'lov qo'shish
+            <Plus size={11} /> Pul olish
           </button>
         )}
       </div>
@@ -87,44 +91,58 @@ const FlightFinanceSummary = ({ flight, onAddPayment }) => {
         <SectionTitle icon={TrendingDown} label="Xarajatlar" />
 
         {/* Yo'l puli bloki */}
-        {hasRoadMoney && (
-          <div className="mb-2 px-3 py-2.5 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/40">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-bold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
-                <Banknote size={12} /> Yo'l puli (berilgan)
-              </span>
+        <div className="mb-2 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/40 overflow-hidden">
+          <div className="flex items-center justify-between px-3 py-2.5">
+            <span className="text-xs font-bold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
+              <Banknote size={12} /> Yo'l puli (berilgan)
+            </span>
+            <div className="flex items-center gap-2">
               <span className="text-sm font-black text-blue-700 dark:text-blue-300 tabular-nums">
                 {formatMoney(roadMoney)}
               </span>
+              {canAddRoadMoney && (
+                <button
+                  onClick={onAddRoadMoney}
+                  className="flex items-center gap-0.5 px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-blue-100 dark:bg-blue-800/40 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800/60 transition-colors"
+                >
+                  <Plus size={10} /> Qo'shish
+                </button>
+              )}
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] text-blue-500 dark:text-blue-400">Xarajatlar uchun sarflangan</span>
-              <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 tabular-nums">
-                -{formatMoney(Math.min(lightExpenses, roadMoney))}
-              </span>
-            </div>
-            <div className="h-px bg-blue-100 dark:bg-blue-800/40 my-1.5" />
-            {finalBalance >= 0 ? (
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">Yo'l puli qoldig'i</span>
-                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">+{formatMoney(finalBalance)}</span>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">Yo'l puli yetmadi (kamomad)</span>
-                <span className="text-xs font-bold text-amber-600 dark:text-amber-400 tabular-nums">-{formatMoney(Math.abs(finalBalance))}</span>
-              </div>
-            )}
           </div>
-        )}
+          {roadPayments.length > 0 && (
+            <div className="border-t border-blue-100 dark:border-blue-800/40 px-3 py-2 flex flex-col gap-1">
+              {roadPayments.map((p) => (
+                <div key={p.id} className="flex items-center justify-between">
+                  <span className="text-[11px] text-blue-500 dark:text-blue-400 tabular-nums flex items-center gap-1.5">
+                    <Calendar size={9} /> {formatDate(p.paidAt, true)}
+                    {p.note && <span className="text-blue-400 truncate max-w-[60px]">· {p.note}</span>}
+                  </span>
+                  <span className="text-[11px] font-bold text-blue-600 dark:text-blue-300 tabular-nums">
+                    +{formatMoney(p.amount)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         <Row label="Yoqilg'i"          value={`-${formatMoney(f.fuelExpenses)}`}   valueClass="text-red-500 dark:text-red-400" />
         <Row label="Yo'l xarajatlari"  value={`-${formatMoney(f.tripExpenses)}`}   valueClass="text-red-500 dark:text-red-400" />
         <Divider />
         <Row label="Jami (yengil)"     value={`-${formatMoney(f.lightExpenses)}`}  valueClass="text-red-600 dark:text-red-400" bold />
-        {parseFloat(f.heavyExpenses) > 0 && (
-          <Row label="Kapital (hisob-kitobga kirmaydi)" value={formatMoney(f.heavyExpenses)} valueClass="text-slate-400 dark:text-slate-500" muted />
+        {heavyExpenses > 0 && (
+          <Row label="Kapital (hisob-kitobga kirmaydi)" value={formatMoney(heavyExpenses)} valueClass="text-slate-400 dark:text-slate-500" muted />
         )}
+        <Divider />
+        <div className="flex items-center justify-between py-2 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/40">
+          <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+            <CircleDollarSign size={13} /> Qolgan pul
+          </span>
+          <span className={`text-base font-black tabular-nums ${qolganPul >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+            {qolganPul >= 0 ? '+' : ''}{formatMoney(qolganPul)}
+          </span>
+        </div>
 
         {/* Haydovchi o'z cho'ntagidan to'lagan */}
         {driverOwnExpenses > 0 && (

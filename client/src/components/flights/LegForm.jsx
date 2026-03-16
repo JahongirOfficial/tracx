@@ -21,8 +21,7 @@ import Button from '../ui/Button';
 import useFlightStore from '../../stores/flightStore';
 import useUiStore from '../../stores/uiStore';
 import { PAYMENT_TYPES } from '../../utils/constants';
-import { formatMoney } from '../../utils/formatters';
-import { MapPin, Package, CreditCard, Percent, ArrowRight, TrendingUp, TrendingDown } from 'lucide-react';
+import { MapPin, Package, CreditCard, ArrowRight } from 'lucide-react';
 
 /* Section header inside the form */
 const FormSection = ({ icon: Icon, title }) => (
@@ -44,7 +43,6 @@ const INITIAL_FORM = {
   weight: '',
   payment: '',
   paymentType: 'cash',
-  transferFeePercent: '0',
 };
 
 const LegForm = ({ isOpen, onClose, flightId, onSuccess, initialFromCity }) => {
@@ -63,12 +61,6 @@ const LegForm = ({ isOpen, onClose, flightId, onSuccess, initialFromCity }) => {
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
-  /* Live financial preview */
-  const payment = parseFloat(form.payment) || 0;
-  const feePercent = parseFloat(form.transferFeePercent) || 0;
-  const transferFeeAmount = (payment * feePercent) / 100;
-  const netPayment = payment - transferFeeAmount;
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -80,7 +72,7 @@ const LegForm = ({ isOpen, onClose, flightId, onSuccess, initialFromCity }) => {
         weight: form.weight ? parseFloat(form.weight) : undefined,
         payment: parseFloat(form.payment),
         paymentType: form.paymentType,
-        transferFeePercent: parseFloat(form.transferFeePercent) || 0,
+        transferFeePercent: 0,
       });
       addToast("Yo'nalish qo'shildi", 'success');
       onSuccess?.();
@@ -155,64 +147,16 @@ const LegForm = ({ isOpen, onClose, flightId, onSuccess, initialFromCity }) => {
               onChange={(e) => set('paymentType', e.target.value)}
               options={PAYMENT_TYPES}
             />
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                label="Miqdor (UZS)"
-                type="number"
-                required
-                value={form.payment}
-                onChange={(e) => set('payment', e.target.value)}
-                placeholder="0"
-              />
-              <Input
-                label="Komissiya (%)"
-                type="number"
-                leftIcon={Percent}
-                value={form.transferFeePercent}
-                onChange={(e) => set('transferFeePercent', e.target.value)}
-                placeholder="0"
-                min="0"
-                max="100"
-              />
-            </div>
+            <Input
+              label="Miqdor (UZS)"
+              type="number"
+              required
+              value={form.payment}
+              onChange={(e) => set('payment', e.target.value)}
+              placeholder="0"
+            />
           </div>
         </div>
-
-        {/* ── Live payment preview ── */}
-        {payment > 0 && (
-          <div
-            className={[
-              'rounded-2xl border p-4',
-              'bg-slate-50 dark:bg-slate-800/50',
-              'border-slate-200 dark:border-slate-700',
-            ].join(' ')}
-          >
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
-              Hisob-kitob
-            </p>
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
-                  <TrendingDown size={13} className="text-red-500" />
-                  Komissiya ({feePercent}%)
-                </span>
-                <span className="font-semibold text-red-600 dark:text-red-400">
-                  -{formatMoney(transferFeeAmount)}
-                </span>
-              </div>
-              <div className="h-px bg-slate-200 dark:bg-slate-700" />
-              <div className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-1.5 font-semibold text-slate-800 dark:text-slate-200">
-                  <TrendingUp size={13} className="text-emerald-500" />
-                  Sof to'lov
-                </span>
-                <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                  {formatMoney(netPayment)}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* ── Actions ── */}
         <div className="flex gap-3 pt-1">

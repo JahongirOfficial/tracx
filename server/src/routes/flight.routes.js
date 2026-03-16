@@ -3,7 +3,7 @@ const router = express.Router();
 const {
   getFlights, getFlight, createFlight, updateFlight, deleteFlight, completeFlight, cancelFlight,
   addLeg, updateLeg, deleteLeg, updateLegStatus,
-  addExpense, updateExpense, deleteExpense, addDriverPayment,
+  addExpense, updateExpense, deleteExpense, addDriverPayment, addRoadMoneyPayment,
   getStatsSummary, getDriverDebts,
 } = require('../controllers/flight.controller');
 const { protect, businessOnly } = require('../middleware/auth');
@@ -44,5 +44,8 @@ router.delete('/:id/expenses/:expId', deleteExpense);
 
 // Driver payment
 router.post('/:id/driver-payment', validate(driverPaymentSchema), addDriverPayment);
+
+// Road money payment
+router.post('/:id/road-money', validate(driverPaymentSchema), addRoadMoneyPayment);
 
 module.exports = router;

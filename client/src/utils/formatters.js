@@ -6,13 +6,19 @@ export const formatMoney = (amount, currency = 'UZS', short = false) => {
   return new Intl.NumberFormat('uz-UZ').format(Math.round(num)) + ' ' + currency;
 };
 
+const UZ_MONTHS = [
+  'yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun',
+  'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr',
+];
+
 export const formatDate = (date, short = false) => {
   if (!date) return '—';
   const d = new Date(date);
-  if (short) {
-    return d.toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: '2-digit' });
-  }
-  return d.toLocaleDateString('uz-UZ', { day: '2-digit', month: 'long', year: 'numeric' });
+  const day  = d.getDate();
+  const mon  = d.getMonth();
+  const year = d.getFullYear();
+  if (short) return `${String(day).padStart(2,'0')}.${String(mon+1).padStart(2,'0')}.${String(year).slice(-2)}`;
+  return `${day} ${UZ_MONTHS[mon]} ${year}`;
 };
 
 export const formatDateTime = (date) => {

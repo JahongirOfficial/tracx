@@ -52,6 +52,7 @@ const getFlight = catchAsync(async (req, res, next) => {
       legs: { orderBy: { createdAt: 'asc' } },
       expenses: { orderBy: { createdAt: 'desc' } },
       driverPayments: { orderBy: { paidAt: 'asc' } },
+      roadMoneyPayments: { orderBy: { paidAt: 'asc' } },
     },
   });
   if (!flight) return next(new AppError('Reys topilmadi', 404));
@@ -400,6 +401,46 @@ const addDriverPayment = catchAsync(async (req, res, next) => {
   res.json({ success: true, data: updated });
 });
 
+const addRoadMoneyPayment = catchAsync(async (req, res, next) => {
+  const flight = await prisma.flight.findFirst({
+    where: { id: req.params.id, businessmanId: req.user.id },
+  });
+  if (!flight) return next(new AppError('Reys topilmadi', 404));
+
+  const { amount, paidAt, note } = req.body;
+
+  await prisma.roadMoneyPayment.create({
+    data: {
+      flightId: flight.id,
+      amount,
+      paidAt: paidAt ? new Date(paidAt) : new Date(),
+      note: note || null,
+    },
+  });
+
+  // roadMoney maydonini oshiramiz
+  await prisma.flight.update({
+    where: { id: flight.id },
+    data: { roadMoney: { increment: amount } },
+  });
+
+  await recalculateFlightFinances(flight.id);
+
+  const updated = await prisma.flight.findUnique({
+    where: { id: flight.id },
+    include: {
+      driver: { select: { id: true, fullName: true, phone: true } },
+      vehicle: { select: { id: true, plateNumber: true } },
+      legs: { orderBy: { createdAt: 'asc' } },
+      expenses: { orderBy: { createdAt: 'desc' } },
+      driverPayments: { orderBy: { paidAt: 'asc' } },
+      roadMoneyPayments: { orderBy: { paidAt: 'asc' } },
+    },
+  });
+
+  res.json({ success: true, data: updated });
+});
+
 // ===== STATS =====
 const getStatsSummary = catchAsync(async (req, res) => {
   const { dateFrom, dateTo } = req.query;
@@ -471,6 +512,6 @@ const getDriverDebts = catchAsync(async (req, res) => {
 module.exports = {
   getFlights, getFlight, createFlight, updateFlight, deleteFlight, completeFlight, cancelFlight,
   addLeg, updateLeg, deleteLeg, updateLegStatus,
-  addExpense, updateExpense, deleteExpense, addDriverPayment,
+  addExpense, updateExpense, deleteExpense, addDriverPayment, addRoadMoneyPayment,
   getStatsSummary, getDriverDebts,
 };
