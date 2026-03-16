@@ -334,8 +334,13 @@ const updateExpense = catchAsync(async (req, res, next) => {
   const expense = await prisma.expense.findFirst({ where: { id: req.params.expId, flightId: flight.id } });
   if (!expense) return next(new AppError('Xarajat topilmadi', 404));
 
-  const { amount, currency, exchangeRate, description, timing, fuelLiters, fuelPricePerLiter, odometerAtExpense, expenseDate } = req.body;
+  const { type, amount, currency, exchangeRate, description, timing, fuelLiters, fuelPricePerLiter, odometerAtExpense, expenseDate, paidFromOwn } = req.body;
   const data = {};
+  if (type !== undefined) {
+    data.type = type;
+    data.expenseClass = HEAVY_TYPES.includes(type) ? 'heavy' : 'light';
+    data.paidFromOwn = data.expenseClass === 'light' ? !!paidFromOwn : false;
+  }
   if (amount !== undefined) {
     data.amount = amount;
     data.amountInUZS = convertToUZS(amount, currency || expense.currency, exchangeRate || expense.exchangeRate);
