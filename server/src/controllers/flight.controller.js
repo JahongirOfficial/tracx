@@ -339,7 +339,9 @@ const updateExpense = catchAsync(async (req, res, next) => {
   if (type !== undefined) {
     data.type = type;
     data.expenseClass = HEAVY_TYPES.includes(type) ? 'heavy' : 'light';
-    data.paidFromOwn = data.expenseClass === 'light' ? !!paidFromOwn : false;
+  }
+  if (paidFromOwn !== undefined) {
+    data.paidFromOwn = !!paidFromOwn;
   }
   if (amount !== undefined) {
     data.amount = amount;
