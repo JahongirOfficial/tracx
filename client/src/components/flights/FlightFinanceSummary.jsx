@@ -64,6 +64,22 @@ const FlightFinanceSummary = ({ flight, onAddPayment, onAddRoadMoney, onRecalcul
   const roadPayments      = f.roadMoneyPayments || [];
   const canAddRoadMoney   = f.status === 'active' && onAddRoadMoney;
 
+  /* ── To'lov turlari bo'yicha daromad ── */
+  const PAYMENT_LABELS = {
+    cash:     { label: 'Naqd',      color: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' },
+    peritsena:{ label: 'Peritsena', color: 'bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300' },
+    card:     { label: 'Karta',     color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' },
+    transfer: { label: "O'tkazma",  color: 'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300' },
+    other:    { label: 'Boshqa',    color: 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300' },
+  };
+  const incomeByType = {};
+  for (const leg of f.legs || []) {
+    if (leg.status === 'cancelled') continue;
+    const t = leg.paymentType || 'other';
+    incomeByType[t] = (incomeByType[t] || 0) + (parseFloat(leg.netPayment) || 0);
+  }
+  const incomeEntries = Object.entries(incomeByType).filter(([, v]) => v > 0);
+
   const banner   = BANNER[f.paymentStatus] || BANNER.pending;
   const BIcon    = banner.icon;
 
@@ -116,6 +132,38 @@ const FlightFinanceSummary = ({ flight, onAddPayment, onAddRoadMoney, onRecalcul
           valueClass="text-emerald-600 dark:text-emerald-400"
           bold
         />
+        {incomeEntries.length > 1 && (
+          <>
+            <Divider />
+            <div className="flex flex-col gap-1.5">
+              {incomeEntries.map(([type, amount]) => {
+                const cfg = PAYMENT_LABELS[type] || PAYMENT_LABELS.other;
+                const pct = totalIncome > 0 ? Math.round((amount / totalIncome) * 100) : 0;
+                return (
+                  <div key={type} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-md ${cfg.color}`}>
+                        {cfg.label}
+                      </span>
+                      <span className="text-[11px] text-slate-400 tabular-nums">{pct}%</span>
+                    </div>
+                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 tabular-nums">
+                      {formatMoney(amount)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+        {incomeEntries.length === 1 && (
+          <div className="flex items-center gap-2 mt-1">
+            <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-md ${(PAYMENT_LABELS[incomeEntries[0][0]] || PAYMENT_LABELS.other).color}`}>
+              {(PAYMENT_LABELS[incomeEntries[0][0]] || PAYMENT_LABELS.other).label}
+            </span>
+            <span className="text-[11px] text-slate-400">100%</span>
+          </div>
+        )}
       </Card>
 
       {/* ── Expenses ── */}
