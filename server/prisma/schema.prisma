@@ -155,13 +155,14 @@ model Flight {
 }
 
 model RoadMoneyPayment {
-  id        String   @id @default(uuid())
-  flightId  String
-  amount    Decimal  @db.Decimal(15, 2)
-  note      String?
-  paidAt    DateTime @default(now())
-  createdAt DateTime @default(now())
-  flight    Flight   @relation(fields: [flightId], references: [id], onDelete: Cascade)
+  id          String   @id @default(uuid())
+  flightId    String
+  amount      Decimal  @db.Decimal(15, 2)
+  paymentType String   @default("cash")  // "cash" | "transfer"
+  note        String?
+  paidAt      DateTime @default(now())
+  createdAt   DateTime @default(now())
+  flight      Flight   @relation(fields: [flightId], references: [id], onDelete: Cascade)
 
   @@index([flightId])
 }

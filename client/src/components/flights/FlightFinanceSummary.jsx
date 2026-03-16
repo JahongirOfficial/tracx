@@ -196,6 +196,9 @@ const FlightFinanceSummary = ({ flight, onAddPayment, onAddRoadMoney, onRecalcul
                 <div key={p.id} className="flex items-center justify-between">
                   <span className="text-[11px] text-blue-500 dark:text-blue-400 tabular-nums flex items-center gap-1.5">
                     <Calendar size={9} /> {formatDate(p.paidAt, true)}
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${p.paymentType === 'cash' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : 'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300'}`}>
+                      {p.paymentType === 'cash' ? 'Naqd' : "O'tkazma"}
+                    </span>
                     {p.note && <span className="text-blue-400 truncate max-w-[60px]">· {p.note}</span>}
                   </span>
                   <span className="text-[11px] font-bold text-blue-600 dark:text-blue-300 tabular-nums">

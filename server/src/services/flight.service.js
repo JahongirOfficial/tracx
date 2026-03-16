@@ -52,18 +52,26 @@ const recalculateFlightFinances = async (flightId) => {
   const driverOwes = businessProfit > 0 ? businessProfit : 0;
 
   // 4. HAYDOVCHI QOLIDAGI PUL
-  // Faqat NAQD (cash) to'lovlar haydovchi qo'lida bo'ladi
-  // Peritsena, karta, o'tkazma — haydovchi qo'liga tegmaydi
+  // Naqd yo'nalishlar + naqd yo'l puli - o'z cho'ntagidan to'lagan xarajatlar
   let cashTotal = 0;
   for (const leg of flight.legs) {
     if (leg.paymentType === 'cash') {
       cashTotal += parseFloat(leg.netPayment);
     }
   }
+  // Faqat naqd berilgan yo'l pulini qo'shamiz
+  const roadMoneyPayments = await prisma.roadMoneyPayment.findMany({
+    where: { flightId },
+  });
+  let cashRoadMoney = 0;
+  for (const p of roadMoneyPayments) {
+    if (p.paymentType === 'cash') {
+      cashRoadMoney += parseFloat(p.amount);
+    }
+  }
   const roadMoney = parseFloat(flight.roadMoney);
-  // Haydovchi qo'lidagi pul = faqat naqd yig'ilgan pul.
-  // Peritsena, karta, o'tkazma haydovchi qo'liga tegmaydi — ta'sir qilmasin.
-  const driverCashInHand = cashTotal;
+  // Haydovchi qo'lidagi pul = naqd yig'ilgan + naqd yo'l puli - o'z cho'ntagidan xarajatlar
+  const driverCashInHand = cashTotal + cashRoadMoney - driverOwnExpenses;
   // Yo'l puli balansi = berilgan yo'l puli - sarf qilingan xarajatlar
   const finalBalance = roadMoney - lightExpenses;
 

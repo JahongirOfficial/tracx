@@ -121,6 +121,7 @@ const FlightDetail = () => {
   const [roadMoneyAmount, setRoadMoneyAmount] = useState('');
   const [roadMoneyDate, setRoadMoneyDate] = useState(new Date().toISOString().split('T')[0]);
   const [roadMoneyNote, setRoadMoneyNote] = useState('');
+  const [roadMoneyType, setRoadMoneyType] = useState('cash');
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [completeData, setCompleteData] = useState({ endOdometer: '', endFuel: '' });
   const [paymentAmount, setPaymentAmount] = useState('');
@@ -207,7 +208,7 @@ const FlightDetail = () => {
     e.preventDefault();
     setActionLoading(true);
     try {
-      await addRoadMoneyPayment(id, parseFloat(roadMoneyAmount), roadMoneyDate, roadMoneyNote);
+      await addRoadMoneyPayment(id, parseFloat(roadMoneyAmount), roadMoneyDate, roadMoneyNote, roadMoneyType);
       addToast("Yo'l puli qo'shildi", 'success');
       setShowRoadMoneyForm(false);
       setRoadMoneyAmount('');
@@ -887,6 +888,31 @@ const FlightDetail = () => {
         title="Yo'l puli qo'shish"
       >
         <form onSubmit={handleAddRoadMoney} className="flex flex-col gap-4">
+          <div>
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
+              To'lov turi
+            </label>
+            <div className="flex gap-2">
+              {[
+                { value: 'cash', label: '💵 Naqd' },
+                { value: 'transfer', label: '🏦 O\'tkazma' },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setRoadMoneyType(opt.value)}
+                  className={[
+                    'flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all',
+                    roadMoneyType === opt.value
+                      ? 'bg-primary-600 border-primary-600 text-white shadow-sm'
+                      : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400',
+                  ].join(' ')}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
           <Input
             label="Sana"
             type="date"

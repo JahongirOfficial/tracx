@@ -407,12 +407,13 @@ const addRoadMoneyPayment = catchAsync(async (req, res, next) => {
   });
   if (!flight) return next(new AppError('Reys topilmadi', 404));
 
-  const { amount, paidAt, note } = req.body;
+  const { amount, paidAt, note, paymentType = 'cash' } = req.body;
 
   await prisma.roadMoneyPayment.create({
     data: {
       flightId: flight.id,
       amount,
+      paymentType,
       paidAt: paidAt ? new Date(paidAt) : new Date(),
       note: note || null,
     },
