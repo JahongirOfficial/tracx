@@ -175,7 +175,7 @@ const DriverForm = ({ isOpen, onClose, driver = null }) => {
           ) : (
             <Input
               label="Oylik maosh (UZS)"
-              type="number"
+              money
               leftIcon={Banknote}
               value={form.baseSalary}
               onChange={(e) => set('baseSalary', e.target.value)}

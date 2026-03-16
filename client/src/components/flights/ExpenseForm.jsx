@@ -206,7 +206,7 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false, e
           {/* Amount (full width, prominent) */}
           <Input
             label="Summa"
-            type="number"
+            money
             required
             value={form.amount}
             onChange={(e) => set('amount', e.target.value)}

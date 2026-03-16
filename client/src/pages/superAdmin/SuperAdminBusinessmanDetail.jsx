@@ -486,7 +486,7 @@ const SuperAdminBusinessmanDetail = () => {
           </p>
           <Input
             label="Qo'shiladigan miqdor (UZS)"
-            type="number"
+            money
             min="1000"
             step="1000"
             required
@@ -535,7 +535,7 @@ const SuperAdminBusinessmanDetail = () => {
           </div>
           <Input
             label="Yangi balans (UZS)"
-            type="number"
+            money
             step="1000"
             required
             autoFocus

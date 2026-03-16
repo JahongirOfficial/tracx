@@ -12,6 +12,14 @@
  *   ...props   – all native <input> attributes (value, onChange, placeholder…)
  */
 
+/* Format number with space thousands separator: 1000000 → "1 000 000" */
+const fmtMoney = (v) => {
+  const raw = String(v).replace(/\s/g, '');
+  if (raw === '' || raw === '-') return raw;
+  const [int, dec] = raw.split('.');
+  return int.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + (dec !== undefined ? '.' + dec : '');
+};
+
 const Input = ({
   label,
   error,
@@ -20,9 +28,22 @@ const Input = ({
   className = '',
   required = false,
   leftIcon: LeftIcon,
+  money = false,
+  value,
+  onChange,
   ...props
 }) => {
   const hasError = Boolean(error);
+
+  /* money mode: display formatted, emit raw on change */
+  const moneyValue   = money ? fmtMoney(value ?? '') : value;
+  const moneyChange  = money
+    ? (e) => {
+        const raw = e.target.value.replace(/\s/g, '');
+        if (raw !== '' && !/^-?\d*\.?\d*$/.test(raw)) return;
+        onChange?.({ ...e, target: { ...e.target, value: raw } });
+      }
+    : onChange;
 
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
@@ -51,7 +72,10 @@ const Input = ({
         )}
 
         <input
-          type={type}
+          type={money ? 'text' : type}
+          inputMode={money ? 'numeric' : undefined}
+          value={moneyValue}
+          onChange={moneyChange}
           {...props}
           className={[
             /* Layout */

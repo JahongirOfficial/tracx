@@ -854,7 +854,7 @@ const FlightDetail = () => {
           />
           <Input
             label="To'lov miqdori (UZS)"
-            type="number"
+            money
             required
             value={paymentAmount}
             onChange={(e) => setPaymentAmount(e.target.value)}
@@ -886,7 +886,7 @@ const FlightDetail = () => {
           />
           <Input
             label="Miqdor (UZS)"
-            type="number"
+            money
             required
             value={roadMoneyAmount}
             onChange={(e) => setRoadMoneyAmount(e.target.value)}

@@ -366,7 +366,7 @@ const DriverDetail = () => {
         <form onSubmit={handleSalary} className="flex flex-col gap-4">
           <Input
             label="Miqdor (UZS)"
-            type="number"
+            money
             required
             value={salary.amount}
             onChange={(e) => setSalary((s) => ({ ...s, amount: e.target.value }))}

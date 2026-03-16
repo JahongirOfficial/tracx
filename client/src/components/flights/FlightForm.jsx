@@ -155,7 +155,7 @@ const FlightForm = ({ isOpen, onClose }) => {
 
             <Input
               label="Yo'l puli (UZS)"
-              type="number"
+              money
               leftIcon={Banknote}
               value={form.roadMoney}
               onChange={(e) => set('roadMoney', e.target.value)}

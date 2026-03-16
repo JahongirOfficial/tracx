@@ -149,7 +149,7 @@ const LegForm = ({ isOpen, onClose, flightId, onSuccess, initialFromCity }) => {
             />
             <Input
               label="Miqdor (UZS)"
-              type="number"
+              money
               required
               value={form.payment}
               onChange={(e) => set('payment', e.target.value)}
