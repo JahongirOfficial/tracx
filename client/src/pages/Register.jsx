@@ -167,29 +167,6 @@ export default function Register() {
           ))}
         </div>
 
-        {/* Free plan pill */}
-        <div className="border border-slate-200 rounded-2xl p-4 bg-white shadow-sm mb-8">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-bold text-slate-800">Bepul reja</span>
-            <span className="bg-emerald-50 text-emerald-600 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-100">
-              Hozirdan faol
-            </span>
-          </div>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-            {[
-              "2 ta mashina — 0 so'm",
-              "Cheksiz haydovchilar",
-              "Cheksiz reyslar",
-              "Moliyaviy hisobotlar",
-            ].map(f => (
-              <div key={f} className="flex items-center gap-1.5 text-xs text-slate-600">
-                <Check size={12} className="text-emerald-500 flex-shrink-0" />
-                {f}
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Social proof */}
         <div className="mt-auto flex items-center gap-3 pt-4 border-t border-slate-100">
           <div className="flex -space-x-2">
