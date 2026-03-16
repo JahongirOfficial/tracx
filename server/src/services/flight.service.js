@@ -65,7 +65,8 @@ const recalculateFlightFinances = async (flightId) => {
   });
   let cashRoadMoney = 0;
   for (const p of roadMoneyPayments) {
-    if (p.paymentType === 'cash') {
+    // NULL = eski yozuvlar, default naqd hisoblanadi
+    if (!p.paymentType || p.paymentType === 'cash') {
       cashRoadMoney += parseFloat(p.amount);
     }
   }
