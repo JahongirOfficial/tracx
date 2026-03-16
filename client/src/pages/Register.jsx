@@ -127,48 +127,55 @@ export default function Register() {
     <div className="h-screen flex overflow-hidden bg-white">
 
       {/* ══ LEFT PANEL — oq minimal ═══════════════════════════ */}
-      <div className="hidden lg:flex lg:w-[44%] xl:w-[42%] flex-col h-full border-r border-slate-100 bg-slate-50/60 px-10 xl:px-14 py-10 overflow-hidden">
+      <div className="hidden lg:flex lg:w-[44%] xl:w-[42%] flex-col h-full px-10 xl:px-14 py-10 overflow-hidden relative"
+        style={{ background: 'linear-gradient(145deg, #0f172a 0%, #1e3a8a 60%, #0c1a3a 100%)' }}>
+
+        {/* Dot pattern */}
+        <div aria-hidden className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          style={{ backgroundImage: 'radial-gradient(circle,#fff 1px,transparent 1px)', backgroundSize: '28px 28px' }} />
+        <div aria-hidden className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div aria-hidden className="absolute bottom-0 -left-16 w-56 h-56 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
 
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 mb-10 group w-fit">
-          <div className="w-9 h-9 bg-primary-600 rounded-xl flex items-center justify-center shadow-md shadow-primary-500/25 group-hover:bg-primary-700 transition-colors">
+        <Link to="/" className="relative flex items-center gap-2.5 mb-10 group w-fit">
+          <div className="w-9 h-9 bg-white/15 border border-white/20 rounded-xl flex items-center justify-center group-hover:bg-white/20 transition-colors">
             <Truck size={18} className="text-white" />
           </div>
-          <span className="text-xl font-black text-slate-900 tracking-tight">Avtojon</span>
+          <span className="text-xl font-black text-white tracking-tight">Avtojon</span>
         </Link>
 
         {/* Headline */}
-        <div className="mb-8">
-          <div className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold px-3 py-1 rounded-full mb-4">
-            <Zap size={11} className="fill-emerald-500 text-emerald-500" />
+        <div className="relative mb-8">
+          <div className="inline-flex items-center gap-1.5 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold px-3 py-1 rounded-full mb-4">
+            <Zap size={11} className="fill-emerald-300 text-emerald-300" />
             Kredit karta kerak emas
           </div>
-          <h1 className="text-2xl xl:text-3xl font-black text-slate-900 leading-tight mb-2">
+          <h1 className="text-2xl xl:text-3xl font-black text-white leading-tight mb-2">
             Transport biznesingizni <br />
-            <span className="text-primary-600">bepul boshlang</span>
+            <span className="bg-gradient-to-r from-sky-300 to-cyan-300 bg-clip-text text-transparent">bepul boshlang</span>
           </h1>
-          <p className="text-sm text-slate-500 leading-relaxed">
+          <p className="text-sm text-blue-200/70 leading-relaxed">
             Haydovchilar, mashinalar va reyslarni bir joyda. Moliya avtomatik ishlaydi.
           </p>
         </div>
 
         {/* Benefits */}
-        <div className="space-y-3 mb-8">
-          {benefits.map(({ icon: Icon, color, bg, title, sub }) => (
-            <div key={title} className="flex items-center gap-3">
-              <div className={`w-9 h-9 ${bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
-                <Icon size={17} className={color} />
+        <div className="relative space-y-3 mb-8">
+          {benefits.map(({ icon: Icon, title, sub }) => (
+            <div key={title} className="flex items-center gap-3 bg-white/5 border border-white/8 rounded-xl p-3 hover:bg-white/8 transition-colors">
+              <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Icon size={17} className="text-white/80" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-800 leading-tight">{title}</p>
-                <p className="text-xs text-slate-400">{sub}</p>
+                <p className="text-sm font-semibold text-white leading-tight">{title}</p>
+                <p className="text-xs text-blue-200/60">{sub}</p>
               </div>
             </div>
           ))}
         </div>
 
         {/* Social proof */}
-        <div className="mt-auto flex items-center gap-3 pt-4 border-t border-slate-100">
+        <div className="relative mt-auto flex items-center gap-3 pt-4 border-t border-white/10">
           <div className="flex -space-x-2">
             {['#3b82f6','#10b981','#8b5cf6','#f59e0b'].map((c,i) => (
               <div key={i} className="w-7 h-7 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold text-white shadow-sm"
@@ -181,8 +188,8 @@ export default function Register() {
             <div className="flex gap-0.5 mb-0.5">
               {[...Array(5)].map((_,i) => <Star key={i} size={10} className="fill-amber-400 text-amber-400" />)}
             </div>
-            <p className="text-[11px] text-slate-400">
-              <span className="font-semibold text-slate-600">50+</span> kompaniya ishlatmoqda
+            <p className="text-[11px] text-blue-200/60">
+              <span className="font-semibold text-white">50+</span> kompaniya ishlatmoqda
             </p>
           </div>
         </div>
