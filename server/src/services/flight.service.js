@@ -35,9 +35,17 @@ const recalculateFlightFinances = async (flightId) => {
     } else {
       tripExpenses += amt;
     }
-    // Haydovchi o'z cho'ntagidan to'lagan xarajatlar (faqat light)
+    // Haydovchi o'z cho'ntagidan to'lagan yengil xarajatlar
     if (expense.paidFromOwn && !HEAVY_TYPES.includes(expense.type)) {
       driverOwnExpenses += amt;
+    }
+  }
+
+  // Haydovchi joyida to'lagan kapital xarajatlar — qo'lidagi puldan ayiriladi
+  let heavyPaidByDriver = 0;
+  for (const expense of flight.expenses) {
+    if (HEAVY_TYPES.includes(expense.type) && expense.paidFromOwn) {
+      heavyPaidByDriver += parseFloat(expense.amountInUZS);
     }
   }
 
@@ -72,8 +80,8 @@ const recalculateFlightFinances = async (flightId) => {
   }
   const roadMoney = parseFloat(flight.roadMoney);
   const cashRoadMoney = roadMoney - transferRoadMoney;
-  // Haydovchi qo'lidagi pul = naqd yig'ilgan + naqd yo'l puli - yengil xarajatlar - to'langan pul
-  const driverCashInHand = cashTotal + cashRoadMoney - lightExpenses - parseFloat(flight.driverPaidAmount);
+  // Haydovchi qo'lidagi pul = naqd yig'ilgan + naqd yo'l puli - yengil xarajatlar - kapital (haydovchi to'lagan) - olingan pul
+  const driverCashInHand = cashTotal + cashRoadMoney - lightExpenses - heavyPaidByDriver - parseFloat(flight.driverPaidAmount);
   // Yo'l puli balansi = berilgan yo'l puli - sarf qilingan xarajatlar
   const finalBalance = roadMoney - lightExpenses;
 

@@ -303,7 +303,7 @@ const addExpense = catchAsync(async (req, res, next) => {
     flightId: flight.id,
     type, expenseClass, amount, currency, exchangeRate, amountInUZS,
     description, timing,
-    paidFromOwn: expenseClass === 'light' ? !!paidFromOwn : false,
+    paidFromOwn: !!paidFromOwn,
     addedBy: 'businessman',
     addedById: req.user.id,
     expenseDate: expenseDate ? new Date(expenseDate) : new Date(),

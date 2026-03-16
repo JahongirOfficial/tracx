@@ -57,7 +57,7 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false, e
 
   const selectedType = EXPENSE_TYPES.find((t) => t.value === form.type);
   const isHeavy      = selectedType?.class === 'heavy';
-  const showPaidFromOwn = !!form.type && !isHeavy;
+  const showPaidFromOwn = !!form.type;
   const isFuel       = FUEL_TYPES.includes(form.type);
   const fuelUnit     = GAS_TYPES.includes(form.type) ? 'kub' : 'litr';
 
@@ -307,7 +307,7 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false, e
           placeholder="Qo'shimcha ma'lumot..."
         />
 
-        {/* ── 5. To'lov manbai (faqat oddiy xarajatlar uchun) ── */}
+        {/* ── 5. To'lov manbai ── */}
         {showPaidFromOwn && (
           <div>
             <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
@@ -325,7 +325,7 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false, e
                 ].join(' ')}
               >
                 <Banknote size={13} />
-                Yo'l pulidan
+                Biznes hisobidan
               </button>
               <button
                 type="button"
@@ -338,13 +338,15 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false, e
                 ].join(' ')}
               >
                 <Wallet size={13} />
-                O'z cho'ntagimdan
+                Haydovchi joyida to'ladi
               </button>
             </div>
             {form.paidFromOwn && (
-              <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1.5 flex items-center gap-1">
+              <p className={`text-[11px] mt-1.5 flex items-center gap-1 ${isHeavy ? 'text-orange-600 dark:text-orange-400' : 'text-amber-600 dark:text-amber-400'}`}>
                 <Wallet size={10} />
-                Ushbu xarajat haydovchi o'z cho'ntagidan to'laydi
+                {isHeavy
+                  ? "Haydovchi joyida to'ladi — qo'lidagi puldan ayiriladi"
+                  : "Haydovchi o'z cho'ntagidan to'laydi"}
               </p>
             )}
           </div>
