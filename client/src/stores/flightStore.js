@@ -113,6 +113,14 @@ const useFlightStore = create((set, get) => ({
     return res.data;
   },
 
+  recalculateFlight: async (flightId) => {
+    const res = await api.post(`/flights/${flightId}/recalculate`);
+    set((s) => ({
+      currentFlight: s.currentFlight?.id === flightId ? res.data : s.currentFlight,
+    }));
+    return res.data;
+  },
+
   refreshCurrentFlight: async () => {
     const id = get().currentFlight?.id;
     if (id) await get().fetchFlight(id);

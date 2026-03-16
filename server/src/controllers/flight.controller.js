@@ -509,9 +509,33 @@ const getDriverDebts = catchAsync(async (req, res) => {
   res.json({ success: true, data });
 });
 
+const recalculateFlight = catchAsync(async (req, res, next) => {
+  const flight = await prisma.flight.findFirst({
+    where: { id: req.params.id, businessmanId: req.user.id },
+  });
+  if (!flight) return next(new AppError('Reys topilmadi', 404));
+
+  await recalculateFlightFinances(flight.id);
+
+  const updated = await prisma.flight.findFirst({
+    where: { id: flight.id },
+    include: {
+      driver: { select: { id: true, fullName: true, phone: true, status: true, perTripRate: true } },
+      vehicle: { select: { id: true, plateNumber: true, brand: true, model: true } },
+      legs: { orderBy: { createdAt: 'asc' } },
+      expenses: { orderBy: { createdAt: 'desc' } },
+      driverPayments: { orderBy: { paidAt: 'asc' } },
+      roadMoneyPayments: { orderBy: { paidAt: 'asc' } },
+    },
+  });
+
+  res.json({ success: true, data: updated });
+});
+
 module.exports = {
   getFlights, getFlight, createFlight, updateFlight, deleteFlight, completeFlight, cancelFlight,
   addLeg, updateLeg, deleteLeg, updateLegStatus,
   addExpense, updateExpense, deleteExpense, addDriverPayment, addRoadMoneyPayment,
+  recalculateFlight,
   getStatsSummary, getDriverDebts,
 };

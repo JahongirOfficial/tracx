@@ -4,6 +4,7 @@ const {
   getFlights, getFlight, createFlight, updateFlight, deleteFlight, completeFlight, cancelFlight,
   addLeg, updateLeg, deleteLeg, updateLegStatus,
   addExpense, updateExpense, deleteExpense, addDriverPayment, addRoadMoneyPayment,
+  recalculateFlight,
   getStatsSummary, getDriverDebts,
 } = require('../controllers/flight.controller');
 const { protect, businessOnly } = require('../middleware/auth');
@@ -47,5 +48,8 @@ router.post('/:id/driver-payment', validate(driverPaymentSchema), addDriverPayme
 
 // Road money payment
 router.post('/:id/road-money', validate(driverPaymentSchema), addRoadMoneyPayment);
+
+// Recalculate finances
+router.post('/:id/recalculate', recalculateFlight);
 
 module.exports = router;

@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import Card from '../ui/Card';
 import { formatMoney, formatDate } from '../../utils/formatters';
 import {
   TrendingUp, TrendingDown, Fuel, Route, Wallet, Building2,
-  HandCoins, CircleDollarSign, CheckCircle2, Calendar, Plus, Banknote,
+  HandCoins, CircleDollarSign, CheckCircle2, Calendar, Plus, Banknote, RefreshCw,
 } from 'lucide-react';
 
 /* ── Status banner config ── */
@@ -36,10 +37,19 @@ const Row = ({ label, value, valueClass = 'text-slate-700 dark:text-slate-200', 
 
 const Divider = () => <div className="h-px bg-slate-100 dark:bg-slate-800 my-2" />;
 
-const FlightFinanceSummary = ({ flight, onAddPayment, onAddRoadMoney }) => {
+const FlightFinanceSummary = ({ flight, onAddPayment, onAddRoadMoney, onRecalculate }) => {
+  const [recalcLoading, setRecalcLoading] = useState(false);
+
   if (!flight) return null;
 
   const f = flight;
+
+  const handleRecalculate = async () => {
+    if (!onRecalculate || recalcLoading) return;
+    setRecalcLoading(true);
+    await onRecalculate();
+    setRecalcLoading(false);
+  };
   const netProfitNum      = parseFloat(f.netProfit) || 0;
   const remaining         = Math.max(0, parseFloat(f.driverOwes) - parseFloat(f.driverPaidAmount));
   const payments          = f.driverPayments || [];
@@ -58,7 +68,29 @@ const FlightFinanceSummary = ({ flight, onAddPayment, onAddRoadMoney }) => {
   const BIcon    = banner.icon;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 relative">
+
+      {/* ── Recalculate loading overlay ── */}
+      {recalcLoading && (
+        <div className="absolute inset-0 z-10 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center">
+            <RefreshCw size={22} className="text-primary-600 dark:text-primary-400 animate-spin" />
+          </div>
+          <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">Qayta hisoblanmoqda...</p>
+        </div>
+      )}
+
+      {/* ── Recalculate button ── */}
+      {onRecalculate && (
+        <button
+          onClick={handleRecalculate}
+          disabled={recalcLoading}
+          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-dashed border-primary-300 dark:border-primary-700 text-primary-600 dark:text-primary-400 text-sm font-semibold hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors disabled:opacity-50"
+        >
+          <RefreshCw size={14} className={recalcLoading ? 'animate-spin' : ''} />
+          Moliyani qayta hisoblash
+        </button>
+      )}
 
       {/* ── Status banner ── */}
       <div className={['flex items-center gap-2.5 px-4 py-3 rounded-2xl border', banner.cls].join(' ')}>

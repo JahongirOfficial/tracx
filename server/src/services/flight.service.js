@@ -61,8 +61,15 @@ const recalculateFlightFinances = async (flightId) => {
     }
   }
   const roadMoney = parseFloat(flight.roadMoney);
-  // Driver cash in hand = collected CASH - what driver owes business
-  const driverCashInHand = cashTotal - driverOwes;
+  // Faqat naqd daromaddan biznesga tegadigan ulushni hisoblaymiz.
+  // Xarajatlar naqd daromad nisbatida taqsimlanadi.
+  const cashRatio = totalIncome > 0 ? cashTotal / totalIncome : 0;
+  const cashLightExpenses = lightExpenses * cashRatio;
+  const cashNetProfit = cashTotal - cashLightExpenses;
+  const cashBusinessShare = cashNetProfit > 0
+    ? cashNetProfit * (1 - driverProfitPercent / 100)
+    : 0;
+  const driverCashInHand = cashTotal - cashBusinessShare;
   // Yo'l puli balansi = berilgan yo'l puli - sarf qilingan xarajatlar
   const finalBalance = roadMoney - lightExpenses;
 

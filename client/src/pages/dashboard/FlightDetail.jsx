@@ -137,6 +137,7 @@ const FlightDetail = () => {
     cancelFlight,
     addDriverPayment,
     addRoadMoneyPayment,
+    recalculateFlight,
     updateLegStatus,
   } = useFlightStore();
   const { addToast } = useUiStore();
@@ -772,6 +773,14 @@ const FlightDetail = () => {
               flight={flight}
               onAddPayment={() => setShowPaymentForm(true)}
               onAddRoadMoney={() => setShowRoadMoneyForm(true)}
+              onRecalculate={async () => {
+                try {
+                  await recalculateFlight(flight.id);
+                  addToast('Moliya qayta hisoblandi', 'success');
+                } catch (err) {
+                  addToast(err.message || 'Xato', 'error');
+                }
+              }}
             />
             <FlightFinanceCharts flight={flight} />
           </div>
