@@ -59,18 +59,19 @@ const recalculateFlightFinances = async (flightId) => {
       cashTotal += parseFloat(leg.netPayment);
     }
   }
-  // Faqat naqd berilgan yo'l pulini qo'shamiz
+  // cashRoadMoney = jami roadMoney - faqat o'tkazma yo'l pullari
+  // (dastlabki yo'l puli va naqd to'lovlar cash hisoblanadi)
   const roadMoneyPayments = await prisma.roadMoneyPayment.findMany({
     where: { flightId },
   });
-  let cashRoadMoney = 0;
+  let transferRoadMoney = 0;
   for (const p of roadMoneyPayments) {
-    // NULL = eski yozuvlar, default naqd hisoblanadi
-    if (!p.paymentType || p.paymentType === 'cash') {
-      cashRoadMoney += parseFloat(p.amount);
+    if (p.paymentType === 'transfer') {
+      transferRoadMoney += parseFloat(p.amount);
     }
   }
   const roadMoney = parseFloat(flight.roadMoney);
+  const cashRoadMoney = roadMoney - transferRoadMoney;
   // Haydovchi qo'lidagi pul = naqd yig'ilgan + naqd yo'l puli - barcha yengil xarajatlar
   const driverCashInHand = cashTotal + cashRoadMoney - lightExpenses;
   // Yo'l puli balansi = berilgan yo'l puli - sarf qilingan xarajatlar
