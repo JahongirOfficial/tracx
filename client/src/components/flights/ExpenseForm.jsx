@@ -268,7 +268,7 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false, e
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <Input
-                  label={fuelUnit === 'kub' ? 'Kub soni' : 'Litr soni'}
+                  label={fuelUnit === 'kub' ? 'Kub' : 'Litr'}
                   type="number"
                   leftIcon={Droplets}
                   value={form.fuelLiters}
