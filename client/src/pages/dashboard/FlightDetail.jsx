@@ -224,67 +224,104 @@ const FlightDetail = () => {
 
   return (
     <div className="page-enter">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
-        <div>
-          <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 mb-2">
-            <button
-              onClick={() => navigate('/dashboard/flights')}
-              className="hover:text-primary-500 transition-colors"
-            >
-              Reyslar
+      {/* ── Header card ── */}
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/70 dark:border-slate-700/60 shadow-sm mb-5 overflow-hidden">
+
+        {/* Status accent line */}
+        <div className={`h-1 w-full ${
+          flight.status === 'active' ? 'bg-gradient-to-r from-primary-400 to-primary-600' :
+          flight.status === 'completed' ? 'bg-gradient-to-r from-emerald-400 to-emerald-600' :
+          'bg-gradient-to-r from-slate-300 to-slate-400'
+        }`} />
+
+        <div className="px-5 pt-4 pb-3">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 mb-3">
+            <button onClick={() => navigate('/dashboard/flights')} className="hover:text-primary-500 transition-colors flex items-center gap-1">
+              <ArrowLeft size={11} /> Reyslar
             </button>
-            <ChevronRight size={12} />
-            <span className="text-slate-600 dark:text-slate-300 font-medium">
-              {flight.driver?.fullName}
-            </span>
+            <ChevronRight size={11} />
+            <span className="text-slate-500 dark:text-slate-400 truncate max-w-[160px]">{flight.driver?.fullName}</span>
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap">
-            <button
-              onClick={() => navigate('/dashboard/flights')}
-              className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-            >
-              <ArrowLeft size={16} className="text-slate-600 dark:text-slate-400" />
-            </button>
-            <div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                {flight.driver?.fullName} — {flight.vehicle?.plateNumber}
-              </h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                {formatDate(flight.startedAt)}
-              </p>
+          {/* Main row */}
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            {/* Left: identity */}
+            <div className="flex items-center gap-3 min-w-0">
+              {/* Avatar */}
+              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-white font-black text-base shrink-0 ${
+                flight.status === 'active' ? 'bg-primary-500' :
+                flight.status === 'completed' ? 'bg-emerald-500' : 'bg-slate-400'
+              }`}>
+                {flight.driver?.fullName?.[0]?.toUpperCase() || 'H'}
+              </div>
+
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">
+                    {flight.driver?.fullName}
+                  </h1>
+                  <Badge
+                    status={flight.status}
+                    label={
+                      flight.status === 'active' ? 'Faol' :
+                      flight.status === 'completed' ? 'Yakunlangan' : 'Bekor'
+                    }
+                  />
+                </div>
+                <div className="flex items-center gap-3 mt-1 flex-wrap">
+                  <span className="flex items-center gap-1 text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-md">
+                    <Car size={11} /> {flight.vehicle?.plateNumber}
+                  </span>
+                  <span className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
+                    <Clock size={11} /> {formatDate(flight.startedAt)}
+                  </span>
+                </div>
+              </div>
             </div>
-            <Badge
-              status={flight.status}
-              label={
-                flight.status === 'active'
-                  ? 'Faol'
-                  : flight.status === 'completed'
-                  ? 'Yakunlangan'
-                  : 'Bekor'
-              }
-            />
+
+            {/* Right: actions */}
+            {flight.status === 'active' && (
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => setShowCancelConfirm(true)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  onClick={() => setShowCompleteForm(true)}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors shadow-sm"
+                >
+                  <CheckCircle size={13} /> Yakunlash
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Stats strip */}
+          <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/50">
+            {[
+              { label: 'Daromad', value: formatMoney(flight.totalIncome), color: 'text-emerald-600 dark:text-emerald-400' },
+              { label: 'Xarajat', value: formatMoney(flight.lightExpenses), color: 'text-red-500 dark:text-red-400' },
+              { label: 'Sof foyda', value: formatMoney(flight.netProfit), color: parseFloat(flight.netProfit) >= 0 ? 'text-primary-600 dark:text-primary-400' : 'text-red-600 dark:text-red-400' },
+            ].map(({ label, value, color }) => (
+              <div key={label} className="text-center">
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mb-0.5">{label}</p>
+                <p className={`text-sm font-black tabular-nums ${color}`}>{value}</p>
+              </div>
+            ))}
           </div>
         </div>
 
-        {flight.status === 'active' && (
-          <div className="flex gap-2 sm:flex-shrink-0">
-            <Button variant="secondary" size="sm" onClick={() => setShowCancelConfirm(true)}>
-              Bekor qilish
-            </Button>
-            <Button icon={CheckCircle} size="sm" onClick={() => setShowCompleteForm(true)}>
-              Yakunlash
-            </Button>
-          </div>
-        )}
+        {/* Tabs inside header card */}
+        <div className="px-2 border-t border-slate-100 dark:border-slate-700/50">
+          <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
+        </div>
       </div>
 
-      {/* Tabs */}
-      <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
-
       {/* Tab content */}
-      <div className="mt-5">
+      <div>
 
         {/* GENERAL TAB */}
         {activeTab === 'general' && (() => {
@@ -404,124 +441,154 @@ const FlightDetail = () => {
 
         {/* LEGS (YO'NALISHLAR) TAB */}
         {activeTab === 'legs' && (() => {
+          const legs = flight.legs || [];
+          const totalFromLegs = legs.reduce((s, l) => s + (parseFloat(l.netPayment) || 0), 0);
+          const completedCount = legs.filter(l => l.status === 'completed').length;
           return (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3">
 
-              {flight.status === 'active' && (
-                <div className="flex justify-end">
-                  <Button icon={Plus} onClick={() => setShowLegForm(true)}>
+              {/* Top bar: summary + add button */}
+              <div className="flex items-center justify-between">
+                {legs.length > 0 ? (
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-slate-400 dark:text-slate-500">
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400">{completedCount}</span>/{legs.length} yetib bordi
+                    </span>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300 tabular-nums">
+                      {formatMoney(totalFromLegs)}
+                    </span>
+                  </div>
+                ) : <div />}
+                {flight.status === 'active' && (
+                  <Button icon={Plus} size="sm" onClick={() => setShowLegForm(true)}>
                     Yo'nalish qo'shish
                   </Button>
-                </div>
-              )}
+                )}
+              </div>
 
-              {!flight.legs || flight.legs.length === 0 ? (
-                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 shadow-card">
-                  <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-3">
-                      <Package size={22} className="text-slate-400" />
-                    </div>
-                    <p className="font-medium text-slate-700 dark:text-slate-300 mb-1">Yo'nalishlar yo'q</p>
-                    <p className="text-sm text-slate-400">Hali hech qanday yo'nalish qo'shilmagan</p>
+              {legs.length === 0 ? (
+                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 flex flex-col items-center justify-center py-16 text-center px-6">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-3">
+                    <MapPin size={22} className="text-slate-400" />
                   </div>
+                  <p className="font-semibold text-slate-700 dark:text-slate-300 mb-1">Yo'nalishlar yo'q</p>
+                  <p className="text-sm text-slate-400">Hali hech qanday yo'nalish qo'shilmagan</p>
                 </div>
               ) : (
-                <div className="flex flex-col gap-3">
-                  {flight.legs.map((leg, idx) => (
-                    <div
-                      key={leg.id}
-                      className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 shadow-sm overflow-hidden"
-                    >
-                      {/* Status accent line */}
-                      <div className={`h-1 ${leg.status === 'completed' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                <div className="flex flex-col gap-2.5">
+                  {legs.map((leg, idx) => {
+                    const isDone = leg.status === 'completed';
+                    return (
+                      <div key={leg.id} className={[
+                        'bg-white dark:bg-slate-800 rounded-2xl border overflow-hidden transition-all',
+                        isDone
+                          ? 'border-emerald-200/70 dark:border-emerald-800/40'
+                          : 'border-slate-200/70 dark:border-slate-700/60',
+                      ].join(' ')}>
 
-                      <div className="p-4">
-                        {/* Row 1: number + route + status badge */}
-                        <div className="flex items-center gap-3 mb-3">
-                          <span className="w-7 h-7 rounded-lg bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center text-xs font-black text-primary-700 dark:text-primary-300 shrink-0">
-                            {idx + 1}
-                          </span>
-                          <div className="flex-1 flex items-center gap-1.5 min-w-0 overflow-hidden">
-                            <span className="font-bold text-slate-800 dark:text-white truncate text-sm">{leg.fromCity}</span>
-                            <ArrowRight size={13} className="text-slate-400 shrink-0" />
-                            <span className="font-bold text-slate-800 dark:text-white truncate text-sm">{leg.toCity}</span>
-                          </div>
-                          <span className={[
-                            'shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full',
-                            leg.status === 'completed'
-                              ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-                              : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
-                          ].join(' ')}>
-                            {leg.status === 'completed' ? '✓ Yetdi' : '⏳ Yo\'lda'}
-                          </span>
-                        </div>
+                        {/* Left color bar */}
+                        <div className="flex">
+                          <div className={`w-1 shrink-0 ${isDone ? 'bg-emerald-400' : 'bg-amber-400'}`} />
 
-                        {/* Row 2: meta chips */}
-                        <div className="flex flex-wrap items-center gap-1.5 mb-4">
-                          {leg.cargo && (
-                            <span className="flex items-center gap-1 text-[11px] font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-full">
-                              <Package size={10} className="text-slate-400" />
-                              {leg.cargo}{leg.weight ? ` · ${leg.weight}t` : ''}
-                            </span>
-                          )}
-                          <span className="flex items-center gap-1 text-[11px] font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-full">
-                            {paymentTypeLabel(leg.paymentType)}
-                          </span>
-                          {leg.createdAt && (
-                            <span className="flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded-full">
-                              {formatDate(leg.createdAt)}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Row 3: amount + actions */}
-                        <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-700/50">
-                          <span className="text-xl font-black text-emerald-600 dark:text-emerald-400 tabular-nums">
-                            {formatMoney(leg.netPayment)}
-                          </span>
-
-                          {flight.status === 'active' && (
-                            <div className="flex items-center gap-2">
-                              <button
-                                disabled={legStatusLoading === leg.id}
-                                onClick={async () => {
-                                  const nextStatus = leg.status === 'completed' ? 'pending' : 'completed';
-                                  setLegStatusLoading(leg.id);
-                                  try {
-                                    await updateLegStatus(flight.id, leg.id, nextStatus);
-                                    fetchFlight(id);
-                                    addToast(nextStatus === 'completed' ? "Yo'nalish yetib bordi" : "Kutilmoqda holatiga o'tkazildi", 'success');
-                                  } catch { addToast('Xato', 'error'); }
-                                  finally { setLegStatusLoading(null); }
-                                }}
-                                className={[
-                                  'flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl border transition-all',
-                                  leg.status === 'completed'
-                                    ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400'
-                                    : 'bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:border-emerald-300 dark:hover:border-emerald-700 hover:text-emerald-700 dark:hover:text-emerald-400',
-                                  legStatusLoading === leg.id ? 'opacity-50 cursor-not-allowed' : '',
-                                ].join(' ')}
-                              >
-                                <CheckCircle2 size={13} />
-                                {leg.status === 'completed' ? 'Yetib bordi' : 'Belgilash'}
-                              </button>
-                              <button
-                                onClick={async () => {
-                                  if (!confirm("Yo'nalishni o'chirasizmi?")) return;
-                                  await deleteLeg(flight.id, leg.id);
-                                  fetchFlight(id);
-                                  addToast("Yo'nalish o'chirildi", 'success');
-                                }}
-                                className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800 transition-all"
-                              >
-                                <Trash2 size={14} />
-                              </button>
+                          <div className="flex-1 p-4">
+                            {/* Row 1: index + route + status */}
+                            <div className="flex items-center gap-2.5 mb-2.5">
+                              <span className={[
+                                'w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black shrink-0',
+                                isDone
+                                  ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'
+                                  : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300',
+                              ].join(' ')}>
+                                {idx + 1}
+                              </span>
+                              <div className="flex-1 flex items-center gap-1.5 min-w-0">
+                                <span className="font-bold text-slate-900 dark:text-white text-sm truncate">{leg.fromCity}</span>
+                                <ArrowRight size={12} className="text-slate-300 dark:text-slate-600 shrink-0" />
+                                <span className="font-bold text-slate-900 dark:text-white text-sm truncate">{leg.toCity}</span>
+                              </div>
+                              <span className={[
+                                'shrink-0 flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full',
+                                isDone
+                                  ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                                  : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
+                              ].join(' ')}>
+                                {isDone ? <CheckCircle2 size={10} /> : <Clock size={10} />}
+                                {isDone ? 'Yetdi' : "Yo'lda"}
+                              </span>
                             </div>
-                          )}
+
+                            {/* Row 2: meta */}
+                            <div className="flex flex-wrap items-center gap-1.5 mb-3">
+                              {leg.cargo && (
+                                <span className="flex items-center gap-1 text-[11px] font-medium text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-900/20 border border-violet-100 dark:border-violet-800/30 px-2 py-0.5 rounded-full">
+                                  <Package size={9} /> {leg.cargo}{leg.weight ? ` · ${leg.weight}t` : ''}
+                                </span>
+                              )}
+                              <span className="flex items-center gap-1 text-[11px] font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 px-2 py-0.5 rounded-full">
+                                {paymentTypeLabel(leg.paymentType)}
+                              </span>
+                              {leg.createdAt && (
+                                <span className="flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500 px-2 py-0.5 rounded-full">
+                                  <Clock size={9} /> {formatDate(leg.createdAt)}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Row 3: amount + actions */}
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <span className="text-xl font-black text-emerald-600 dark:text-emerald-400 tabular-nums">
+                                  {formatMoney(leg.netPayment)}
+                                </span>
+                                {parseFloat(leg.transferFeeAmount) > 0 && (
+                                  <span className="ml-2 text-xs text-slate-400 line-through tabular-nums">{formatMoney(leg.payment)}</span>
+                                )}
+                              </div>
+
+                              {flight.status === 'active' && (
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    disabled={legStatusLoading === leg.id}
+                                    onClick={async () => {
+                                      const nextStatus = isDone ? 'pending' : 'completed';
+                                      setLegStatusLoading(leg.id);
+                                      try {
+                                        await updateLegStatus(flight.id, leg.id, nextStatus);
+                                        fetchFlight(id);
+                                        addToast(nextStatus === 'completed' ? "Yetib bordi" : "Kutilmoqda", 'success');
+                                      } catch { addToast('Xato', 'error'); }
+                                      finally { setLegStatusLoading(null); }
+                                    }}
+                                    className={[
+                                      'flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-xl border transition-all',
+                                      isDone
+                                        ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400'
+                                        : 'bg-slate-50 dark:bg-slate-700/80 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700',
+                                      legStatusLoading === leg.id ? 'opacity-50 cursor-not-allowed' : '',
+                                    ].join(' ')}
+                                  >
+                                    <CheckCircle2 size={12} />
+                                    {isDone ? 'Bekor' : 'Yetdi'}
+                                  </button>
+                                  <button
+                                    onClick={async () => {
+                                      if (!confirm("Yo'nalishni o'chirasizmi?")) return;
+                                      await deleteLeg(flight.id, leg.id);
+                                      fetchFlight(id);
+                                      addToast("O'chirildi", 'success');
+                                    }}
+                                    className="w-8 h-8 rounded-xl border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all"
+                                  >
+                                    <Trash2 size={13} />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -534,156 +601,161 @@ const FlightDetail = () => {
           const totalLight = exps.filter(e => e.expenseClass !== 'heavy').reduce((s, e) => s + (parseFloat(e.amountInUZS) || 0), 0);
           const totalHeavy = exps.filter(e => e.expenseClass === 'heavy').reduce((s, e) => s + (parseFloat(e.amountInUZS) || 0), 0);
           return (
-            <div className="flex flex-col gap-4">
-              {/* Summary */}
-              {exps.length > 0 && (
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 p-3.5 text-center">
-                    <p className="text-[11px] text-slate-400 mb-1">Jami</p>
-                    <p className="text-xl font-black text-slate-800 dark:text-white">{exps.length}</p>
-                  </div>
-                  <div className="bg-red-50 dark:bg-red-900/10 rounded-2xl border border-red-100 dark:border-red-800/30 p-3.5 text-center">
-                    <p className="text-[11px] text-slate-400 mb-1">Oddiy</p>
-                    <p className="text-sm font-black text-red-600 dark:text-red-400 tabular-nums leading-tight mt-0.5">{formatMoney(totalLight)}</p>
-                  </div>
-                  <div className="bg-orange-50 dark:bg-orange-900/10 rounded-2xl border border-orange-100 dark:border-orange-800/30 p-3.5 text-center">
-                    <p className="text-[11px] text-slate-400 mb-1">Kapital</p>
-                    <p className="text-sm font-black text-orange-600 dark:text-orange-400 tabular-nums leading-tight mt-0.5">{formatMoney(totalHeavy)}</p>
-                  </div>
-                </div>
-              )}
+            <div className="flex flex-col gap-3">
 
-              {flight.status === 'active' && (
-                <div className="flex justify-end">
-                  <Button icon={Plus} onClick={() => { setEditingExpense(null); setShowExpenseForm(true); }}>
+              {/* Top bar */}
+              <div className="flex items-center justify-between">
+                {exps.length > 0 ? (
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-slate-400 dark:text-slate-500">
+                      <span className="font-bold text-red-500 dark:text-red-400 tabular-nums">{formatMoney(totalLight)}</span> oddiy
+                    </span>
+                    {totalHeavy > 0 && (
+                      <span className="text-xs text-slate-400 dark:text-slate-500">
+                        <span className="font-bold text-orange-500 dark:text-orange-400 tabular-nums">{formatMoney(totalHeavy)}</span> kapital
+                      </span>
+                    )}
+                  </div>
+                ) : <div />}
+                {flight.status === 'active' && (
+                  <Button icon={Plus} size="sm" onClick={() => { setEditingExpense(null); setShowExpenseForm(true); }}>
                     Xarajat qo'shish
                   </Button>
-                </div>
-              )}
+                )}
+              </div>
 
               {exps.length === 0 ? (
-                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 shadow-card">
-                  <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-3">
-                      <Receipt size={22} className="text-slate-400" />
-                    </div>
-                    <p className="font-medium text-slate-700 dark:text-slate-300 mb-1">Xarajatlar yo'q</p>
-                    <p className="text-sm text-slate-400">Hali hech qanday xarajat qo'shilmagan</p>
+                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 flex flex-col items-center justify-center py-16 text-center px-6">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-3">
+                    <Receipt size={22} className="text-slate-400" />
                   </div>
+                  <p className="font-semibold text-slate-700 dark:text-slate-300 mb-1">Xarajatlar yo'q</p>
+                  <p className="text-sm text-slate-400">Hali hech qanday xarajat qo'shilmagan</p>
                 </div>
               ) : (
-                <div className="flex flex-col gap-2.5">
+                <div className="flex flex-col gap-2">
                   {exps.map((exp) => {
                     const typeInfo = EXPENSE_TYPES.find((t) => t.value === exp.type);
                     const hasFuel = exp.fuelLiters && parseFloat(exp.fuelLiters) > 0;
                     const isGas = exp.type === 'fuel_metan' || exp.type === 'fuel_propan';
                     const fuelUnit = isGas ? 'kub' : 'litr';
                     const isHeavy = exp.expenseClass === 'heavy';
+                    const byDriver = exp.addedBy === 'driver';
                     return (
-                      <div
-                        key={exp.id}
-                        className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 shadow-card overflow-hidden"
-                      >
-                        <div className="flex items-start gap-3.5 p-4">
-                          {/* Emoji icon */}
-                          <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0 text-xl">
-                            {typeInfo?.emoji}
-                          </div>
+                      <div key={exp.id} className={[
+                        'bg-white dark:bg-slate-800 rounded-2xl border overflow-hidden',
+                        isHeavy
+                          ? 'border-orange-200/70 dark:border-orange-800/30'
+                          : 'border-slate-200/70 dark:border-slate-700/60',
+                      ].join(' ')}>
 
-                          {/* Main content */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <p className="font-semibold text-slate-800 dark:text-slate-200 text-sm leading-snug">
-                                  {typeInfo?.label || exp.type}
-                                </p>
-                                <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
+                        <div className="flex">
+                          {/* Left color bar */}
+                          <div className={`w-1 shrink-0 ${isHeavy ? 'bg-orange-400' : 'bg-red-400'}`} />
+
+                          <div className="flex-1 p-3.5">
+                            <div className="flex items-start gap-3">
+                              {/* Emoji */}
+                              <div className={[
+                                'w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-lg',
+                                isHeavy
+                                  ? 'bg-orange-50 dark:bg-orange-900/20'
+                                  : 'bg-red-50 dark:bg-red-900/10',
+                              ].join(' ')}>
+                                {typeInfo?.emoji}
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                {/* Title + amount */}
+                                <div className="flex items-start justify-between gap-2 mb-1.5">
+                                  <p className="font-semibold text-slate-800 dark:text-slate-200 text-sm leading-snug">
+                                    {typeInfo?.label || exp.type}
+                                  </p>
+                                  <div className="text-right shrink-0">
+                                    <p className={`font-black text-sm tabular-nums ${isHeavy ? 'text-orange-600 dark:text-orange-400' : 'text-red-500 dark:text-red-400'}`}>
+                                      {formatMoney(exp.amountInUZS)}
+                                    </p>
+                                    {exp.currency === 'USD' && (
+                                      <p className="text-[10px] text-slate-400 tabular-nums">${exp.amount}</p>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Badges + date */}
+                                <div className="flex items-center gap-1.5 flex-wrap">
                                   <span className={[
-                                    'text-[11px] font-semibold px-2 py-0.5 rounded-full border',
-                                    exp.addedBy === 'driver'
-                                      ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800/30 text-blue-600 dark:text-blue-400'
-                                      : 'bg-slate-100 dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400',
+                                    'text-[10px] font-bold px-1.5 py-0.5 rounded-md',
+                                    byDriver
+                                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                                      : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400',
                                   ].join(' ')}>
-                                    {exp.addedBy === 'driver' ? 'Haydovchi' : 'Biznesmen'}
+                                    {byDriver ? 'Haydovchi' : 'Biznesmen'}
                                   </span>
                                   <span className={[
-                                    'text-[11px] font-semibold px-2 py-0.5 rounded-full border',
+                                    'text-[10px] font-bold px-1.5 py-0.5 rounded-md',
                                     isHeavy
-                                      ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-100 dark:border-orange-800/30 text-orange-600 dark:text-orange-400'
-                                      : 'bg-slate-100 dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400',
+                                      ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400'
+                                      : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400',
                                   ].join(' ')}>
                                     {isHeavy ? 'Kapital' : 'Oddiy'}
                                   </span>
                                   {exp.expenseDate && (
-                                    <span className="text-[11px] text-slate-400">
-                                      {formatDate(exp.expenseDate, true)}
+                                    <span className="flex items-center gap-1 text-[10px] text-slate-400 dark:text-slate-500">
+                                      <Clock size={9} /> {formatDate(exp.expenseDate, true)}
                                     </span>
                                   )}
                                 </div>
-                              </div>
 
-                              {/* Amount */}
-                              <div className="text-right shrink-0">
-                                <p className="font-black text-danger-600 dark:text-danger-400 text-base tabular-nums">
-                                  {formatMoney(exp.amountInUZS)}
-                                </p>
-                                {exp.currency === 'USD' && (
-                                  <p className="text-[11px] text-slate-400 tabular-nums">${exp.amount}</p>
+                                {/* Fuel detail */}
+                                {hasFuel && (
+                                  <div className="flex items-center gap-2 mt-2 px-2.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/30">
+                                    <Droplets size={11} className="text-blue-400 shrink-0" />
+                                    <span className="text-xs text-blue-700 dark:text-blue-300 tabular-nums font-semibold">
+                                      {parseFloat(exp.fuelLiters)} {fuelUnit}
+                                    </span>
+                                    {exp.fuelPricePerLiter && (
+                                      <span className="text-xs text-blue-400 tabular-nums">× {formatMoney(exp.fuelPricePerLiter)}</span>
+                                    )}
+                                    {exp.odometerAtExpense && (
+                                      <span className="flex items-center gap-1 text-xs text-blue-400 ml-auto tabular-nums">
+                                        <Gauge size={10} /> {exp.odometerAtExpense.toLocaleString('uz-UZ')} km
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+
+                                {exp.description && (
+                                  <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">{exp.description}</p>
                                 )}
                               </div>
                             </div>
 
-                            {/* Fuel detail chip */}
-                            {hasFuel && (
-                              <div className="flex items-center gap-3 mt-2.5 px-3 py-2 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/30">
-                                <Droplets size={12} className="text-blue-400 shrink-0" />
-                                <span className="text-xs text-blue-700 dark:text-blue-300 tabular-nums">
-                                  {parseFloat(exp.fuelLiters)} {fuelUnit}
-                                </span>
-                                {exp.fuelPricePerLiter && (
-                                  <span className="text-xs text-blue-500 dark:text-blue-400 tabular-nums">
-                                    × {formatMoney(exp.fuelPricePerLiter)}/{fuelUnit}
-                                  </span>
+                            {/* Actions — compact, inline */}
+                            {flight.status === 'active' && (
+                              <div className="flex items-center justify-end gap-1 mt-2.5 pt-2.5 border-t border-slate-100 dark:border-slate-700/40">
+                                {exp.addedBy !== 'driver' && (
+                                  <button
+                                    onClick={() => { setEditingExpense(exp); setShowExpenseForm(true); }}
+                                    className="flex items-center gap-1 text-[11px] font-medium text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors px-2 py-1 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50"
+                                  >
+                                    <Edit2 size={11} /> Tahrirlash
+                                  </button>
                                 )}
-                                {exp.odometerAtExpense && (
-                                  <span className="flex items-center gap-1 text-xs text-blue-500 dark:text-blue-400 ml-auto tabular-nums">
-                                    <Gauge size={11} />
-                                    {exp.odometerAtExpense.toLocaleString('uz-UZ')} km
-                                  </span>
-                                )}
+                                <button
+                                  onClick={async () => {
+                                    if (!confirm("Xarajatni o'chirasizmi?")) return;
+                                    await deleteExpense(flight.id, exp.id);
+                                    fetchFlight(id);
+                                    addToast("O'chirildi", 'success');
+                                  }}
+                                  className="flex items-center gap-1 text-[11px] font-medium text-slate-400 hover:text-red-500 transition-colors px-2 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10"
+                                >
+                                  <Trash2 size={11} /> O'chirish
+                                </button>
                               </div>
-                            )}
-
-                            {exp.description && (
-                              <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">{exp.description}</p>
                             )}
                           </div>
                         </div>
-
-                        {/* Action row — only when active */}
-                        {flight.status === 'active' && (
-                          <div className="flex items-center justify-end gap-2 px-4 py-2.5 border-t border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50">
-                            {exp.addedBy !== 'driver' && (
-                              <button
-                                onClick={() => { setEditingExpense(exp); setShowExpenseForm(true); }}
-                                className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors px-2 py-1"
-                              >
-                                <Edit2 size={12} /> Tahrirlash
-                              </button>
-                            )}
-                            <button
-                              onClick={async () => {
-                                if (!confirm("Xarajatni o'chirasizmi?")) return;
-                                await deleteExpense(flight.id, exp.id);
-                                fetchFlight(id);
-                                addToast("Xarajat o'chirildi", 'success');
-                              }}
-                              className="flex items-center gap-1.5 text-xs font-medium text-danger-400 hover:text-danger-600 transition-colors px-2 py-1"
-                            >
-                              <Trash2 size={12} /> O'chirish
-                            </button>
-                          </div>
-                        )}
                       </div>
                     );
                   })}
