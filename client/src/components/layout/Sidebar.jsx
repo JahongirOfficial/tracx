@@ -41,9 +41,7 @@ const Sidebar = () => {
     >
       {/* ── Logo ── */}
       <div className="flex items-center h-16 shrink-0 px-3.5 gap-3 border-b border-slate-200 dark:border-white/[0.06]">
-        <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-600/30 shrink-0">
-          <Truck size={18} className="text-white" />
-        </div>
+        <img src="/icon.png" alt="Avtojon" className="w-9 h-9 object-contain shrink-0" />
         <div className={['overflow-hidden transition-[opacity] duration-200', sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'].join(' ')}>
           <p className="text-slate-900 dark:text-white font-bold text-[15px] leading-none whitespace-nowrap">Avtojon</p>
           <p className="text-slate-400 dark:text-slate-500 text-[11px] mt-0.5 whitespace-nowrap">Transport tizimi</p>

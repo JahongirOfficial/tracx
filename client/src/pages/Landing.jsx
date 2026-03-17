@@ -224,10 +224,8 @@ const Landing = () => {
       <header className="sticky top-0 z-50 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-md shadow-primary-500/30">
-              <Truck size={18} className="text-white" />
-            </div>
+          <div className="flex items-center gap-2">
+            <img src="/icon.png" alt="Avtojon" className="w-9 h-9 object-contain" />
             <span className="text-xl font-black tracking-tight">Avtojon</span>
           </div>
 
@@ -378,9 +376,7 @@ const Landing = () => {
 
                   {/* App topbar */}
                   <div className="bg-white px-4 pt-1 pb-2.5 border-b border-slate-100 flex items-center gap-2">
-                    <div className="w-7 h-7 bg-primary-600 rounded-lg flex items-center justify-center shadow-sm">
-                      <Truck size={14} className="text-white" />
-                    </div>
+                    <img src="/icon.png" alt="" className="w-7 h-7 object-contain" />
                     <span className="text-sm font-black text-slate-900 tracking-tight">Avtojon</span>
                     <div className="ml-auto flex items-center gap-1">
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
@@ -679,9 +675,7 @@ const Landing = () => {
             {/* Brand */}
             <div className="md:col-span-2">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center">
-                  <Truck size={17} className="text-white" />
-                </div>
+                <img src="/icon.png" alt="Avtojon" className="w-9 h-9 object-contain" />
                 <span className="text-white font-black text-lg">Avtojon</span>
               </div>
               <p className="text-sm leading-relaxed max-w-xs mb-4">
