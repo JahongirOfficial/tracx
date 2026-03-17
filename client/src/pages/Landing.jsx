@@ -500,6 +500,84 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* ── Comparison ──────────────────────────────────────────── */}
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-white dark:bg-slate-950">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-10 md:mb-14">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+              An'anaviy usul vs{' '}
+              <span className="text-primary-600 dark:text-primary-400">Avtojon</span>
+            </h2>
+            <p className="mt-3 text-slate-500 dark:text-slate-400 text-sm">
+              Zamonaviy yechim bilan vaqt va pulni tejang
+            </p>
+          </div>
+
+          <div className="relative flex flex-col md:flex-row gap-5 md:gap-6 items-stretch">
+            {/* Eski usul */}
+            <div className="flex-1 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm bg-white dark:bg-slate-800">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-8 h-8 rounded-full border-2 border-red-400 flex items-center justify-center flex-shrink-0">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </div>
+                <span className="font-bold text-slate-900 dark:text-white text-base">Eski usul</span>
+              </div>
+              <ul className="space-y-3.5">
+                {[
+                  "Excel va qog'oz daftarlar — xato ko'p",
+                  'WhatsApp guruhlar — spam va tartibsizlik',
+                  "Vositachilarga 10–15% komissiya",
+                  "Haydovchi qo'lidagi pul nazorat qilinmaydi",
+                  "Eskirgan va noaniq ma'lumotlar",
+                ].map(item => (
+                  <li key={item} className="flex items-start gap-3 text-sm text-slate-500 dark:text-slate-400">
+                    <div className="w-5 h-5 rounded-full border border-red-300 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </div>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* VS badge */}
+            <div className="flex md:flex-col items-center justify-center z-10 md:-mx-3">
+              <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center shadow-sm">
+                <span className="text-xs font-black text-slate-500 dark:text-slate-300">VS</span>
+              </div>
+            </div>
+
+            {/* Avtojon bilan */}
+            <div className="flex-1 border-2 border-primary-400 dark:border-primary-500 rounded-2xl p-6 shadow-lg shadow-primary-500/10 bg-white dark:bg-slate-800">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center flex-shrink-0">
+                  <Zap size={14} className="fill-white text-white" />
+                </div>
+                <span className="font-bold text-slate-900 dark:text-white text-base">
+                  <span className="text-primary-600 dark:text-primary-400">Avtojon</span> bilan
+                </span>
+              </div>
+              <ul className="space-y-3.5">
+                {[
+                  'Barcha reyslar bir platformada — real vaqt',
+                  "Haydovchi o'zi xarajat kiritadi, siz ko'rasiz",
+                  "Vositachisiz — to'g'ridan-to'g'ri boshqaruv",
+                  "Moliyaviy hisob avtomatik — foyda ko'rinadi",
+                  "Real vaqt ma'lumotlar — har doim yangi",
+                ].map(item => (
+                  <li key={item} className="flex items-start gap-3 text-sm text-slate-700 dark:text-slate-300">
+                    <div className="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── How it works ────────────────────────────────────────── */}
       <section id="how" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-slate-50 dark:bg-slate-900">
         <div className="max-w-4xl mx-auto">
