@@ -214,7 +214,7 @@ const Landing = () => {
   const navigate = useNavigate();
   const [mobileMenu, setMobileMenu] = useState(false);
 
-  const PHONE = '+998 90 000 00 00'; // TODO: replace with real phone
+  const PHONE = '+998 88-863-36-63';
   const TELEGRAM = 'https://t.me/avtojon_support'; // TODO: replace
 
   return (
