@@ -40,6 +40,7 @@ import FlightFinanceSummary from '../../components/flights/FlightFinanceSummary'
 import FlightFinanceCharts from '../../components/flights/FlightFinanceCharts';
 import useFlightStore from '../../stores/flightStore';
 import useUiStore from '../../stores/uiStore';
+import usePermission from '../../hooks/usePermission';
 import { formatMoney, formatDate, formatDateTime } from '../../utils/formatters';
 import { EXPENSE_TYPES, PAYMENT_TYPES } from '../../utils/constants';
 
@@ -109,6 +110,7 @@ const CompletionSummary = ({ flight, onClose }) => {
 const FlightDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { can } = usePermission();
   const [activeTab, setActiveTab] = useState('general');
   const [showLegForm, setShowLegForm] = useState(false);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
@@ -283,20 +285,24 @@ const FlightDetail = () => {
             </div>
 
             {/* Right: actions */}
-            {flight.status === 'active' && (
+            {flight.status === 'active' && (can('flights.cancel') || can('flights.complete')) && (
               <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => setShowCancelConfirm(true)}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors"
-                >
-                  Bekor qilish
-                </button>
-                <button
-                  onClick={() => setShowCompleteForm(true)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors shadow-sm"
-                >
-                  <CheckCircle size={13} /> Yakunlash
-                </button>
+                {can('flights.cancel') && (
+                  <button
+                    onClick={() => setShowCancelConfirm(true)}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors"
+                  >
+                    Bekor qilish
+                  </button>
+                )}
+                {can('flights.complete') && (
+                  <button
+                    onClick={() => setShowCompleteForm(true)}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors shadow-sm"
+                  >
+                    <CheckCircle size={13} /> Yakunlash
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -461,7 +467,7 @@ const FlightDetail = () => {
                     </span>
                   </div>
                 ) : <div />}
-                {flight.status === 'active' && (
+                {flight.status === 'active' && can('legs.add') && (
                   <Button icon={Plus} size="sm" onClick={() => setShowLegForm(true)}>
                     Yo'nalish qo'shish
                   </Button>
@@ -619,7 +625,7 @@ const FlightDetail = () => {
                     )}
                   </div>
                 ) : <div />}
-                {flight.status === 'active' && (
+                {flight.status === 'active' && can('expenses.add') && (
                   <Button icon={Plus} size="sm" onClick={() => { setEditingExpense(null); setShowExpenseForm(true); }}>
                     Xarajat qo'shish
                   </Button>

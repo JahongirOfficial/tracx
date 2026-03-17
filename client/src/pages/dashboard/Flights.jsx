@@ -12,6 +12,7 @@ import { formatMoney, formatDate } from '../../utils/formatters';
 import { FLIGHT_STATUSES, PAYMENT_STATUSES } from '../../utils/constants';
 import useFlightStore from '../../stores/flightStore';
 import api from '../../services/api';
+import usePermission from '../../hooks/usePermission';
 
 /* ── Compact top-stat card ───────────────────────────────────────── */
 const QuickStat = ({ label, value, icon: Icon, colorCls }) => (
@@ -136,6 +137,7 @@ const FlightCard = ({ flight, onClick }) => {
 /* ── Main component ──────────────────────────────────────────────── */
 const Flights = () => {
   const navigate = useNavigate();
+  const { can } = usePermission();
   const [showForm, setShowForm] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [filters, setFilters] = useState({
@@ -177,26 +179,6 @@ const Flights = () => {
 
   return (
     <div className="page-enter space-y-4">
-
-      {/* ── Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
-            Reyslar
-            {meta?.total ? (
-              <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg tabular-nums">
-                {meta.total}
-              </span>
-            ) : null}
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            Barcha reyslar va ularning holati
-          </p>
-        </div>
-        <Button icon={Plus} onClick={() => setShowForm(true)} className="sm:self-start">
-          Yangi reys
-        </Button>
-      </div>
 
       {/* ── Quick stats ── */}
       {!loading && flights.length > 0 && (
@@ -246,8 +228,13 @@ const Flights = () => {
               onClick={() => setShowAdvanced((v) => !v)}
               className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
             >
-              {showAdvanced ? 'Yig\'ish ▲' : 'Batafsil ▼'}
+              {showAdvanced ? "Yig'ish ▲" : 'Batafsil ▼'}
             </button>
+            {can('flights.create') && (
+              <Button icon={Plus} size="sm" onClick={() => setShowForm(true)}>
+                Yangi reys
+              </Button>
+            )}
             {/* View toggle */}
             <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
               <button
@@ -333,7 +320,7 @@ const Flights = () => {
             icon={Plane}
             title="Reyslar topilmadi"
             description="Yangi reys yaratish uchun quyidagi tugmani bosing"
-            action={() => setShowForm(true)}
+            action={can('flights.create') ? () => setShowForm(true) : undefined}
             actionLabel="Yangi reys"
           />
         </div>

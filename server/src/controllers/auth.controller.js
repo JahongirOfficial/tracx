@@ -185,9 +185,6 @@ const register = catchAsync(async (req, res, next) => {
 
   const hashed = await bcrypt.hash(password, 12);
 
-  const trialDays = parseInt(env.TRIAL_DAYS || '30', 10);
-  const trialEndsAt = new Date(Date.now() + trialDays * 86400000);
-
   const businessman = await prisma.businessman.create({
     data: {
       username: email,
@@ -198,7 +195,6 @@ const register = catchAsync(async (req, res, next) => {
       companyName: companyName || null,
       plan: 'free',
       subscriptionEnd: new Date('2099-12-31'),
-      trialEndsAt,
     },
   });
 
@@ -219,4 +215,52 @@ const register = catchAsync(async (req, res, next) => {
   });
 });
 
-module.exports = { login, register, getMe, refresh, logout, getSubscription, upgradeSubscriptionHandler, changePassword };
+const googleAuth = catchAsync(async (req, res, next) => {
+  const { token } = req.body;
+  if (!token) return next(new AppError('Google token kerak', 400));
+
+  // Verify token with Google and get user info
+  const googleRes = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!googleRes.ok) return next(new AppError('Google token yaroqsiz', 401));
+  const googleUser = await googleRes.json();
+
+  const { email, name } = googleUser;
+  if (!email) return next(new AppError('Google emailni bermadi', 400));
+
+  // Find or create businessman
+  let businessman = await prisma.businessman.findFirst({
+    where: { OR: [{ email }, { username: email }] },
+  });
+
+  if (!businessman) {
+    businessman = await prisma.businessman.create({
+      data: {
+        username: email,
+        email,
+        password: '',
+        fullName: name || email,
+        plan: 'free',
+        subscriptionEnd: new Date('2099-12-31'),
+      },
+    });
+  }
+
+  if (!businessman.isActive) return next(new AppError('Hisobingiz bloklangan', 403));
+
+  const { accessToken, refreshToken } = await generateTokens(businessman.id, 'business');
+
+  const userData = {
+    id: businessman.id,
+    username: businessman.username,
+    email: businessman.email,
+    role: 'business',
+    fullName: businessman.fullName,
+    companyName: businessman.companyName,
+  };
+
+  res.json({ success: true, data: { user: userData, accessToken, refreshToken, role: 'business' } });
+});
+
+module.exports = { login, register, googleAuth, getMe, refresh, logout, getSubscription, upgradeSubscriptionHandler, changePassword };

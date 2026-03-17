@@ -1,40 +1,25 @@
 /**
  * DriverForm — modal for creating or editing a driver.
- *
- * Sections:
- *   1. Account   — username (disabled on edit), password (create only)
- *   2. Personal  — full name, phone
- *   3. Payment   — payment type toggle (per_trip / monthly), rate or salary
- *
- * Props:
- *   isOpen, onClose — modal visibility
- *   driver          — when provided, puts the form into edit mode
+ * 2-step stepper:
+ *   Step 0: Hisob & Shaxsiy — username, password (create), fullName, phone
+ *   Step 1: To'lov          — paymentType, rate / salary
  */
 
 import { useState } from 'react';
 import Modal from '../ui/Modal';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
+import StepHeader from '../ui/StepHeader';
 import useDriverStore from '../../stores/driverStore';
 import useUiStore from '../../stores/uiStore';
-import { AtSign, Lock, User, Percent, Banknote } from 'lucide-react';
+import { AtSign, Lock, User, Percent, Banknote, ChevronRight } from 'lucide-react';
 import { PhoneInput } from '../ui/MaskedInput';
 
-/* Section header */
-const FormSection = ({ icon: Icon, title }) => (
-  <div className="flex items-center gap-2 mb-3">
-    <div className="w-6 h-6 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center shrink-0">
-      <Icon size={13} className="text-primary-600 dark:text-primary-400" />
-    </div>
-    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-      {title}
-    </p>
-    <div className="flex-1 h-px bg-slate-100 dark:bg-slate-800" />
-  </div>
-);
+const STEPS = ["Hisob & Shaxsiy", "To'lov"];
 
 const DriverForm = ({ isOpen, onClose, driver = null }) => {
   const isEdit = !!driver;
+  const [step, setStep] = useState(0);
 
   const [form, setForm] = useState({
     username: driver?.username || '',
@@ -52,15 +37,21 @@ const DriverForm = ({ isOpen, onClose, driver = null }) => {
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
+  const handleClose = () => { setStep(0); onClose(); };
+
+  const canAdvance = () => {
+    if (!form.fullName.trim()) return false;
+    if (!isEdit && (!form.username.trim() || !form.password.trim())) return false;
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const data = { ...form };
-      /* Convert number fields — delete if empty so server uses default(0) */
       data.baseSalary = form.baseSalary !== '' ? parseFloat(form.baseSalary) || 0 : 0;
       data.perTripRate = form.perTripRate !== '' ? parseFloat(form.perTripRate) || 0 : 0;
-      /* Don't send empty password on edit */
       if (!form.password) delete data.password;
 
       if (isEdit) {
@@ -70,7 +61,7 @@ const DriverForm = ({ isOpen, onClose, driver = null }) => {
         await createDriver(data);
         addToast('Haydovchi yaratildi', 'success');
       }
-      onClose();
+      handleClose();
     } catch (err) {
       addToast(err.message || 'Xato', 'error');
     } finally {
@@ -79,120 +70,141 @@ const DriverForm = ({ isOpen, onClose, driver = null }) => {
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={isEdit ? 'Haydovchini tahrirlash' : 'Yangi haydovchi'}
-    >
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <Modal isOpen={isOpen} onClose={handleClose} title={isEdit ? 'Haydovchini tahrirlash' : 'Yangi haydovchi'}>
+      <StepHeader steps={STEPS} current={step} />
 
-        {/* ── Section 1: Account ── */}
-        <div>
-          <FormSection icon={AtSign} title="Kirish ma'lumotlari" />
-          <div className="flex flex-col gap-3">
-            <Input
-              label="Foydalanuvchi nomi"
-              required={!isEdit}
-              leftIcon={AtSign}
-              value={form.username}
-              onChange={(e) => set('username', e.target.value)}
-              disabled={isEdit}
-              placeholder="driver123"
-              helper={isEdit ? "Foydalanuvchi nomi o'zgartirilmaydi" : undefined}
-            />
+      <form onSubmit={handleSubmit}>
+
+        {/* ── Step 0: Hisob & Shaxsiy ── */}
+        {step === 0 && (
+          <div className="flex flex-col gap-4">
             {!isEdit && (
-              <Input
-                label="Parol"
-                type="password"
-                required
-                leftIcon={Lock}
-                value={form.password}
-                onChange={(e) => set('password', e.target.value)}
-                placeholder="Kamida 8 ta belgi"
-              />
+              <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                  <Lock size={13} className="text-slate-400" />
+                  <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Kirish ma'lumotlari</span>
+                </div>
+                <div className="p-4 grid grid-cols-2 gap-3">
+                  <Input
+                    label="Foydalanuvchi nomi"
+                    required
+                    leftIcon={AtSign}
+                    value={form.username}
+                    onChange={(e) => set('username', e.target.value)}
+                    placeholder="driver123"
+                  />
+                  <Input
+                    label="Parol"
+                    type="password"
+                    required
+                    leftIcon={Lock}
+                    value={form.password}
+                    onChange={(e) => set('password', e.target.value)}
+                    placeholder="Kamida 8 ta belgi"
+                  />
+                </div>
+              </div>
             )}
+
+            <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                <User size={13} className="text-slate-400" />
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Shaxsiy ma'lumotlar</span>
+              </div>
+              <div className="p-4 grid grid-cols-2 gap-3">
+                <Input
+                  label="To'liq ism"
+                  required
+                  leftIcon={User}
+                  value={form.fullName}
+                  onChange={(e) => set('fullName', e.target.value)}
+                  placeholder="Alisher Navoiy"
+                />
+                <PhoneInput
+                  label="Telefon"
+                  value={form.phone}
+                  onChange={(e) => set('phone', e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button type="button" variant="secondary" fullWidth onClick={handleClose}>Bekor qilish</Button>
+              <Button type="button" fullWidth disabled={!canAdvance()} onClick={() => setStep(1)}>
+                Keyingi <ChevronRight size={14} />
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* ── Section 2: Personal info ── */}
-        <div>
-          <FormSection icon={User} title="Shaxsiy ma'lumotlar" />
-          <div className="flex flex-col gap-3">
-            <Input
-              label="To'liq ism"
-              required
-              leftIcon={User}
-              value={form.fullName}
-              onChange={(e) => set('fullName', e.target.value)}
-              placeholder="Alisher Navoiy"
-            />
-            <PhoneInput
-              label="Telefon"
-              value={form.phone}
-              onChange={(e) => set('phone', e.target.value)}
-            />
+        {/* ── Step 1: To'lov ── */}
+        {step === 1 && (
+          <div className="flex flex-col gap-4">
+            {/* Summary chip */}
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+              <User size={13} className="text-slate-400 shrink-0" />
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 truncate">{form.fullName}</span>
+              {!isEdit && <span className="text-xs font-mono text-slate-400 ml-auto">@{form.username}</span>}
+            </div>
+
+            <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                <Banknote size={13} className="text-slate-400" />
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">To'lov turi</span>
+              </div>
+              <div className="p-4 flex flex-col gap-3">
+                <div className="flex gap-2">
+                  {[
+                    { value: 'per_trip', label: "Reys bo'yicha (%)" },
+                    { value: 'monthly', label: 'Oylik maosh' },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => set('paymentType', opt.value)}
+                      className={[
+                        'flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all duration-150',
+                        form.paymentType === opt.value
+                          ? 'bg-primary-600 border-primary-600 text-white shadow-sm'
+                          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-primary-300',
+                      ].join(' ')}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+
+                {form.paymentType === 'per_trip' ? (
+                  <Input
+                    label="Reys ulushi (%)"
+                    type="number"
+                    leftIcon={Percent}
+                    value={form.perTripRate}
+                    onChange={(e) => set('perTripRate', e.target.value)}
+                    placeholder="30"
+                    min="0"
+                    max="100"
+                    helper="Har bir reysdan haydovchiga beriladigan foiz"
+                  />
+                ) : (
+                  <Input
+                    label="Oylik maosh (UZS)"
+                    money
+                    leftIcon={Banknote}
+                    value={form.baseSalary}
+                    onChange={(e) => set('baseSalary', e.target.value)}
+                    placeholder="3 000 000"
+                  />
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button type="button" variant="secondary" fullWidth onClick={() => setStep(0)}>Orqaga</Button>
+              <Button type="submit" fullWidth loading={loading}>{isEdit ? 'Saqlash' : 'Yaratish'}</Button>
+            </div>
           </div>
-        </div>
-
-        {/* ── Section 3: Payment type ── */}
-        <div>
-          <FormSection icon={Banknote} title="To'lov turi" />
-          {/* Toggle buttons */}
-          <div className="flex gap-2 mb-3">
-            {[
-              { value: 'per_trip', label: 'Reys bo\'yicha (%)' },
-              { value: 'monthly', label: 'Oylik maosh' },
-            ].map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => set('paymentType', opt.value)}
-                className={[
-                  'flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all duration-150',
-                  form.paymentType === opt.value
-                    ? 'bg-primary-600 border-primary-600 text-white shadow-sm'
-                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-primary-300 dark:hover:border-primary-700',
-                ].join(' ')}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Conditional rate/salary field */}
-          {form.paymentType === 'per_trip' ? (
-            <Input
-              label="Reys ulushi (%)"
-              type="number"
-              leftIcon={Percent}
-              value={form.perTripRate}
-              onChange={(e) => set('perTripRate', e.target.value)}
-              placeholder="30"
-              min="0"
-              max="100"
-              helper="Har bir reysdan haydovchiga beriladigan foiz"
-            />
-          ) : (
-            <Input
-              label="Oylik maosh (UZS)"
-              money
-              leftIcon={Banknote}
-              value={form.baseSalary}
-              onChange={(e) => set('baseSalary', e.target.value)}
-              placeholder="3 000 000"
-            />
-          )}
-        </div>
-
-        {/* ── Actions ── */}
-        <div className="flex gap-3 pt-1">
-          <Button type="button" variant="secondary" fullWidth onClick={onClose}>
-            Bekor qilish
-          </Button>
-          <Button type="submit" fullWidth loading={loading}>
-            {isEdit ? 'Saqlash' : 'Yaratish'}
-          </Button>
-        </div>
+        )}
       </form>
     </Modal>
   );

@@ -1,10 +1,5 @@
-/**
- * Combobox — searchable select dropdown.
- * Props:
- *   label, required, value, onChange(value), options=[{value,label}],
- *   placeholder, disabled, className
- */
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, Search, X } from 'lucide-react';
 
 const Combobox = ({
@@ -19,32 +14,58 @@ const Combobox = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const containerRef = useRef(null);
-  const inputRef = useRef(null);
+  const [dropPos, setDropPos] = useState({ top: 0, left: 0, width: 0 });
+
+  const triggerRef = useRef(null);
+  const dropRef    = useRef(null);
+  const inputRef   = useRef(null);
 
   const selected = options.find((o) => o.value === value);
-
-  const filtered = search
+  const filtered  = search
     ? options.filter((o) => o.label.toLowerCase().includes(search.toLowerCase()))
     : options;
 
-  // Close on outside click
+  /* Position dropdown relative to trigger */
+  const calcPos = useCallback(() => {
+    if (!triggerRef.current) return;
+    const r = triggerRef.current.getBoundingClientRect();
+    setDropPos({ top: r.bottom + 4, left: r.left, width: r.width });
+  }, []);
+
+  const handleOpen = () => {
+    if (disabled) return;
+    calcPos();
+    setOpen(true);
+    setTimeout(() => inputRef.current?.focus(), 50);
+  };
+
+  /* Reposition on scroll/resize while open */
   useEffect(() => {
+    if (!open) return;
+    const update = () => calcPos();
+    window.addEventListener('scroll', update, true);
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update, true);
+      window.removeEventListener('resize', update);
+    };
+  }, [open, calcPos]);
+
+  /* Close on outside click */
+  useEffect(() => {
+    if (!open) return;
     const handler = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
+      if (
+        triggerRef.current && !triggerRef.current.contains(e.target) &&
+        dropRef.current   && !dropRef.current.contains(e.target)
+      ) {
         setOpen(false);
         setSearch('');
       }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
-  const handleOpen = () => {
-    if (disabled) return;
-    setOpen(true);
-    setTimeout(() => inputRef.current?.focus(), 50);
-  };
+  }, [open]);
 
   const handleSelect = (opt) => {
     onChange(opt.value);
@@ -59,29 +80,32 @@ const Combobox = ({
   };
 
   return (
-    <div className={`relative ${className}`} ref={containerRef}>
+    <div className={className}>
       {label && (
-        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+        <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
           {label}
           {required && <span className="text-red-500 ml-0.5">*</span>}
         </label>
       )}
 
-      {/* Trigger button */}
+      {/* Trigger */}
       <button
+        ref={triggerRef}
         type="button"
         onClick={handleOpen}
         disabled={disabled}
         className={[
-          'w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-sm',
-          'border transition-all duration-150 text-left',
+          'w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-md text-sm',
+          'border transition-colors duration-150 text-left',
           open
-            ? 'border-primary-500 ring-2 ring-primary-500/20 bg-white dark:bg-slate-800'
+            ? 'border-primary-500 ring-1 ring-primary-500/30 bg-white dark:bg-slate-800'
             : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800',
-          disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-slate-300 dark:hover:border-slate-600',
+          disabled
+            ? 'opacity-50 cursor-not-allowed'
+            : 'cursor-pointer hover:border-slate-300 dark:hover:border-slate-600',
         ].join(' ')}
       >
-        <span className={selected ? 'text-slate-800 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500'}>
+        <span className={selected ? 'text-slate-800 dark:text-slate-200 truncate' : 'text-slate-400 dark:text-slate-500'}>
           {selected ? selected.label : placeholder}
         </span>
         <div className="flex items-center gap-1 shrink-0">
@@ -100,10 +124,13 @@ const Combobox = ({
         </div>
       </button>
 
-      {/* Dropdown */}
-      {open && (
-        <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg overflow-hidden">
-          {/* Search input */}
+      {/* Dropdown — rendered via portal so it escapes modal overflow:hidden */}
+      {open && createPortal(
+        <div
+          ref={dropRef}
+          style={{ position: 'fixed', top: dropPos.top, left: dropPos.left, width: dropPos.width, zIndex: 9999 }}
+          className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg overflow-hidden"
+        >
           <div className="p-2 border-b border-slate-100 dark:border-slate-700">
             <div className="relative">
               <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
@@ -113,17 +140,14 @@ const Combobox = ({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Qidirish..."
-                className="w-full pl-8 pr-3 py-1.5 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary-400"
+                className="w-full pl-8 pr-3 py-1.5 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-300 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary-400"
               />
             </div>
           </div>
 
-          {/* Options list */}
-          <div className="max-h-48 overflow-y-auto">
+          <div className="max-h-52 overflow-y-auto">
             {filtered.length === 0 ? (
-              <div className="px-3 py-6 text-center text-sm text-slate-400">
-                Natija topilmadi
-              </div>
+              <div className="px-3 py-5 text-center text-sm text-slate-400">Natija topilmadi</div>
             ) : (
               filtered.map((opt) => (
                 <button
@@ -142,7 +166,8 @@ const Combobox = ({
               ))
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import Modal from '../ui/Modal';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
+import StepHeader from '../ui/StepHeader';
 import useUiStore from '../../stores/uiStore';
 import { EXPENSE_TYPES } from '../../utils/constants';
-import { AlertTriangle, Droplets, Gauge, Wallet, Banknote } from 'lucide-react';
+import { AlertTriangle, Droplets, Gauge, Wallet, Banknote, ChevronRight } from 'lucide-react';
 
 const FUEL_TYPES = ['fuel', 'fuel_metan', 'fuel_propan', 'fuel_benzin', 'fuel_diesel'];
 const GAS_TYPES  = ['fuel_metan', 'fuel_propan'];
@@ -26,7 +27,10 @@ const INITIAL = {
 const LIGHT_TYPES = EXPENSE_TYPES.filter((t) => t.class === 'light');
 const HEAVY_TYPES = EXPENSE_TYPES.filter((t) => t.class === 'heavy');
 
+const STEPS = ['Xarajat turi', "Ma'lumotlar"];
+
 const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false, expense = null }) => {
+  const [step, setStep] = useState(0);
   const [form, setForm] = useState(INITIAL);
   const [loading, setLoading] = useState(false);
   const { addToast } = useUiStore();
@@ -48,18 +52,21 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false, e
           : todayStr(),
         paidFromOwn: expense.paidFromOwn || false,
       });
+      setStep(0);
     } else if (isOpen && !expense) {
       setForm({ ...INITIAL, expenseDate: todayStr() });
+      setStep(0);
     }
   }, [isOpen, expense]);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
+  const handleClose = () => { setStep(0); onClose(); };
+
   const selectedType = EXPENSE_TYPES.find((t) => t.value === form.type);
-  const isHeavy      = selectedType?.class === 'heavy';
-  const showPaidFromOwn = !!form.type;
-  const isFuel       = FUEL_TYPES.includes(form.type);
-  const fuelUnit     = GAS_TYPES.includes(form.type) ? 'kub' : 'litr';
+  const isHeavy = selectedType?.class === 'heavy';
+  const isFuel = FUEL_TYPES.includes(form.type);
+  const fuelUnit = GAS_TYPES.includes(form.type) ? 'kub' : 'litr';
 
   const pricePerUnit =
     isFuel && form.fuelLiters && form.amount && parseFloat(form.fuelLiters) > 0
@@ -104,7 +111,7 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false, e
       }
 
       onSuccess?.();
-      onClose();
+      handleClose();
       setForm(INITIAL);
     } catch (err) {
       addToast(err.message || 'Xato', 'error');
@@ -129,243 +136,238 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false, e
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title={isEditMode ? 'Xarajatni tahrirlash' : "Xarajat qo'shish"}
       size="lg"
     >
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <StepHeader steps={STEPS} current={step} />
 
-        {/* ── 1. Xarajat turi ── */}
-        <div className="space-y-3">
-          {/* Light */}
-          <div>
-            <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
-              Oddiy xarajatlar
-            </p>
-            <div className="grid grid-cols-5 sm:grid-cols-6 gap-1.5">
-              {LIGHT_TYPES.map((type) => (
-                <button
-                  key={type.value}
-                  type="button"
-                  onClick={() => set('type', type.value)}
-                  className={tileCls(type)}
-                >
-                  <span className="text-xl leading-none">{type.emoji}</span>
-                  <span className="truncate w-full text-center">{type.label}</span>
-                </button>
-              ))}
+      <form onSubmit={handleSubmit}>
+
+        {/* ── Step 0: Xarajat turi ── */}
+        {step === 0 && (
+          <div className="flex flex-col gap-4">
+            <div className="space-y-3">
+              <div>
+                <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
+                  Oddiy xarajatlar
+                </p>
+                <div className="grid grid-cols-5 sm:grid-cols-6 gap-1.5">
+                  {LIGHT_TYPES.map((type) => (
+                    <button key={type.value} type="button" onClick={() => set('type', type.value)} className={tileCls(type)}>
+                      <span className="text-xl leading-none">{type.emoji}</span>
+                      <span className="truncate w-full text-center">{type.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-[11px] font-semibold text-orange-500 dark:text-orange-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+                  <AlertTriangle size={10} />
+                  Kapital (foydadan chiqarilmaydi)
+                </p>
+                <div className="grid grid-cols-5 sm:grid-cols-6 gap-1.5">
+                  {HEAVY_TYPES.map((type) => (
+                    <button key={type.value} type="button" onClick={() => set('type', type.value)} className={tileCls(type)}>
+                      <span className="text-xl leading-none">{type.emoji}</span>
+                      <span className="truncate w-full text-center">{type.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {selectedType && (
+                <div className={[
+                  'flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium border',
+                  isHeavy
+                    ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800/40 text-orange-700 dark:text-orange-400'
+                    : 'bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800/40 text-primary-700 dark:text-primary-400',
+                ].join(' ')}>
+                  <span className="text-base">{selectedType.emoji}</span>
+                  <span className="font-semibold">{selectedType.label}</span>
+                  <span className="opacity-50">—</span>
+                  <span className="opacity-80">{isHeavy ? 'Kapital xarajat' : 'Oddiy xarajat'}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <Button type="button" variant="secondary" fullWidth onClick={handleClose}>Bekor qilish</Button>
+              <Button type="button" fullWidth disabled={!form.type} onClick={() => setStep(1)}>
+                Keyingi <ChevronRight size={14} />
+              </Button>
             </div>
           </div>
+        )}
 
-          {/* Heavy */}
-          <div>
-            <p className="text-[11px] font-semibold text-orange-500 dark:text-orange-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-              <AlertTriangle size={10} />
-              Kapital (foydadan chiqarilmaydi)
-            </p>
-            <div className="grid grid-cols-5 sm:grid-cols-6 gap-1.5">
-              {HEAVY_TYPES.map((type) => (
-                <button
-                  key={type.value}
-                  type="button"
-                  onClick={() => set('type', type.value)}
-                  className={tileCls(type)}
-                >
-                  <span className="text-xl leading-none">{type.emoji}</span>
-                  <span className="truncate w-full text-center">{type.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Selected badge */}
-          {selectedType && (
-            <div
-              className={[
+        {/* ── Step 1: Ma'lumotlar ── */}
+        {step === 1 && (
+          <div className="flex flex-col gap-4">
+            {/* Selected type chip */}
+            {selectedType && (
+              <div className={[
                 'flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium border',
                 isHeavy
                   ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800/40 text-orange-700 dark:text-orange-400'
                   : 'bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800/40 text-primary-700 dark:text-primary-400',
-              ].join(' ')}
-            >
-              <span className="text-base">{selectedType.emoji}</span>
-              <span className="font-semibold">{selectedType.label}</span>
-              <span className="opacity-50">—</span>
-              <span className="opacity-80">
-                {isHeavy ? 'Kapital xarajat' : 'Oddiy xarajat'}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* ── divider ── */}
-        <div className="h-px bg-slate-100 dark:bg-slate-800" />
-
-        {/* ── 2. Summa ── */}
-        <div className="space-y-3">
-          {/* Amount (full width, prominent) */}
-          <Input
-            label="Summa"
-            money
-            required
-            value={form.amount}
-            onChange={(e) => set('amount', e.target.value)}
-            placeholder="0"
-          />
-
-          {/* Currency + Date side by side */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                Valyuta
-              </label>
-              <div className="flex gap-2">
-                {['UZS', 'USD'].map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => set('currency', c)}
-                    className={[
-                      'flex-1 py-2.5 rounded-xl text-xs font-semibold border transition-all duration-150',
-                      form.currency === c
-                        ? 'bg-primary-600 border-primary-600 text-white'
-                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-primary-300',
-                    ].join(' ')}
-                  >
-                    {c === 'UZS' ? "So'm" : 'USD'}
-                  </button>
-                ))}
+              ].join(' ')}>
+                <span className="text-base">{selectedType.emoji}</span>
+                <span className="font-semibold">{selectedType.label}</span>
               </div>
-            </div>
-            <Input
-              label="Sana"
-              type="date"
-              value={form.expenseDate}
-              onChange={(e) => set('expenseDate', e.target.value)}
-            />
-          </div>
+            )}
 
-          {/* USD kurs */}
-          {form.currency === 'USD' && (
-            <Input
-              label="Kurs (UZS/USD)"
-              type="number"
-              value={form.exchangeRate}
-              onChange={(e) => set('exchangeRate', e.target.value)}
-              placeholder="12800"
-            />
-          )}
-        </div>
-
-        {/* ── 3. Yoqilg'i (conditional) ── */}
-        {isFuel && (
-          <>
-            <div className="h-px bg-slate-100 dark:bg-slate-800" />
-            <div className="space-y-3">
-              <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                <Droplets size={11} />
-                Yoqilg'i ma'lumotlari
-              </p>
-              <div className="grid grid-cols-2 gap-3">
+            {/* Amount */}
+            <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="p-4 space-y-3">
                 <Input
-                  label={fuelUnit === 'kub' ? 'Kub' : 'Litr'}
-                  type="number"
-                  leftIcon={Droplets}
-                  value={form.fuelLiters}
-                  onChange={(e) => set('fuelLiters', e.target.value)}
+                  label="Summa"
+                  money
+                  required
+                  value={form.amount}
+                  onChange={(e) => set('amount', e.target.value)}
                   placeholder="0"
                 />
-                <Input
-                  label="Odometr (km)"
-                  type="number"
-                  leftIcon={Gauge}
-                  value={form.odometerAtExpense}
-                  onChange={(e) => set('odometerAtExpense', e.target.value)}
-                  placeholder="0"
-                />
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Valyuta</label>
+                    <div className="flex gap-2">
+                      {['UZS', 'USD'].map((c) => (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => set('currency', c)}
+                          className={[
+                            'flex-1 py-2.5 rounded-xl text-xs font-semibold border transition-all duration-150',
+                            form.currency === c
+                              ? 'bg-primary-600 border-primary-600 text-white'
+                              : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-primary-300',
+                          ].join(' ')}
+                        >
+                          {c === 'UZS' ? "So'm" : 'USD'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <Input
+                    label="Sana"
+                    type="date"
+                    value={form.expenseDate}
+                    onChange={(e) => set('expenseDate', e.target.value)}
+                  />
+                </div>
+
+                {form.currency === 'USD' && (
+                  <Input
+                    label="Kurs (UZS/USD)"
+                    type="number"
+                    value={form.exchangeRate}
+                    onChange={(e) => set('exchangeRate', e.target.value)}
+                    placeholder="12800"
+                  />
+                )}
               </div>
-              {pricePerUnit !== null && (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
-                  <Droplets size={13} className="text-slate-400 shrink-0" />
-                  <span className="text-xs text-slate-500 dark:text-slate-400">
-                    1 {fuelUnit} narxi:
-                  </span>
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200 tabular-nums ml-auto">
-                    {pricePerUnit.toLocaleString()} UZS
+            </div>
+
+            {/* Fuel details (conditional) */}
+            {isFuel && (
+              <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                  <Droplets size={13} className="text-slate-400" />
+                  <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
+                    Yoqilg'i ma'lumotlari
                   </span>
                 </div>
+                <div className="p-4 space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input
+                      label={fuelUnit === 'kub' ? 'Kub' : 'Litr'}
+                      type="number"
+                      leftIcon={Droplets}
+                      value={form.fuelLiters}
+                      onChange={(e) => set('fuelLiters', e.target.value)}
+                      placeholder="0"
+                    />
+                    <Input
+                      label="Odometr (km)"
+                      type="number"
+                      leftIcon={Gauge}
+                      value={form.odometerAtExpense}
+                      onChange={(e) => set('odometerAtExpense', e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+                  {pricePerUnit !== null && (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                      <Droplets size={13} className="text-slate-400 shrink-0" />
+                      <span className="text-xs text-slate-500 dark:text-slate-400">1 {fuelUnit} narxi:</span>
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-200 tabular-nums ml-auto">
+                        {pricePerUnit.toLocaleString()} UZS
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Description */}
+            <Input
+              label="Izoh (ixtiyoriy)"
+              value={form.description}
+              onChange={(e) => set('description', e.target.value)}
+              placeholder="Qo'shimcha ma'lumot..."
+            />
+
+            {/* Payment source */}
+            <div>
+              <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
+                To'lov manbai
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => set('paidFromOwn', false)}
+                  className={[
+                    'flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold border transition-all duration-150',
+                    !form.paidFromOwn
+                      ? 'bg-primary-600 border-primary-600 text-white'
+                      : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-primary-300',
+                  ].join(' ')}
+                >
+                  <Banknote size={13} />
+                  Biznes hisobidan
+                </button>
+                <button
+                  type="button"
+                  onClick={() => set('paidFromOwn', true)}
+                  className={[
+                    'flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold border transition-all duration-150',
+                    form.paidFromOwn
+                      ? 'bg-amber-500 border-amber-500 text-white'
+                      : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-amber-300',
+                  ].join(' ')}
+                >
+                  <Wallet size={13} />
+                  Haydovchi joyida to'ladi
+                </button>
+              </div>
+              {form.paidFromOwn && (
+                <p className={`text-[11px] mt-1.5 flex items-center gap-1 ${isHeavy ? 'text-orange-600 dark:text-orange-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                  <Wallet size={10} />
+                  {isHeavy ? "Haydovchi joyida to'ladi — qo'lidagi puldan ayiriladi" : "Haydovchi o'z cho'ntagidan to'laydi"}
+                </p>
               )}
             </div>
-          </>
-        )}
 
-        {/* ── 4. Izoh ── */}
-        <Input
-          label="Izoh (ixtiyoriy)"
-          value={form.description}
-          onChange={(e) => set('description', e.target.value)}
-          placeholder="Qo'shimcha ma'lumot..."
-        />
-
-        {/* ── 5. To'lov manbai ── */}
-        {showPaidFromOwn && (
-          <div>
-            <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
-              To'lov manbai
-            </p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => set('paidFromOwn', false)}
-                className={[
-                  'flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold border transition-all duration-150',
-                  !form.paidFromOwn
-                    ? 'bg-primary-600 border-primary-600 text-white'
-                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-primary-300',
-                ].join(' ')}
-              >
-                <Banknote size={13} />
-                Biznes hisobidan
-              </button>
-              <button
-                type="button"
-                onClick={() => set('paidFromOwn', true)}
-                className={[
-                  'flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold border transition-all duration-150',
-                  form.paidFromOwn
-                    ? 'bg-amber-500 border-amber-500 text-white'
-                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-amber-300',
-                ].join(' ')}
-              >
-                <Wallet size={13} />
-                Haydovchi joyida to'ladi
-              </button>
+            <div className="flex gap-3">
+              <Button type="button" variant="secondary" fullWidth onClick={() => setStep(0)}>Orqaga</Button>
+              <Button type="submit" fullWidth loading={loading} disabled={!form.amount}>
+                {isEditMode ? 'Saqlash' : "Qo'shish"}
+              </Button>
             </div>
-            {form.paidFromOwn && (
-              <p className={`text-[11px] mt-1.5 flex items-center gap-1 ${isHeavy ? 'text-orange-600 dark:text-orange-400' : 'text-amber-600 dark:text-amber-400'}`}>
-                <Wallet size={10} />
-                {isHeavy
-                  ? "Haydovchi joyida to'ladi — qo'lidagi puldan ayiriladi"
-                  : "Haydovchi o'z cho'ntagidan to'laydi"}
-              </p>
-            )}
           </div>
         )}
-
-        {/* ── Actions ── */}
-        <div className="flex gap-3">
-          <Button type="button" variant="secondary" fullWidth onClick={onClose}>
-            Bekor qilish
-          </Button>
-          <Button
-            type="submit"
-            fullWidth
-            loading={loading}
-            disabled={!form.type || !form.amount}
-          >
-            {isEditMode ? 'Saqlash' : "Qo'shish"}
-          </Button>
-        </div>
       </form>
     </Modal>
   );

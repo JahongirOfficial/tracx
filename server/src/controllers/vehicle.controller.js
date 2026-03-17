@@ -2,10 +2,12 @@ const prisma = require('../config/database');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 
+const getBizId = (req) => req.user.role === 'employee' ? req.user.businessmanId : req.user.id;
+
 const getVehicles = catchAsync(async (req, res) => {
   const { page = 1, limit = 20, search, status } = req.query;
   const skip = (parseInt(page) - 1) * parseInt(limit);
-  const businessmanId = req.user.id;
+  const businessmanId = getBizId(req);
 
   const where = { businessmanId };
   if (status) where.status = status;
@@ -50,7 +52,7 @@ const getVehicles = catchAsync(async (req, res) => {
 
 const getVehicle = catchAsync(async (req, res, next) => {
   const vehicle = await prisma.vehicle.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
     include: {
       tires: true,
       maintenanceLogs: { orderBy: { performedAt: 'desc' } },
@@ -69,50 +71,12 @@ const getVehicle = catchAsync(async (req, res, next) => {
   res.json({ success: true, data: vehicle });
 });
 
-const FREE_VEHICLES = 2;
-const EXTRA_VEHICLE_PRICE = 50000;
-
 const createVehicle = catchAsync(async (req, res, next) => {
   const { plateNumber, brand, model, year, color, currentOdometer, oilChangeIntervalKm, lastOilChangeKm } = req.body;
 
-  const vehicleCount = await prisma.vehicle.count({
-    where: { businessmanId: req.user.id, isActive: true },
-  });
-
-  if (vehicleCount >= FREE_VEHICLES) {
-    const biz = await prisma.businessman.findUnique({
-      where: { id: req.user.id },
-      select: { balance: true },
-    });
-    const balance = parseFloat(biz.balance);
-    if (balance < EXTRA_VEHICLE_PRICE) {
-      return next(new AppError(
-        `${vehicleCount + 1}-mashina qo'shish uchun ${EXTRA_VEHICLE_PRICE.toLocaleString()} UZS kerak. Hisobingizda: ${balance.toLocaleString()} UZS`,
-        400
-      ));
-    }
-
-    await prisma.$transaction([
-      prisma.businessman.update({
-        where: { id: req.user.id },
-        data: { balance: { decrement: EXTRA_VEHICLE_PRICE } },
-      }),
-      prisma.balanceTransaction.create({
-        data: {
-          businessmanId: req.user.id,
-          type: 'vehicle_unlock',
-          amount: -EXTRA_VEHICLE_PRICE,
-          balanceBefore: balance,
-          balanceAfter: balance - EXTRA_VEHICLE_PRICE,
-          description: `Qo'shimcha mashina qo'shildi (${vehicleCount + 1}-mashina)`,
-        },
-      }),
-    ]);
-  }
-
   const vehicle = await prisma.vehicle.create({
     data: {
-      businessmanId: req.user.id,
+      businessmanId: getBizId(req),
       plateNumber, brand, model, year, color,
       currentOdometer: currentOdometer || 0,
       oilChangeIntervalKm: oilChangeIntervalKm || 10000,
@@ -122,7 +86,7 @@ const createVehicle = catchAsync(async (req, res, next) => {
 
   await prisma.auditLog.create({
     data: {
-      businessmanId: req.user.id, userId: req.user.id,
+      businessmanId: getBizId(req), userId: req.user.id,
       userRole: req.user.role, action: 'create',
       entity: 'vehicle', entityId: vehicle.id,
       newData: vehicle, ipAddress: req.ip,
@@ -134,7 +98,7 @@ const createVehicle = catchAsync(async (req, res, next) => {
 
 const updateVehicle = catchAsync(async (req, res, next) => {
   const existing = await prisma.vehicle.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
   });
   if (!existing) return next(new AppError('Mashina topilmadi', 404));
 
@@ -148,7 +112,7 @@ const updateVehicle = catchAsync(async (req, res, next) => {
 
 const deleteVehicle = catchAsync(async (req, res, next) => {
   const existing = await prisma.vehicle.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
   });
   if (!existing) return next(new AppError('Mashina topilmadi', 404));
 
@@ -158,7 +122,7 @@ const deleteVehicle = catchAsync(async (req, res, next) => {
 
 const assignDriver = catchAsync(async (req, res, next) => {
   const vehicle = await prisma.vehicle.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
   });
   if (!vehicle) return next(new AppError('Mashina topilmadi', 404));
 
@@ -166,7 +130,7 @@ const assignDriver = catchAsync(async (req, res, next) => {
 
   if (driverId) {
     const driver = await prisma.driver.findFirst({
-      where: { id: driverId, businessmanId: req.user.id },
+      where: { id: driverId, businessmanId: getBizId(req) },
     });
     if (!driver) return next(new AppError('Haydovchi topilmadi', 404));
   }
@@ -181,7 +145,7 @@ const assignDriver = catchAsync(async (req, res, next) => {
 
 const addMaintenance = catchAsync(async (req, res, next) => {
   const vehicle = await prisma.vehicle.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
   });
   if (!vehicle) return next(new AppError('Mashina topilmadi', 404));
 

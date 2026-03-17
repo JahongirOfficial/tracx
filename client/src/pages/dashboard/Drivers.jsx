@@ -13,6 +13,7 @@ import { formatMoney } from '../../utils/formatters';
 import { DRIVER_STATUSES } from '../../utils/constants';
 import useDriverStore from '../../stores/driverStore';
 import api from '../../services/api';
+import usePermission from '../../hooks/usePermission';
 
 /* ── Avatar helpers ── */
 const GRADIENTS = [
@@ -116,6 +117,7 @@ const INACTIVE_PILL = 'bg-white dark:bg-slate-800 border-slate-200 dark:border-s
 /* ── Main component ── */
 const Drivers = () => {
   const navigate = useNavigate();
+  const { can } = usePermission();
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch]     = useState('');
   const [status, setStatus]     = useState('');
@@ -154,24 +156,6 @@ const Drivers = () => {
 
   return (
     <div className="page-enter space-y-4">
-
-      {/* ── Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
-            Haydovchilar
-            {meta?.total ? (
-              <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg tabular-nums">
-                {meta.total}
-              </span>
-            ) : null}
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Barcha haydovchilar va ularning holati</p>
-        </div>
-        <Button icon={Plus} onClick={() => setShowForm(true)} className="sm:self-start">
-          Yangi haydovchi
-        </Button>
-      </div>
 
       {/* ── Quick stats ── */}
       {!loading && drivers.length > 0 && (
@@ -224,6 +208,12 @@ const Drivers = () => {
             </button>
           )}
 
+          {can('drivers.create') && (
+            <Button icon={Plus} size="sm" onClick={() => setShowForm(true)}>
+              Yangi haydovchi
+            </Button>
+          )}
+
           {/* View toggle */}
           <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5 gap-0.5">
             <button
@@ -265,7 +255,7 @@ const Drivers = () => {
             icon={Users}
             title="Haydovchilar topilmadi"
             description="Yangi haydovchi qo'shish uchun quyidagi tugmani bosing"
-            action={() => setShowForm(true)}
+            action={can('drivers.create') ? () => setShowForm(true) : undefined}
             actionLabel="Yangi haydovchi"
           />
         </div>

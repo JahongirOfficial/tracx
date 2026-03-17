@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import {
-  Wallet, TrendingUp, Clock, Truck,
+  Wallet, Clock, Truck, TrendingUp,
   CreditCard, ArrowDownCircle, ArrowUpCircle, AlertTriangle,
-  CheckCircle, Gift, RefreshCw, ExternalLink,
+  RefreshCw, ExternalLink,
 } from 'lucide-react';
 import useBalanceStore from '../../stores/balanceStore';
 import useUiStore from '../../stores/uiStore';
@@ -19,7 +19,6 @@ const TX_ICONS = {
   topup:        { icon: ArrowUpCircle,   cls: 'text-emerald-500' },
   daily_charge: { icon: ArrowDownCircle, cls: 'text-red-400' },
   manual:       { icon: RefreshCw,       cls: 'text-blue-400' },
-  trial_start:  { icon: Gift,            cls: 'text-purple-400' },
 };
 
 const AMOUNTS = [30_000, 50_000, 100_000, 150_000, 200_000, 300_000];
@@ -65,16 +64,6 @@ const Balance = () => {
   return (
     <div className="page-enter space-y-5">
 
-      {/* ── Header ── */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
-          Balans
-        </h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-          To'lov va tranzaksiyalar tarixi
-        </p>
-      </div>
-
       {loading ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {[...Array(3)].map((_, i) => (
@@ -99,9 +88,9 @@ const Balance = () => {
                 <p className="text-3xl font-extrabold tabular-nums leading-none mb-1">
                   {formatMoney(info?.balance ?? 0, 'UZS')}
                 </p>
-                {info?.isTrial && (
+                {(info?.billableVehicles ?? 0) === 0 && (
                   <span className="inline-flex items-center gap-1 mt-2 text-xs font-semibold bg-white/20 px-2 py-0.5 rounded-full">
-                    <Gift size={11} /> Sinov davri
+                    ✓ Bepul tarif
                   </span>
                 )}
               </div>
@@ -112,36 +101,47 @@ const Balance = () => {
               <div className="flex items-center gap-2 mb-2">
                 <Clock size={15} className={dc.text} />
                 <span className={['text-sm font-semibold', dc.text].join(' ')}>
-                  {info?.isTrial ? 'Sinov muddati' : 'Qolgan kunlar'}
+                  {(info?.billableVehicles ?? 0) === 0 ? 'Tarif holati' : 'Qolgan kunlar'}
                 </span>
               </div>
-              <p className={['text-4xl font-extrabold tabular-nums leading-none mb-3', dc.text].join(' ')}>
-                {info?.isTrial ? info?.trialDaysLeft : days}
-                <span className="text-base font-normal ml-1 opacity-70">kun</span>
-              </p>
-              {/* Progress bar */}
+              {(info?.billableVehicles ?? 0) === 0 ? (
+                <p className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400 leading-none mb-3">
+                  Bepul · Cheksiz
+                </p>
+              ) : (
+                <p className={['text-4xl font-extrabold tabular-nums leading-none mb-3', dc.text].join(' ')}>
+                  {days}
+                  <span className="text-base font-normal ml-1 opacity-70">kun</span>
+                </p>
+              )}
               <div className="h-1.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
                 <div
                   className={['h-full rounded-full transition-all duration-500', dc.bar].join(' ')}
-                  style={{ width: `${barPct}%` }}
+                  style={{ width: `${(info?.billableVehicles ?? 0) === 0 ? 100 : barPct}%` }}
                 />
               </div>
             </div>
 
-            {/* Daily cost */}
+            {/* Monthly cost */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Truck size={15} className="text-slate-400" />
-                <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">Kunlik to'lov</span>
+                <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">Oylik to'lov</span>
               </div>
               <p className="text-2xl font-extrabold text-slate-900 dark:text-white tabular-nums mb-1">
-                {formatMoney(info?.dailyCost ?? 0, 'UZS')}
+                {(info?.billableVehicles ?? 0) === 0
+                  ? <span className="text-emerald-600 dark:text-emerald-400">Bepul</span>
+                  : formatMoney(info?.monthlyCost ?? 0, 'UZS')
+                }
               </p>
               <p className="text-xs text-slate-400 dark:text-slate-500">
-                {info?.vehicleCount ?? 0} ta mashina × 1,000 UZS/kun
+                {(info?.billableVehicles ?? 0) === 0
+                  ? `${info?.vehicleCount ?? 0} ta mashina (${info?.freeVehicles ?? 2} tagacha bepul)`
+                  : `${info?.billableVehicles} ta qo'shimcha × 50,000 UZS/oy`
+                }
               </p>
               <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 tabular-nums">
-                Oyiga ~{formatMoney((info?.dailyCost ?? 0) * 30, 'UZS', true)}
+                Kunlik: ~{formatMoney(info?.dailyCost ?? 0, 'UZS')}
               </div>
             </div>
           </div>
@@ -158,24 +158,13 @@ const Balance = () => {
               </div>
             </div>
           )}
-          {!info?.isExpired && !info?.isTrial && days <= 5 && days > 0 && (
+          {!info?.isExpired && (info?.billableVehicles ?? 0) > 0 && days <= 5 && days > 0 && (
             <div className="flex items-start gap-3 bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-800/40 rounded-xl p-4">
               <AlertTriangle size={18} className="text-amber-500 shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-bold text-amber-700 dark:text-amber-400">Balans yaqinda tugaydi</p>
                 <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5">
                   {days} kun qoldi. Uzluksiz ishlash uchun balansni to'ldiring.
-                </p>
-              </div>
-            </div>
-          )}
-          {info?.isTrial && (
-            <div className="flex items-start gap-3 bg-purple-50 dark:bg-purple-900/15 border border-purple-200 dark:border-purple-800/40 rounded-xl p-4">
-              <Gift size={18} className="text-purple-500 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-bold text-purple-700 dark:text-purple-400">Bepul sinov davri</p>
-                <p className="text-xs text-purple-600 dark:text-purple-500 mt-0.5">
-                  {info?.trialDaysLeft} kun qoldi. Sinov tugagandan so'ng har kecha mashinalar soni × 1,000 UZS hisobdan yechiladi.
                 </p>
               </div>
             </div>

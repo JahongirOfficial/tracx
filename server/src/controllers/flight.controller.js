@@ -5,11 +5,13 @@ const { recalculateFlightFinances } = require('../services/flight.service');
 const { convertToUZS } = require('../utils/currency');
 const { FUEL_TYPES, HEAVY_TYPES } = require('../validators/flight.validator');
 
+const getBizId = (req) => req.user.role === 'employee' ? req.user.businessmanId : req.user.id;
+
 // ===== FLIGHTS =====
 const getFlights = catchAsync(async (req, res) => {
   const { page = 1, limit = 20, status, driverId, vehicleId, dateFrom, dateTo } = req.query;
   const skip = (parseInt(page) - 1) * parseInt(limit);
-  const businessmanId = req.user.id;
+  const businessmanId = getBizId(req);
 
   const where = { businessmanId };
   if (status) where.status = status;
@@ -45,7 +47,7 @@ const getFlights = catchAsync(async (req, res) => {
 
 const getFlight = catchAsync(async (req, res, next) => {
   const flight = await prisma.flight.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
     include: {
       driver: { select: { id: true, fullName: true, phone: true, status: true, perTripRate: true } },
       vehicle: { select: { id: true, plateNumber: true, brand: true, model: true } },
@@ -61,7 +63,7 @@ const getFlight = catchAsync(async (req, res, next) => {
 
 const createFlight = catchAsync(async (req, res, next) => {
   const { driverId, vehicleId, flightType, roadMoney, fuelType, startOdometer, startFuel } = req.body;
-  const businessmanId = req.user.id;
+  const businessmanId = getBizId(req);
 
   const [driver, vehicle] = await Promise.all([
     prisma.driver.findFirst({ where: { id: driverId, businessmanId } }),
@@ -109,7 +111,7 @@ const createFlight = catchAsync(async (req, res, next) => {
 
 const updateFlight = catchAsync(async (req, res, next) => {
   const flight = await prisma.flight.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
   });
   if (!flight) return next(new AppError('Reys topilmadi', 404));
   if (flight.status !== 'active') return next(new AppError("Faqat faol reysni o'zgartirish mumkin", 400));
@@ -129,7 +131,7 @@ const updateFlight = catchAsync(async (req, res, next) => {
 
 const deleteFlight = catchAsync(async (req, res, next) => {
   const flight = await prisma.flight.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
   });
   if (!flight) return next(new AppError('Reys topilmadi', 404));
   if (flight.status !== 'active') return next(new AppError("Faqat faol reysni o'chirish mumkin", 400));
@@ -142,7 +144,7 @@ const deleteFlight = catchAsync(async (req, res, next) => {
 
 const completeFlight = catchAsync(async (req, res, next) => {
   const flight = await prisma.flight.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id, status: 'active' },
+    where: { id: req.params.id, businessmanId: getBizId(req), status: 'active' },
   });
   if (!flight) return next(new AppError('Faol reys topilmadi', 404));
 
@@ -183,7 +185,7 @@ const completeFlight = catchAsync(async (req, res, next) => {
 
 const cancelFlight = catchAsync(async (req, res, next) => {
   const flight = await prisma.flight.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id, status: 'active' },
+    where: { id: req.params.id, businessmanId: getBizId(req), status: 'active' },
   });
   if (!flight) return next(new AppError('Faol reys topilmadi', 404));
 
@@ -199,7 +201,7 @@ const cancelFlight = catchAsync(async (req, res, next) => {
 // ===== LEGS (YO'NALISHLAR) =====
 const addLeg = catchAsync(async (req, res, next) => {
   const flight = await prisma.flight.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id, status: 'active' },
+    where: { id: req.params.id, businessmanId: getBizId(req), status: 'active' },
     include: { legs: true },
   });
   if (!flight) return next(new AppError('Faol reys topilmadi', 404));
@@ -231,7 +233,7 @@ const addLeg = catchAsync(async (req, res, next) => {
 
 const updateLeg = catchAsync(async (req, res, next) => {
   const flight = await prisma.flight.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
   });
   if (!flight) return next(new AppError('Reys topilmadi', 404));
 
@@ -254,7 +256,7 @@ const updateLeg = catchAsync(async (req, res, next) => {
 
 const deleteLeg = catchAsync(async (req, res, next) => {
   const flight = await prisma.flight.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
   });
   if (!flight) return next(new AppError('Reys topilmadi', 404));
 
@@ -269,7 +271,7 @@ const deleteLeg = catchAsync(async (req, res, next) => {
 
 const updateLegStatus = catchAsync(async (req, res, next) => {
   const flight = await prisma.flight.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
   });
   if (!flight) return next(new AppError('Reys topilmadi', 404));
 
@@ -287,7 +289,7 @@ const updateLegStatus = catchAsync(async (req, res, next) => {
 // ===== EXPENSES =====
 const addExpense = catchAsync(async (req, res, next) => {
   const flight = await prisma.flight.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
   });
   if (!flight) return next(new AppError('Reys topilmadi', 404));
 
@@ -327,7 +329,7 @@ const addExpense = catchAsync(async (req, res, next) => {
 
 const updateExpense = catchAsync(async (req, res, next) => {
   const flight = await prisma.flight.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
   });
   if (!flight) return next(new AppError('Reys topilmadi', 404));
 
@@ -364,7 +366,7 @@ const updateExpense = catchAsync(async (req, res, next) => {
 
 const deleteExpense = catchAsync(async (req, res, next) => {
   const flight = await prisma.flight.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
   });
   if (!flight) return next(new AppError('Reys topilmadi', 404));
 
@@ -379,7 +381,7 @@ const deleteExpense = catchAsync(async (req, res, next) => {
 
 const addDriverPayment = catchAsync(async (req, res, next) => {
   const flight = await prisma.flight.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
   });
   if (!flight) return next(new AppError('Reys topilmadi', 404));
 
@@ -410,7 +412,7 @@ const addDriverPayment = catchAsync(async (req, res, next) => {
 
 const addRoadMoneyPayment = catchAsync(async (req, res, next) => {
   const flight = await prisma.flight.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
   });
   if (!flight) return next(new AppError('Reys topilmadi', 404));
 
@@ -452,7 +454,7 @@ const addRoadMoneyPayment = catchAsync(async (req, res, next) => {
 // ===== STATS =====
 const getStatsSummary = catchAsync(async (req, res) => {
   const { dateFrom, dateTo } = req.query;
-  const businessmanId = req.user.id;
+  const businessmanId = getBizId(req);
 
   const where = { businessmanId };
   if (dateFrom || dateTo) {
@@ -490,7 +492,7 @@ const getStatsSummary = catchAsync(async (req, res) => {
 });
 
 const getDriverDebts = catchAsync(async (req, res) => {
-  const businessmanId = req.user.id;
+  const businessmanId = getBizId(req);
 
   const drivers = await prisma.driver.findMany({
     where: { businessmanId, isActive: true },
@@ -519,7 +521,7 @@ const getDriverDebts = catchAsync(async (req, res) => {
 
 const recalculateFlight = catchAsync(async (req, res, next) => {
   const flight = await prisma.flight.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
   });
   if (!flight) return next(new AppError('Reys topilmadi', 404));
 

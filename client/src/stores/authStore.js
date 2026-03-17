@@ -56,6 +56,15 @@ const useAuthStore = create((set, get) => ({
     return accessToken;
   },
 
+  googleLogin: async (token) => {
+    const res = await api.post('/auth/google', { token });
+    const { user, accessToken, refreshToken, role } = res.data;
+    localStorage.setItem('token', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+    set({ user, token: accessToken, refreshToken, role, isLoading: false });
+    return role;
+  },
+
   updateUser: (updates) => set((s) => ({ user: { ...s.user, ...updates } })),
 }));
 

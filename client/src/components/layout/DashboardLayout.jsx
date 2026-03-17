@@ -128,8 +128,8 @@ const DashboardLayout = () => {
   /* Is any "more" item currently active? */
   const moreActive = moreNav.some(({ to }) => location.pathname.startsWith(to));
 
-  const isLow  = !info?.isTrial && (info?.daysLeft ?? 99) <= 5;
-  const isWarn = !info?.isTrial && (info?.daysLeft ?? 99) <= 14 && !isLow;
+  const isLow  = (info?.daysLeft ?? 99) <= 5;
+  const isWarn = (info?.daysLeft ?? 99) <= 14 && !isLow;
 
   const initials = user?.fullName
     ? user.fullName.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase()
@@ -320,7 +320,7 @@ const DashboardLayout = () => {
             </div>
 
             {/* Balance strip (if available) */}
-            {info && !info.isTrial && (
+            {info && (
               <div className={[
                 'mx-4 mt-2 px-4 py-2.5 rounded-xl flex items-center justify-between',
                 isLow

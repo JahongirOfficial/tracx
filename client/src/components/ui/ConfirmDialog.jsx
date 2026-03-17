@@ -71,7 +71,7 @@ const ConfirmDialog = ({
       {/* Backdrop */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-md fade-in"
+        className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm fade-in"
         onClick={!loading ? onClose : undefined}
       />
 
@@ -80,23 +80,12 @@ const ConfirmDialog = ({
         className={[
           'relative w-full max-w-[400px]',
           'bg-white dark:bg-slate-900',
-          'rounded-2xl shadow-modal',
+          'rounded-lg shadow-xl shadow-slate-900/15',
           'overflow-hidden',
           'modal-enter',
         ].join(' ')}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top gradient accent */}
-        <div
-          aria-hidden="true"
-          className={[
-            'absolute top-0 left-0 right-0 h-[3px]',
-            danger
-              ? 'bg-gradient-to-r from-danger-500 to-danger-400'
-              : 'bg-gradient-to-r from-amber-500 to-amber-400',
-          ].join(' ')}
-        />
-
         {/* Close button */}
         <button
           type="button"
@@ -105,7 +94,7 @@ const ConfirmDialog = ({
           aria-label="Close"
           className={[
             'absolute top-4 right-4',
-            'w-8 h-8 flex items-center justify-center rounded-xl',
+            'w-7 h-7 flex items-center justify-center rounded-md',
             'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300',
             'hover:bg-slate-100 dark:hover:bg-slate-800',
             'transition-all duration-150',
@@ -121,7 +110,7 @@ const ConfirmDialog = ({
           <div
             aria-hidden="true"
             className={[
-              'w-14 h-14 rounded-full flex items-center justify-center mb-5',
+              'w-12 h-12 rounded-lg flex items-center justify-center mb-5',
               iconRingClass,
             ].join(' ')}
           >

@@ -7,7 +7,7 @@ const BusinessRoute = ({ children }) => {
 
   if (isLoading) return <PageLoader />;
   if (!role) return <Navigate to="/login" replace />;
-  if (role !== 'business') {
+  if (role !== 'business' && role !== 'employee') {
     if (role === 'driver') return <Navigate to="/driver" replace />;
     if (role === 'super_admin') return <Navigate to="/super-admin" replace />;
     return <Navigate to="/login" replace />;

@@ -16,6 +16,7 @@ const envSchema = z.object({
   TRIAL_DAYS: z.string().default('7'),
   PAYME_MERCHANT_ID: z.string().optional(),
   PAYME_KEY: z.string().optional(),
+  GOOGLE_CLIENT_ID: z.string().optional(),
 });
 
 let env;

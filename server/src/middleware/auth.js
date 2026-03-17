@@ -77,4 +77,17 @@ const businessOnly = authorize('business');
 const driverOnly = authorize('driver');
 const superAdminOnly = authorize('super_admin');
 
-module.exports = { protect, authorize, businessOnly, driverOnly, superAdminOnly };
+/**
+ * Allow business owner OR an employee with at least one of the listed permissions.
+ * Usage: hasPermission('flights.view', 'flights.create')
+ */
+const hasPermission = (...perms) => (req, res, next) => {
+  if (req.user.role === 'business') return next(); // owner always allowed
+  if (req.user.role !== 'employee') return next(new AppError('Bu amal uchun ruxsatingiz yo\'q', 403));
+  const userPerms = req.user.permissions || [];
+  const allowed = perms.some((p) => userPerms.includes(p));
+  if (!allowed) return next(new AppError('Bu amalni bajarishga ruxsat yo\'q', 403));
+  next();
+};
+
+module.exports = { protect, authorize, businessOnly, driverOnly, superAdminOnly, hasPermission };

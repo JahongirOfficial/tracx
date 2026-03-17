@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   Plus, Users, Search, X, Key, Trash2, Edit2,
   Shield, CheckSquare, Square, ChevronDown, ChevronUp,
+  ChevronRight, User, Lock,
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
@@ -12,6 +13,8 @@ import EmptyState from '../../components/ui/EmptyState';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import useEmployeeStore from '../../stores/employeeStore';
 import useUiStore from '../../stores/uiStore';
+import usePermission from '../../hooks/usePermission';
+import StepHeader from '../../components/ui/StepHeader';
 import { EMPLOYEE_PERMISSION_GROUPS, EMPLOYEE_POSITIONS } from '../../utils/constants';
 
 /* ── Permission preset bundles ── */
@@ -105,10 +108,13 @@ const PermGroup = ({ group, permissions, selected, onChange }) => {
   );
 };
 
+const STEPS = ["Ma'lumotlar", 'Ruxsatlar'];
+
 /* ── Main component ── */
 const Employees = () => {
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [step, setStep] = useState(0);
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [formLoading, setFormLoading] = useState(false);
@@ -119,6 +125,7 @@ const Employees = () => {
 
   const { employees, meta, loading, fetchEmployees, createEmployee, updateEmployee, deleteEmployee, changePassword } = useEmployeeStore();
   const { addToast } = useUiStore();
+  const { isOwner } = usePermission();
 
   useEffect(() => {
     fetchEmployees();
@@ -132,6 +139,7 @@ const Employees = () => {
   const openCreate = () => {
     setEditingEmployee(null);
     setForm({ ...EMPTY_FORM });
+    setStep(0);
     setShowForm(true);
   };
 
@@ -145,7 +153,19 @@ const Employees = () => {
       position: emp.position || 'dispatcher',
       permissions: emp.permissions || [],
     });
+    setStep(0);
     setShowForm(true);
+  };
+
+  const closeForm = () => { setShowForm(false); setStep(0); };
+
+  /* Step 1 validation before advancing */
+  const canAdvance = () => {
+    if (step === 0) {
+      if (!editingEmployee && (!form.username.trim() || !form.password.trim())) return false;
+      if (!form.fullName.trim()) return false;
+    }
+    return true;
   };
 
   const handleSubmit = async (e) => {
@@ -171,7 +191,7 @@ const Employees = () => {
         });
         addToast("Xodim qo'shildi", 'success');
       }
-      setShowForm(false);
+      closeForm();
     } catch (err) {
       addToast(err.message || 'Xato', 'error');
     } finally {
@@ -213,24 +233,6 @@ const Employees = () => {
 
   return (
     <div className="page-enter space-y-4">
-      {/* ── Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
-            Xodimlar
-            {meta?.total ? (
-              <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg tabular-nums">
-                {meta.total}
-              </span>
-            ) : null}
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Xodimlar va ularning ruxsatlari</p>
-        </div>
-        <Button icon={Plus} onClick={openCreate} className="sm:self-start">
-          Yangi xodim
-        </Button>
-      </div>
-
       {/* ── Search bar ── */}
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm px-4 py-3 flex items-center gap-3">
         <Search size={14} className="text-slate-400 shrink-0" />
@@ -245,6 +247,11 @@ const Employees = () => {
           <button onClick={() => setSearch('')} className="text-slate-400 hover:text-slate-600">
             <X size={14} />
           </button>
+        )}
+        {isOwner && (
+          <Button icon={Plus} size="sm" onClick={openCreate}>
+            Yangi xodim
+          </Button>
         )}
       </div>
 
@@ -304,30 +311,34 @@ const Employees = () => {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
-                        <button
-                          type="button"
-                          onClick={() => openEdit(emp)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
-                          title="Tahrirlash"
-                        >
-                          <Edit2 size={14} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => { setShowPwModal(emp.id); setNewPw(''); }}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
-                          title="Parol o'zgartirish"
-                        >
-                          <Key size={14} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeletingId(emp.id)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/20 transition-colors"
-                          title="O'chirish"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                        {isOwner && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => openEdit(emp)}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
+                              title="Tahrirlash"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { setShowPwModal(emp.id); setNewPw(''); }}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+                              title="Parol o'zgartirish"
+                            >
+                              <Key size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDeletingId(emp.id)}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/20 transition-colors"
+                              title="O'chirish"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -338,121 +349,171 @@ const Employees = () => {
         </div>
       )}
 
-      {/* ── Add/Edit employee modal ── */}
+      {/* ── Add/Edit employee stepper modal ── */}
       <Modal
         isOpen={showForm}
-        onClose={() => setShowForm(false)}
+        onClose={closeForm}
         title={editingEmployee ? 'Xodimni tahrirlash' : "Yangi xodim qo'shish"}
         size="lg"
       >
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-h-[75vh] overflow-y-auto pr-1">
-          {/* Basic info */}
-          <div className="grid grid-cols-2 gap-3">
-            <Input
-              label="Login"
-              required
-              value={form.username}
-              onChange={(e) => set('username', e.target.value)}
-              placeholder="login123"
-              disabled={!!editingEmployee}
-            />
-            {!editingEmployee && (
-              <Input
-                label="Parol"
-                type="password"
-                required
-                value={form.password}
-                onChange={(e) => set('password', e.target.value)}
-                placeholder="••••••"
-              />
-            )}
-            {editingEmployee && <div />}
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Input
-              label="To'liq ism"
-              required
-              value={form.fullName}
-              onChange={(e) => set('fullName', e.target.value)}
-              placeholder="Alisher Karimov"
-            />
-            <Input
-              label="Telefon"
-              value={form.phone}
-              onChange={(e) => set('phone', e.target.value)}
-              placeholder="+998 90 123 45 67"
-            />
-          </div>
-          <Select
-            label="Lavozim"
-            value={form.position}
-            onChange={(e) => set('position', e.target.value)}
-            options={EMPLOYEE_POSITIONS}
-          />
+        <StepHeader steps={STEPS} current={step} />
 
-          {/* Permissions */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                <Shield size={14} className="text-primary-500" />
-                Ruxsatlar ({form.permissions.length}/{ALL_PERMS.length})
-              </p>
-              <div className="flex items-center gap-2">
-                <button
+        <form onSubmit={handleSubmit}>
+
+          {/* ── Step 0: Ma'lumotlar ── */}
+          {step === 0 && (
+            <div className="flex flex-col gap-4">
+              {/* Credentials section */}
+              {!editingEmployee && (
+                <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                  <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                    <Lock size={13} className="text-slate-400" />
+                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Kirish ma'lumotlari</span>
+                  </div>
+                  <div className="p-4 grid grid-cols-2 gap-3">
+                    <Input
+                      label="Login"
+                      required
+                      value={form.username}
+                      onChange={(e) => set('username', e.target.value)}
+                      placeholder="login123"
+                    />
+                    <Input
+                      label="Parol"
+                      type="password"
+                      required
+                      value={form.password}
+                      onChange={(e) => set('password', e.target.value)}
+                      placeholder="••••••"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Personal section */}
+              <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                  <User size={13} className="text-slate-400" />
+                  <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Shaxsiy ma'lumotlar</span>
+                </div>
+                <div className="p-4 flex flex-col gap-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input
+                      label="To'liq ism"
+                      required
+                      value={form.fullName}
+                      onChange={(e) => set('fullName', e.target.value)}
+                      placeholder="Alisher Karimov"
+                    />
+                    <Input
+                      label="Telefon"
+                      value={form.phone}
+                      onChange={(e) => set('phone', e.target.value)}
+                      placeholder="+998 90 123 45 67"
+                    />
+                  </div>
+                  <Select
+                    label="Lavozim"
+                    value={form.position}
+                    onChange={(e) => set('position', e.target.value)}
+                    options={EMPLOYEE_POSITIONS}
+                  />
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="flex gap-3 pt-1">
+                <Button type="button" variant="secondary" fullWidth onClick={closeForm}>
+                  Bekor
+                </Button>
+                <Button
                   type="button"
-                  onClick={() => set('permissions', ALL_PERMS)}
-                  className="text-xs text-primary-600 hover:underline"
+                  fullWidth
+                  disabled={!canAdvance()}
+                  onClick={() => setStep(1)}
                 >
-                  Barchasi
-                </button>
-                <span className="text-slate-300 dark:text-slate-600">|</span>
-                <button
-                  type="button"
-                  onClick={() => set('permissions', [])}
-                  className="text-xs text-red-500 hover:underline"
-                >
-                  Tozalash
-                </button>
+                  Keyingi <ChevronRight size={14} />
+                </Button>
               </div>
             </div>
+          )}
 
-            {/* Presets */}
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {PRESETS.map((preset) => (
-                <button
-                  key={preset.label}
-                  type="button"
-                  onClick={() => applyPreset(preset)}
-                  className="text-xs px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-primary-300 hover:text-primary-600 transition-colors"
-                >
-                  {preset.label} shablon
-                </button>
-              ))}
+          {/* ── Step 1: Ruxsatlar ── */}
+          {step === 1 && (
+            <div className="flex flex-col gap-4">
+              {/* Summary chip */}
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                <User size={13} className="text-slate-400 shrink-0" />
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 truncate">{form.fullName}</span>
+                <span className="text-xs text-slate-400 ml-auto shrink-0">
+                  {EMPLOYEE_POSITIONS.find((p) => p.value === form.position)?.label || form.position}
+                </span>
+              </div>
+
+              {/* Presets */}
+              <div>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">Tezkor shablonlar</p>
+                <div className="flex flex-wrap gap-2">
+                  {PRESETS.map((preset) => {
+                    const active = preset.perms.length === form.permissions.length &&
+                      preset.perms.every((p) => form.permissions.includes(p));
+                    return (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        onClick={() => applyPreset(preset)}
+                        className={[
+                          'text-xs px-3 py-1.5 rounded-full border font-medium transition-all duration-150',
+                          active
+                            ? 'bg-primary-600 border-primary-600 text-white shadow-sm'
+                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-primary-400 hover:text-primary-600',
+                        ].join(' ')}
+                      >
+                        {preset.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Permission groups */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <Shield size={14} className="text-primary-500" />
+                    Ruxsatlar
+                    <span className="text-xs font-normal text-slate-400">({form.permissions.length}/{ALL_PERMS.length})</span>
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button type="button" onClick={() => set('permissions', ALL_PERMS)} className="text-xs text-primary-600 hover:underline">Barchasi</button>
+                    <span className="text-slate-300 dark:text-slate-600">|</span>
+                    <button type="button" onClick={() => set('permissions', [])} className="text-xs text-red-500 hover:underline">Tozalash</button>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2 max-h-[40vh] overflow-y-auto pr-1">
+                  {EMPLOYEE_PERMISSION_GROUPS.map((g) => (
+                    <PermGroup
+                      key={g.group}
+                      group={g.group}
+                      permissions={g.permissions}
+                      selected={form.permissions}
+                      onChange={(perms) => set('permissions', perms)}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="flex gap-3 pt-1 sticky bottom-0 bg-white dark:bg-slate-900 pb-1">
+                <Button type="button" variant="secondary" fullWidth onClick={() => setStep(0)}>
+                  Orqaga
+                </Button>
+                <Button type="submit" fullWidth loading={formLoading}>
+                  {editingEmployee ? 'Saqlash' : "Qo'shish"}
+                </Button>
+              </div>
             </div>
-
-            {/* Permission groups */}
-            <div className="flex flex-col gap-2">
-              {EMPLOYEE_PERMISSION_GROUPS.map((g) => (
-                <PermGroup
-                  key={g.group}
-                  group={g.group}
-                  permissions={g.permissions}
-                  selected={form.permissions}
-                  onChange={(perms) => set('permissions', perms)}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-3 pt-1 sticky bottom-0 bg-white dark:bg-slate-900 pb-1">
-            <Button type="button" variant="secondary" fullWidth onClick={() => setShowForm(false)}>
-              Bekor
-            </Button>
-            <Button type="submit" fullWidth loading={formLoading}>
-              {editingEmployee ? 'Saqlash' : "Qo'shish"}
-            </Button>
-          </div>
+          )}
         </form>
       </Modal>
 

@@ -6,25 +6,27 @@ import {
 } from 'lucide-react';
 import useUiStore from '../../stores/uiStore';
 import useBalanceStore from '../../stores/balanceStore';
+import usePermission from '../../hooks/usePermission';
 import { formatMoney } from '../../utils/formatters';
-
-const navItems = [
-  { to: '/dashboard',           icon: LayoutDashboard, labelKey: 'nav.dashboard', end: true },
-  { to: '/dashboard/flights',   icon: Plane,           labelKey: 'nav.flights' },
-  { to: '/dashboard/drivers',   icon: Users,           labelKey: 'nav.drivers' },
-  { to: '/dashboard/vehicles',  icon: Truck,           labelKey: 'nav.vehicles' },
-  { to: '/dashboard/employees', icon: UserCog,         labelKey: 'nav.employees' },
-  { to: '/dashboard/reports',   icon: BarChart3,       labelKey: 'nav.reports' },
-];
 
 const Sidebar = () => {
   const { sidebarOpen, toggleSidebar, t } = useUiStore();
   const { info, fetchBalance } = useBalanceStore();
+  const { can, isOwner } = usePermission();
 
-  useEffect(() => { fetchBalance(); }, []);
+  useEffect(() => { if (isOwner) fetchBalance(); }, [isOwner]);
 
-  const isLow  = !info?.isTrial && (info?.daysLeft ?? 99) <= 5;
-  const isWarn = !info?.isTrial && (info?.daysLeft ?? 99) <= 14 && !isLow;
+  const isLow  = (info?.daysLeft ?? 99) <= 5;
+  const isWarn = (info?.daysLeft ?? 99) <= 14 && !isLow;
+
+  const navItems = [
+    { to: '/dashboard',           icon: LayoutDashboard, labelKey: 'nav.dashboard', end: true, show: true },
+    { to: '/dashboard/flights',   icon: Plane,           labelKey: 'nav.flights',   show: can('flights.view') },
+    { to: '/dashboard/drivers',   icon: Users,           labelKey: 'nav.drivers',   show: can('drivers.view') },
+    { to: '/dashboard/vehicles',  icon: Truck,           labelKey: 'nav.vehicles',  show: can('vehicles.view') },
+    { to: '/dashboard/employees', icon: UserCog,         labelKey: 'nav.employees', show: isOwner || can('employees.view') },
+    { to: '/dashboard/reports',   icon: BarChart3,       labelKey: 'nav.reports',   show: can('finance.view_reports') },
+  ];
 
   return (
     <aside
@@ -50,7 +52,7 @@ const Sidebar = () => {
 
       {/* ── Navigation ── */}
       <nav className="flex-1 py-3 px-2 overflow-y-auto overflow-x-hidden">
-        {navItems.map(({ to, icon: Icon, labelKey, end }) => (
+        {navItems.filter(item => item.show).map(({ to, icon: Icon, labelKey, end }) => (
           <NavLink
             key={to}
             to={to}
@@ -58,7 +60,7 @@ const Sidebar = () => {
             title={!sidebarOpen ? t(labelKey) : undefined}
             className={({ isActive }) =>
               [
-                'flex items-center gap-3 rounded-xl px-3 py-[9px] mb-0.5',
+                'flex items-center gap-3 rounded-md px-3 py-[9px] mb-0.5',
                 'text-[13.5px] font-medium transition-all duration-150',
                 'whitespace-nowrap overflow-hidden',
                 isActive
@@ -78,8 +80,8 @@ const Sidebar = () => {
           </NavLink>
         ))}
 
-        {/* ── Balance nav item (special with badge) ── */}
-        <NavLink
+        {/* ── Balance nav item (special with badge, owner only) ── */}
+        {isOwner && <NavLink
           to="/dashboard/balance"
           title={!sidebarOpen ? t('nav.balance') : undefined}
           className={({ isActive }) =>
@@ -114,17 +116,17 @@ const Sidebar = () => {
                       ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
                       : 'bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400',
                   ].join(' ')}>
-                    {info.isTrial ? `${info.trialDaysLeft}k` : `${info.daysLeft}k`}
+                    {`${info.daysLeft ?? 0}k`}
                   </span>
                 )}
               </span>
             </>
           )}
-        </NavLink>
+        </NavLink>}
       </nav>
 
-      {/* ── Balance mini widget (only when expanded) ── */}
-      {sidebarOpen && info && !info.isTrial && (
+      {/* ── Balance mini widget (only when expanded, owner only) ── */}
+      {isOwner && sidebarOpen && info && (
         <div className={[
           'mx-2 mb-2 px-3 py-2.5 rounded-xl border',
           isLow

@@ -3,10 +3,12 @@ const prisma = require('../config/database');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 
+const getBizId = (req) => req.user.role === 'employee' ? req.user.businessmanId : req.user.id;
+
 const getDrivers = catchAsync(async (req, res) => {
   const { page = 1, limit = 20, search, status } = req.query;
   const skip = (parseInt(page) - 1) * parseInt(limit);
-  const businessmanId = req.user.id;
+  const businessmanId = getBizId(req);
 
   const where = { businessmanId };
   if (status) where.status = status;
@@ -44,7 +46,7 @@ const getDrivers = catchAsync(async (req, res) => {
 
 const getDriver = catchAsync(async (req, res, next) => {
   const driver = await prisma.driver.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
     include: {
       flights: {
         orderBy: { createdAt: 'desc' },
@@ -72,7 +74,7 @@ const createDriver = catchAsync(async (req, res) => {
 
   const driver = await prisma.driver.create({
     data: {
-      businessmanId: req.user.id,
+      businessmanId: getBizId(req),
       username,
       password: hashed,
       fullName,
@@ -90,7 +92,7 @@ const createDriver = catchAsync(async (req, res) => {
 
   await prisma.auditLog.create({
     data: {
-      businessmanId: req.user.id,
+      businessmanId: getBizId(req),
       userId: req.user.id,
       userRole: req.user.role,
       action: 'create',
@@ -106,7 +108,7 @@ const createDriver = catchAsync(async (req, res) => {
 
 const updateDriver = catchAsync(async (req, res, next) => {
   const existing = await prisma.driver.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
   });
   if (!existing) return next(new AppError('Haydovchi topilmadi', 404));
 
@@ -132,7 +134,7 @@ const updateDriver = catchAsync(async (req, res, next) => {
 
   await prisma.auditLog.create({
     data: {
-      businessmanId: req.user.id, userId: req.user.id,
+      businessmanId: getBizId(req), userId: req.user.id,
       userRole: req.user.role, action: 'update',
       entity: 'driver', entityId: req.params.id,
       oldData: existing, newData: updated, ipAddress: req.ip,
@@ -144,7 +146,7 @@ const updateDriver = catchAsync(async (req, res, next) => {
 
 const deleteDriver = catchAsync(async (req, res, next) => {
   const existing = await prisma.driver.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
   });
   if (!existing) return next(new AppError('Haydovchi topilmadi', 404));
 
@@ -155,7 +157,7 @@ const deleteDriver = catchAsync(async (req, res, next) => {
 
 const paySalary = catchAsync(async (req, res, next) => {
   const driver = await prisma.driver.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
   });
   if (!driver) return next(new AppError('Haydovchi topilmadi', 404));
 
@@ -176,7 +178,7 @@ const paySalary = catchAsync(async (req, res, next) => {
 
 const getDriverStats = catchAsync(async (req, res, next) => {
   const driver = await prisma.driver.findFirst({
-    where: { id: req.params.id, businessmanId: req.user.id },
+    where: { id: req.params.id, businessmanId: getBizId(req) },
   });
   if (!driver) return next(new AppError('Haydovchi topilmadi', 404));
 

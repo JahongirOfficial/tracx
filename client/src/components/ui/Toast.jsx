@@ -81,7 +81,7 @@ const ToastItem = ({ toast, onClose }) => {
         /* Base */
         'relative flex items-start gap-3',
         'bg-white dark:bg-slate-800',
-        'rounded-xl shadow-lg',
+        'rounded-md shadow-lg',
         /* Left colored border */
         'border-l-4',
         theme.border,
@@ -113,7 +113,7 @@ const ToastItem = ({ toast, onClose }) => {
         aria-label="Close notification"
         className={[
           'flex-shrink-0 mt-0.5',
-          'w-6 h-6 flex items-center justify-center rounded-lg',
+          'w-6 h-6 flex items-center justify-center rounded',
           'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200',
           'hover:bg-slate-100 dark:hover:bg-slate-700',
           'transition-colors duration-150',
@@ -129,7 +129,7 @@ const ToastItem = ({ toast, onClose }) => {
         className={[
           'absolute bottom-0 left-0 h-[2px]',
           theme.progressColor,
-          'opacity-60 rounded-bl-xl',
+          'opacity-60 rounded-bl-md',
         ].join(' ')}
         style={{ width: '100%' }}
       />

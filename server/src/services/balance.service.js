@@ -2,65 +2,46 @@ const prisma = require('../config/database');
 const AppError = require('../utils/AppError');
 const logger = require('../utils/logger');
 
-const DAILY_RATE_PER_VEHICLE = 1000; // UZS per vehicle per day
-const FREE_VEHICLES = 2; // First N vehicles are always free
-const TRIAL_DAYS = parseInt(process.env.TRIAL_DAYS || '30', 10);
+const MONTHLY_RATE_PER_VEHICLE = 50000; // UZS per extra vehicle per month
+const DAILY_RATE_PER_VEHICLE = Math.round(MONTHLY_RATE_PER_VEHICLE / 30); // ~1667 UZS/day
+const FREE_VEHICLES = 2; // First 2 vehicles are always free forever
 
 /* ── helpers ── */
 const toDecimal = (v) => parseFloat(v || 0);
 
 /**
  * Get full balance info for a businessman.
- * Returns: balance, isTrial, trialDaysLeft, daysLeft, dailyCost, vehicleCount, isExpired
  */
 const getBalanceInfo = async (businessmanId) => {
   const biz = await prisma.businessman.findUnique({
     where: { id: businessmanId },
-    select: {
-      balance: true,
-      trialEndsAt: true,
-      suspendedAt: true,
-      isActive: true,
-      registrationDate: true,
-    },
+    select: { balance: true, suspendedAt: true, isActive: true },
   });
   if (!biz) throw new AppError('Biznesmen topilmadi', 404);
 
-  const now = new Date();
-
-  // If trialEndsAt not set yet, calculate from registrationDate
-  const trialEnd = biz.trialEndsAt
-    ? new Date(biz.trialEndsAt)
-    : new Date(new Date(biz.registrationDate).getTime() + TRIAL_DAYS * 86400000);
-
-  const isTrial = now < trialEnd;
-  const trialDaysLeft = isTrial
-    ? Math.ceil((trialEnd - now) / 86400000)
-    : 0;
-
-  // Count active vehicles for cost calculation
   const vehicleCount = await prisma.vehicle.count({
     where: { businessmanId, isActive: true },
   });
 
   const billableVehicles = Math.max(0, vehicleCount - FREE_VEHICLES);
   const dailyCost = billableVehicles * DAILY_RATE_PER_VEHICLE;
+  const monthlyCost = billableVehicles * MONTHLY_RATE_PER_VEHICLE;
   const balance = toDecimal(biz.balance);
 
-  // Days remaining based on balance
+  // Days remaining based on balance (if no extra vehicles — infinite)
   const daysLeft = dailyCost > 0
     ? Math.max(0, Math.floor(balance / dailyCost))
-    : isTrial ? trialDaysLeft : 999;
+    : 9999;
 
-  const isExpired = !isTrial && (balance < 0 || !!biz.suspendedAt);
+  const isExpired = dailyCost > 0 && (balance < 0 || !!biz.suspendedAt);
 
   return {
     balance,
-    isTrial,
-    trialDaysLeft,
-    trialEndsAt: trialEnd,
     vehicleCount,
+    freeVehicles: FREE_VEHICLES,
+    billableVehicles,
     dailyCost,
+    monthlyCost,
     daysLeft,
     isExpired,
     suspendedAt: biz.suspendedAt,
@@ -85,7 +66,6 @@ const topUp = async (businessmanId, amount, paymeId = null) => {
       where: { id: businessmanId },
       data: {
         balance: after,
-        // Reactivate if was suspended and now has positive balance
         suspendedAt: after >= 0 ? null : biz.suspendedAt,
       },
       select: { balance: true },
@@ -109,29 +89,21 @@ const topUp = async (businessmanId, amount, paymeId = null) => {
 
 /**
  * Run daily charge for ONE businessman.
- * Deducts vehicleCount × 1000 UZS from balance.
+ * Only charged if they have more than FREE_VEHICLES active vehicles.
  */
 const dailyChargeSingle = async (businessmanId) => {
   const biz = await prisma.businessman.findUnique({
     where: { id: businessmanId },
-    select: { balance: true, trialEndsAt: true, registrationDate: true, isActive: true },
+    select: { balance: true, isActive: true },
   });
   if (!biz || !biz.isActive) return null;
-
-  const now = new Date();
-  const trialEnd = biz.trialEndsAt
-    ? new Date(biz.trialEndsAt)
-    : new Date(new Date(biz.registrationDate).getTime() + TRIAL_DAYS * 86400000);
-
-  // Skip if still in trial
-  if (now < trialEnd) return null;
 
   const vehicleCount = await prisma.vehicle.count({
     where: { businessmanId, isActive: true },
   });
 
   const billableVehicles = Math.max(0, vehicleCount - FREE_VEHICLES);
-  if (billableVehicles === 0) return null;
+  if (billableVehicles === 0) return null; // 2 or fewer vehicles = free forever
 
   const charge = billableVehicles * DAILY_RATE_PER_VEHICLE;
   const before = toDecimal(biz.balance);
@@ -142,7 +114,7 @@ const dailyChargeSingle = async (businessmanId) => {
       where: { id: businessmanId },
       data: {
         balance: after,
-        suspendedAt: after < 0 ? (after < -charge * 3 ? now : null) : null,
+        suspendedAt: after < 0 ? (after < -charge * 3 ? new Date() : null) : null,
       },
     }),
     prisma.balanceTransaction.create({
@@ -153,7 +125,7 @@ const dailyChargeSingle = async (businessmanId) => {
         balanceBefore: before,
         balanceAfter: after,
         vehicleCount,
-        description: `Kunlik to'lov: ${billableVehicles} ta mashina × ${DAILY_RATE_PER_VEHICLE.toLocaleString()} UZS (${vehicleCount} ta jami, ${FREE_VEHICLES} ta bepul)`,
+        description: `Kunlik to'lov: ${billableVehicles} ta qo'shimcha mashina × ${DAILY_RATE_PER_VEHICLE.toLocaleString()} UZS (${vehicleCount} ta jami, ${FREE_VEHICLES} ta bepul)`,
       },
     }),
   ]);
@@ -164,7 +136,6 @@ const dailyChargeSingle = async (businessmanId) => {
 
 /**
  * Run daily charge for ALL eligible businessmen.
- * Called by CRON job every night at 00:00.
  */
 const dailyChargeAll = async () => {
   const businessmen = await prisma.businessman.findMany({
@@ -202,30 +173,13 @@ const getTransactions = async (businessmanId, { page = 1, limit = 20 } = {}) => 
   };
 };
 
-/**
- * Set trialEndsAt for a businessman if not set (called on first login).
- */
-const initTrial = async (businessmanId) => {
-  const biz = await prisma.businessman.findUnique({
-    where: { id: businessmanId },
-    select: { trialEndsAt: true, registrationDate: true },
-  });
-  if (!biz || biz.trialEndsAt) return;
-
-  const trialEnd = new Date(new Date(biz.registrationDate).getTime() + TRIAL_DAYS * 86400000);
-
-  await prisma.businessman.update({
-    where: { id: businessmanId },
-    data: { trialEndsAt: trialEnd },
-  });
-};
-
 module.exports = {
   getBalanceInfo,
   topUp,
   dailyChargeSingle,
   dailyChargeAll,
   getTransactions,
-  initTrial,
   DAILY_RATE_PER_VEHICLE,
+  MONTHLY_RATE_PER_VEHICLE,
+  FREE_VEHICLES,
 };

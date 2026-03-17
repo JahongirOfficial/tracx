@@ -24,7 +24,7 @@ const StyledInput = ({ hasError, leftAddon, inputRef, ...inputProps }) => (
       ref={inputRef}
       {...inputProps}
       className={[
-        'w-full px-4 py-3 text-sm rounded-xl transition-all duration-150 shadow-sm',
+        'w-full px-3 py-2.5 text-sm rounded-md transition-colors duration-150',
         leftAddon ? 'pl-[3.75rem]' : '',
         'bg-white dark:bg-slate-800/80',
         'text-slate-900 dark:text-slate-100',
@@ -42,7 +42,7 @@ const StyledInput = ({ hasError, leftAddon, inputRef, ...inputProps }) => (
 const FieldWrapper = ({ label, required, error, helper, className = '', children }) => (
   <div className={`flex flex-col gap-1.5 ${className}`}>
     {label && (
-      <label className="text-sm font-medium text-slate-700 dark:text-slate-300 select-none">
+      <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide select-none">
         {label}
         {required && <span className="text-danger-500 ml-0.5" aria-hidden="true">*</span>}
       </label>

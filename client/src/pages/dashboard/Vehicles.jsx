@@ -12,6 +12,7 @@ import EmptyState from '../../components/ui/EmptyState';
 import { formatOdometer } from '../../utils/formatters';
 import { VEHICLE_STATUSES } from '../../utils/constants';
 import useVehicleStore from '../../stores/vehicleStore';
+import usePermission from '../../hooks/usePermission';
 
 /* ── Quick stat card ── */
 const QuickStat = ({ label, value, icon: Icon, colorCls }) => (
@@ -125,6 +126,7 @@ const INACTIVE_PILL = 'bg-white dark:bg-slate-800 border-slate-200 dark:border-s
 /* ── Main component ── */
 const Vehicles = () => {
   const navigate = useNavigate();
+  const { can } = usePermission();
   const [showForm, setShowForm]   = useState(false);
   const [status, setStatus]       = useState('');
   const [search, setSearch]       = useState('');
@@ -154,24 +156,6 @@ const Vehicles = () => {
 
   return (
     <div className="page-enter space-y-4">
-
-      {/* ── Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
-            Mashinalar
-            {meta?.total ? (
-              <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg tabular-nums">
-                {meta.total}
-              </span>
-            ) : null}
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Avtomobil parki boshqaruvi</p>
-        </div>
-        <Button icon={Plus} onClick={() => setShowForm(true)} className="sm:self-start">
-          Yangi mashina
-        </Button>
-      </div>
 
       {/* ── Quick stats ── */}
       {!loading && vehicles.length > 0 && (
@@ -223,6 +207,12 @@ const Vehicles = () => {
             </button>
           )}
 
+          {can('vehicles.create') && (
+            <Button icon={Plus} size="sm" onClick={() => setShowForm(true)}>
+              Yangi mashina
+            </Button>
+          )}
+
           {/* View toggle */}
           <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden ml-auto sm:ml-0">
             <button
@@ -254,7 +244,7 @@ const Vehicles = () => {
             icon={Truck}
             title="Mashinalar topilmadi"
             description="Yangi mashina qo'shish uchun quyidagi tugmani bosing"
-            action={() => setShowForm(true)}
+            action={can('vehicles.create') ? () => setShowForm(true) : undefined}
             actionLabel="Yangi mashina"
           />
         </div>

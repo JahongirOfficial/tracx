@@ -82,12 +82,12 @@ const steps = [
 
 const pricing = [
   {
-    name: 'Bepul',
+    name: 'Starter',
     badge: null,
     priceMain: '0',
     priceSub: "so'm",
-    period: 'umrbot',
-    desc: "Kichik biznes uchun. 2 ta mashina bilan doimiy bepul.",
+    period: 'umrbot bepul',
+    desc: "2 ta mashinagacha hech qanday to'lov yo'q. Kredit karta kerak emas.",
     popular: false,
     features: [
       "2 ta mashina — umrbot bepul",
@@ -104,16 +104,16 @@ const pricing = [
     name: 'O\'sish',
     badge: 'Mashhur',
     priceMain: '50 000',
-    priceSub: "so'm",
-    period: 'har qo\'shimcha mashina',
-    desc: "3-mashina va undan keyin har birini qo'shishda bir martalik to'lov.",
+    priceSub: "so'm/oy",
+    period: 'har bir qo\'shimcha mashina uchun',
+    desc: "3-mashina va undan ortiq har biridan 50,000 UZS/oy. 2 ta mashina har doim bepul.",
     popular: true,
     features: [
-      "2 ta mashina bepul (asosiy)",
-      "Qo'shimcha har mashina 50 000 UZS",
-      "Kunlik to'lov yo'q",
-      "Barcha imkoniyatlar",
-      "Ustunlik qo'llab-quvvatlash",
+      "2 ta mashina bepul (har doim)",
+      "3-mashina: +50,000 so'm/oy",
+      "5 ta mashina: 150,000 so'm/oy",
+      "10 ta mashina: 400,000 so'm/oy",
+      "Barcha imkoniyatlar kiradi",
     ],
     cta: "Hoziroq boshlash",
     to: '/register',
@@ -125,7 +125,7 @@ const pricing = [
     priceMain: 'Aloqa',
     priceSub: '',
     period: 'narx kelishiladi',
-    desc: "Yirik flot uchun. 10+ mashina, maxsus shart va imkoniyatlar.",
+    desc: "Yirik flot uchun. 20+ mashina, maxsus shart va imkoniyatlar.",
     popular: false,
     features: [
       "Cheksiz mashinalar",
@@ -144,11 +144,11 @@ const pricing = [
 const faqs = [
   {
     q: "Ro'yxatdan o'tish uchun kredit karta kerakmi?",
-    a: "Yo'q. Faqat email va parol bilan ro'yxatdan o'tishingiz mumkin. 2 ta mashina bepul va doimiy.",
+    a: "Yo'q. Faqat email va parol bilan ro'yxatdan o'tishingiz mumkin. 2 ta mashina umrbot bepul.",
   },
   {
     q: "3-mashina qo'shganda qanday to'lov ishlaydi?",
-    a: "3-mashina va undan keyingi har bir mashina uchun hisobingizdan bir martalik 50,000 UZS ayiriladi. Oylik to'lov yo'q.",
+    a: "3-mashina va undan keyingi har bir qo'shimcha mashina uchun oyiga 50,000 UZS to'lanadi. 2 ta mashina esa har doim bepul qoladi.",
   },
   {
     q: "Haydovchi o'z telefonidan foydalana oladimi?",
@@ -160,7 +160,7 @@ const faqs = [
   },
   {
     q: "Balansga pul qanday yuklanadi?",
-    a: "Payme orqali istalgan vaqt balans to'ldirishingiz mumkin. To'ldirilgan pul qo'shimcha mashina qo'shishda ishlatiladi.",
+    a: "Payme orqali istalgan vaqt balans to'ldirishingiz mumkin. To'ldirilgan pul 3-mashina va undan keyingilar uchun oylik to'lovda ishlatiladi.",
   },
 ];
 
@@ -299,48 +299,48 @@ const Landing = () => {
         <div aria-hidden className="absolute -bottom-32 -left-32 w-80 h-80 bg-cyan-500/20 rounded-full blur-3xl" />
         <div aria-hidden className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-600/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 pt-20 md:pt-28 pb-16 text-center">
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 md:pt-24 pb-10 sm:pb-16 text-center">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-blue-200 px-4 py-1.5 rounded-full text-xs font-semibold mb-6 backdrop-blur-sm uppercase tracking-wide">
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-blue-200 px-3 sm:px-4 py-1.5 rounded-full text-xs font-semibold mb-4 sm:mb-6 backdrop-blur-sm uppercase tracking-wide">
             <Zap size={12} className="fill-blue-300 text-blue-300" />
             Transport logistika platformasi · O'zbekiston
           </div>
 
           {/* Headline */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black leading-[1.1] tracking-tight mb-5">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight mb-4 sm:mb-5">
             Transport biznesingizni{' '}
             <span className="bg-gradient-to-r from-sky-300 via-blue-300 to-cyan-300 bg-clip-text text-transparent">
               aqlli boshqaring
             </span>
           </h1>
 
-          <p className="text-lg sm:text-xl text-slate-300 mb-3 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base md:text-lg text-slate-300 mb-3 max-w-2xl mx-auto leading-relaxed">
             Haydovchilar, mashinalar va reyslarni bir platformada boshqaring.
             Moliyaviy hisob avtomatik. Real vaqt GPS kuzatuv.
           </p>
-          <p className="text-sm text-emerald-400 font-semibold mb-10">
-            ✓ 2 ta mashinaga umrbot bepul · ✓ Kredit karta kerak emas · ✓ 30 soniyada boshlang
+          <p className="text-xs sm:text-sm text-emerald-400 font-semibold mb-6 sm:mb-10">
+            ✓ 2 ta mashinaga umrbot bepul · ✓ Kredit karta kerak emas · ✓ Hoziroq boshlang
           </p>
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               to="/register"
-              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-primary-500 hover:bg-primary-400 text-white font-bold text-base rounded-xl shadow-2xl shadow-primary-500/40 transition-all duration-150 hover:scale-105"
+              className="inline-flex items-center justify-center gap-2 px-5 sm:px-7 py-2.5 sm:py-3.5 bg-primary-500 hover:bg-primary-400 text-white font-bold text-sm sm:text-base rounded-xl shadow-2xl shadow-primary-500/40 transition-all duration-150 hover:scale-105"
             >
               Bepul boshlash
-              <ArrowRight size={18} />
+              <ArrowRight size={17} />
             </Link>
             <a
               href="#how"
-              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-white/10 border border-white/25 text-white font-semibold text-base rounded-xl hover:bg-white/20 transition-all duration-150 backdrop-blur-sm"
+              className="inline-flex items-center justify-center gap-2 px-5 sm:px-7 py-2.5 sm:py-3.5 bg-white/10 border border-white/25 text-white font-semibold text-sm sm:text-base rounded-xl hover:bg-white/20 transition-all duration-150 backdrop-blur-sm"
             >
               Qanday ishlashini ko'ring
             </a>
           </div>
 
           {/* Social proof stars */}
-          <div className="mt-10 flex items-center justify-center gap-1 text-slate-300 text-sm">
+          <div className="mt-6 sm:mt-10 flex items-center justify-center gap-1 text-slate-300 text-xs sm:text-sm">
             {[...Array(5)].map((_, i) => (
               <Star key={i} size={14} className="fill-amber-400 text-amber-400" />
             ))}
@@ -361,7 +361,7 @@ const Landing = () => {
                 <span className="text-[10px] text-slate-400">avtojon.uz/dashboard</span>
               </div>
             </div>
-            <div className="grid grid-cols-4 gap-2 mb-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
               {[
                 { c: 'from-blue-500/20 to-blue-700/20', label: 'Jami daromad', val: '18.6M' },
                 { c: 'from-green-500/20 to-green-700/20', label: 'Xarajatlar', val: '4.2M' },
@@ -396,12 +396,12 @@ const Landing = () => {
       <div className="h-8 bg-slate-100 dark:bg-slate-900" />
 
       {/* ── Stats ───────────────────────────────────────────────── */}
-      <section className="py-14 bg-slate-100 dark:bg-slate-900">
+      <section className="py-8 sm:py-14 bg-slate-100 dark:bg-slate-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
             {stats.map(({ value, label }) => (
               <div key={label} className="text-center">
-                <p className="text-3xl font-black text-primary-600 dark:text-primary-400">{value}</p>
+                <p className="text-2xl sm:text-3xl font-black text-primary-600 dark:text-primary-400">{value}</p>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{label}</p>
               </div>
             ))}
@@ -410,13 +410,13 @@ const Landing = () => {
       </section>
 
       {/* ── Features ────────────────────────────────────────────── */}
-      <section id="features" className="py-20 px-4 sm:px-6 bg-white dark:bg-slate-950">
+      <section id="features" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-white dark:bg-slate-950">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-8 md:mb-14">
             <span className="inline-block bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-3">
               Imkoniyatlar
             </span>
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight">
               Biznesingiz uchun kerakli{' '}
               <span className="text-primary-600 dark:text-primary-400">hamma narsa</span>
             </h2>
@@ -440,17 +440,17 @@ const Landing = () => {
       </section>
 
       {/* ── How it works ────────────────────────────────────────── */}
-      <section id="how" className="py-20 px-4 sm:px-6 bg-slate-50 dark:bg-slate-900">
+      <section id="how" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-slate-50 dark:bg-slate-900">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-8 md:mb-14">
             <span className="inline-block bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-3">
               Qanday ishlaydi
             </span>
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight">
               3 ta oddiy qadam
             </h2>
             <p className="mt-3 text-slate-500 dark:text-slate-400 text-sm">
-              30 daqiqada to'liq sozlab ishga tushiring
+              Tez va oson sozlab ishga tushiring
             </p>
           </div>
 
@@ -460,7 +460,7 @@ const Landing = () => {
                 {i < steps.length - 1 && (
                   <div aria-hidden className="hidden md:block absolute top-8 left-[calc(50%+2.5rem)] right-0 h-0.5 bg-gradient-to-r from-primary-400 to-transparent dark:from-primary-600" />
                 )}
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 text-white text-2xl font-black mb-4 shadow-xl shadow-primary-500/30">
+                <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 text-white text-xl sm:text-2xl font-black mb-3 sm:mb-4 shadow-xl shadow-primary-500/30">
                   {step.num}
                 </div>
                 <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2">{step.title}</h3>
@@ -469,10 +469,10 @@ const Landing = () => {
             ))}
           </div>
 
-          <div className="mt-12 text-center">
+          <div className="mt-8 sm:mt-12 text-center">
             <Link
               to="/register"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all duration-150 shadow-lg shadow-primary-500/30 hover:scale-105"
+              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm sm:text-base rounded-xl transition-all duration-150 shadow-lg shadow-primary-500/30 hover:scale-105"
             >
               Hoziroq boshlang
               <ArrowRight size={18} />
@@ -482,13 +482,13 @@ const Landing = () => {
       </section>
 
       {/* ── Pricing ─────────────────────────────────────────────── */}
-      <section id="pricing" className="py-20 px-4 sm:px-6 bg-white dark:bg-slate-950">
+      <section id="pricing" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-white dark:bg-slate-950">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-8 md:mb-14">
             <span className="inline-block bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-3">
               Narxlar
             </span>
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight">
               Sodda va shaffof narxlar
             </h2>
             <p className="mt-3 text-slate-500 dark:text-slate-400 text-sm max-w-lg mx-auto">
@@ -569,13 +569,13 @@ const Landing = () => {
       </section>
 
       {/* ── Testimonials ────────────────────────────────────────── */}
-      <section className="py-20 px-4 sm:px-6 bg-slate-50 dark:bg-slate-900">
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-slate-50 dark:bg-slate-900">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-8 md:mb-14">
             <span className="inline-block bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-3">
               Mijozlar fikri
             </span>
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight">
               Ular nima deyishadi
             </h2>
           </div>
@@ -600,13 +600,13 @@ const Landing = () => {
       </section>
 
       {/* ── FAQ ─────────────────────────────────────────────────── */}
-      <section id="faq" className="py-20 px-4 sm:px-6 bg-white dark:bg-slate-950">
+      <section id="faq" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-white dark:bg-slate-950">
         <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-12">
+          <div className="text-center mb-8 sm:mb-12">
             <span className="inline-block bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-3">
               Savol-javob
             </span>
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight">
               Ko'p beriladigan savollar
             </h2>
           </div>
@@ -620,33 +620,33 @@ const Landing = () => {
       </section>
 
       {/* ── CTA Banner ──────────────────────────────────────────── */}
-      <section className="py-20 px-4 sm:px-6" style={{ background: 'linear-gradient(135deg, #1e40af 0%, #1d4ed8 50%, #1e3a8a 100%)' }}>
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6" style={{ background: 'linear-gradient(135deg, #1e40af 0%, #1d4ed8 50%, #1e3a8a 100%)' }}>
         <div className="max-w-3xl mx-auto text-center text-white">
-          <div className="w-16 h-16 bg-white/15 rounded-2xl flex items-center justify-center mx-auto mb-5">
-            <Truck size={28} className="text-white" />
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/15 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-5">
+            <Truck size={24} className="text-white" />
           </div>
-          <h2 className="text-3xl md:text-4xl font-black mb-3">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black mb-3">
             Bugundan boshlang — bepul
           </h2>
           <p className="text-blue-200 mb-2 max-w-xl mx-auto text-sm">
             2 ta mashinagacha hech qanday to'lov talab qilinmaydi. Kredit karta shart emas.
           </p>
-          <p className="text-blue-300 font-semibold mb-8 text-sm">
+          <p className="text-blue-300 font-semibold mb-6 sm:mb-8 text-sm">
             Tanishingizdan eshitdingizmi? Hoziroq ro'yxatdan o'ting!
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               to="/register"
-              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white text-primary-700 hover:bg-blue-50 font-bold rounded-xl transition-all duration-150 shadow-xl hover:scale-105"
+              className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-white text-primary-700 hover:bg-blue-50 font-bold text-sm sm:text-base rounded-xl transition-all duration-150 shadow-xl hover:scale-105"
             >
               Bepul ro'yxatdan o'tish
-              <ArrowRight size={18} />
+              <ArrowRight size={17} />
             </Link>
             <a
               href={TELEGRAM}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white/10 border border-white/30 text-white font-semibold rounded-xl hover:bg-white/20 transition-all duration-150"
+              className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-white/10 border border-white/30 text-white font-semibold text-sm sm:text-base rounded-xl hover:bg-white/20 transition-all duration-150"
             >
               <MessageCircle size={18} />
               Telegram orqali bog'lanish
@@ -656,9 +656,9 @@ const Landing = () => {
       </section>
 
       {/* ── Footer ──────────────────────────────────────────────── */}
-      <footer className="bg-slate-900 text-slate-400 py-12 px-4 sm:px-6">
+      <footer className="bg-slate-900 text-slate-400 py-8 sm:py-12 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-8 border-b border-slate-800">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-8 pb-6 sm:pb-8 border-b border-slate-800">
             {/* Brand */}
             <div className="md:col-span-2">
               <div className="flex items-center gap-2 mb-3">

@@ -49,7 +49,7 @@ const Input = ({
     <div className={`flex flex-col gap-1.5 ${className}`}>
       {/* Label */}
       {label && (
-        <label className="text-sm font-medium text-slate-700 dark:text-slate-300 select-none">
+        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide select-none">
           {label}
           {required && (
             <span className="text-danger-500 ml-0.5" aria-hidden="true">
@@ -65,9 +65,9 @@ const Input = ({
         {LeftIcon && (
           <span
             aria-hidden="true"
-            className="absolute left-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500"
+            className="absolute left-3 flex items-center pointer-events-none text-slate-400 dark:text-slate-500"
           >
-            <LeftIcon size={16} />
+            <LeftIcon size={15} />
           </span>
         )}
 
@@ -78,30 +78,20 @@ const Input = ({
           onChange={moneyChange}
           {...props}
           className={[
-            /* Layout */
-            'w-full px-4 py-3 text-sm',
-            /* Left padding when icon is present */
-            LeftIcon ? 'pl-10' : '',
-            /* Shape */
-            'rounded-xl',
-            /* Colors */
+            'w-full px-3 py-2.5 text-sm',
+            LeftIcon ? 'pl-9' : '',
+            'rounded-md',
             'bg-white dark:bg-slate-800/80',
             'text-slate-900 dark:text-slate-100',
             'placeholder-slate-400 dark:placeholder-slate-500',
-            /* Border */
             hasError
               ? 'border border-danger-500 dark:border-danger-500'
               : 'border border-slate-200 dark:border-slate-700',
-            /* Focus ring */
             hasError
-              ? 'focus:outline-none focus:ring-2 focus:ring-danger-500/30 focus:border-danger-500'
-              : 'focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500',
-            /* Transition */
-            'transition-all duration-150 ease-in-out',
-            /* Disabled */
+              ? 'focus:outline-none focus:ring-1 focus:ring-danger-500/40 focus:border-danger-500'
+              : 'focus:outline-none focus:ring-1 focus:ring-primary-500/40 focus:border-primary-500',
+            'transition-colors duration-150',
             'disabled:bg-slate-50 dark:disabled:bg-slate-900 disabled:text-slate-400 disabled:cursor-not-allowed',
-            /* Shadow */
-            'shadow-sm',
           ]
             .filter(Boolean)
             .join(' ')}

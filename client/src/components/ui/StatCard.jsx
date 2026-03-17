@@ -69,7 +69,7 @@ const StatCard = ({
       className={[
         /* Base surface */
         'relative bg-white dark:bg-slate-900',
-        'rounded-2xl border border-slate-100 dark:border-slate-800',
+        'rounded-lg border border-slate-100 dark:border-slate-800',
         'shadow-sm overflow-hidden p-5',
         /* Interaction */
         isClickable
@@ -89,7 +89,7 @@ const StatCard = ({
         <div
           aria-hidden="true"
           className={[
-            'w-9 h-9 rounded-xl flex items-center justify-center shadow-md shrink-0',
+            'w-9 h-9 rounded-md flex items-center justify-center shadow-sm shrink-0',
             theme.iconWrap,
             theme.iconShadow,
           ].join(' ')}
@@ -108,7 +108,7 @@ const StatCard = ({
         <div className="mt-3">
           <span
             className={[
-              'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold',
+              'inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold',
               isUp ? theme.trendUp : theme.trendDown,
             ].join(' ')}
           >
