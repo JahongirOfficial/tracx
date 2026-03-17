@@ -235,7 +235,6 @@ const Landing = () => {
           <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-slate-600 dark:text-slate-300">
             <a href="#features" className="hover:text-primary-600 dark:hover:text-white transition-colors">Imkoniyatlar</a>
             <a href="#how" className="hover:text-primary-600 dark:hover:text-white transition-colors">Qanday ishlaydi</a>
-            <a href="#pricing" className="hover:text-primary-600 dark:hover:text-white transition-colors">Narxlar</a>
             <a href="#faq" className="hover:text-primary-600 dark:hover:text-white transition-colors">Savol-javob</a>
           </nav>
 
@@ -268,14 +267,14 @@ const Landing = () => {
         {/* Mobile menu */}
         {mobileMenu && (
           <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-4 flex flex-col gap-3">
-            {['#features', '#how', '#pricing', '#faq'].map((href, i) => (
+            {['#features', '#how', '#faq'].map((href, i) => (
               <a
                 key={href}
                 href={href}
                 onClick={() => setMobileMenu(false)}
                 className="text-sm font-medium text-slate-600 dark:text-slate-300 py-1"
               >
-                {['Imkoniyatlar', 'Qanday ishlaydi', 'Narxlar', 'Savol-javob'][i]}
+                {['Imkoniyatlar', 'Qanday ishlaydi', 'Savol-javob'][i]}
               </a>
             ))}
             <div className="flex gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
@@ -620,92 +619,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ── Pricing ─────────────────────────────────────────────── */}
-      <section id="pricing" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-white dark:bg-slate-950">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-8 md:mb-14">
-            <span className="inline-block bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-3">
-              Narxlar
-            </span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight">
-              Sodda va shaffof narxlar
-            </h2>
-            <p className="mt-3 text-slate-500 dark:text-slate-400 text-sm max-w-lg mx-auto">
-              Oylik to'lov yo'q. Faqat qo'shimcha mashina qo'shganda to'laysiz.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-            {pricing.map((plan) => (
-              <div
-                key={plan.name}
-                className={[
-                  'relative rounded-2xl border p-7 transition-all duration-200',
-                  plan.highlight
-                    ? 'border-primary-500 shadow-2xl shadow-primary-500/15 bg-white dark:bg-slate-800 md:scale-[1.03]'
-                    : 'border-slate-200 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-800',
-                ].join(' ')}
-              >
-                {plan.badge && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                    <span className="inline-flex items-center gap-1 bg-gradient-to-r from-primary-600 to-primary-500 text-white text-xs font-bold px-4 py-1 rounded-full shadow-md">
-                      <Star size={10} className="fill-white" />
-                      {plan.badge}
-                    </span>
-                  </div>
-                )}
-
-                <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1">{plan.name}</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-5 leading-relaxed">{plan.desc}</p>
-
-                <div className="mb-6">
-                  <div className="flex items-end gap-1 flex-wrap">
-                    <span className={`text-4xl font-black ${plan.highlight ? 'text-primary-600 dark:text-primary-400' : 'text-slate-900 dark:text-white'}`}>
-                      {plan.priceMain}
-                    </span>
-                    {plan.priceSub && (
-                      <span className="text-sm text-slate-400 mb-1">{plan.priceSub}</span>
-                    )}
-                  </div>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{plan.period}</p>
-                </div>
-
-                <ul className="space-y-2.5 mb-7">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2.5 text-sm text-slate-700 dark:text-slate-300">
-                      <CheckCircle size={16} className={`flex-shrink-0 mt-0.5 ${plan.highlight ? 'text-primary-500' : 'text-emerald-500'}`} />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-
-                {plan.phone ? (
-                  <a
-                    href={`tel:${PHONE}`}
-                    className="flex items-center justify-center gap-2 w-full py-2.5 border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold rounded-xl hover:border-primary-500 hover:text-primary-600 transition-all text-sm"
-                  >
-                    <Phone size={15} />
-                    {plan.cta}
-                  </a>
-                ) : (
-                  <Link
-                    to={plan.to}
-                    className={[
-                      'flex items-center justify-center gap-2 w-full py-2.5 font-semibold rounded-xl transition-all text-sm',
-                      plan.highlight
-                        ? 'bg-primary-600 hover:bg-primary-700 text-white shadow-md shadow-primary-500/30'
-                        : 'border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-primary-500 hover:text-primary-600',
-                    ].join(' ')}
-                  >
-                    {plan.cta}
-                    <ChevronRight size={15} />
-                  </Link>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── Testimonials ────────────────────────────────────────── */}
       <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-slate-50 dark:bg-slate-900">
