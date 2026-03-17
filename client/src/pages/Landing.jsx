@@ -291,52 +291,47 @@ const Landing = () => {
       </header>
 
       {/* ── Hero ────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-white dark:bg-slate-950">
-        {/* Subtle radial glow — no hard split */}
-        <div aria-hidden className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[500px] h-[500px] bg-primary-100/40 dark:bg-primary-900/15 rounded-full blur-3xl pointer-events-none" />
-        <div aria-hidden className="absolute bottom-0 left-0 w-64 h-64 bg-sky-100/30 dark:bg-sky-900/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 py-14 sm:py-20 lg:py-20">
+      <section
+        className="relative overflow-hidden dark:bg-slate-950"
+        style={{ background: 'linear-gradient(160deg, #eef2ff 0%, #f0f6ff 40%, #ffffff 100%)' }}
+      >
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="flex flex-col lg:flex-row items-center lg:items-stretch min-h-[580px]">
 
             {/* ── Left: Text ── */}
-            <div className="flex-1 text-center lg:text-left">
+            <div className="flex-1 flex flex-col justify-center py-16 lg:py-20 text-center lg:text-left lg:pr-10">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 border border-primary-200 dark:border-primary-800 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-4 py-1.5 rounded-full text-xs font-semibold mb-5 sm:mb-7">
-                <Zap size={11} className="fill-primary-500 text-primary-500" />
+              <div className="inline-flex self-center lg:self-start items-center gap-2 bg-primary-600 text-white px-4 py-1.5 rounded-full text-xs font-semibold mb-6">
+                <Zap size={11} className="fill-white" />
                 O'zbekistonda №1 transport boshqaruv platformasi
               </div>
 
               {/* Headline */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.08] tracking-tight mb-5 text-slate-900 dark:text-white">
+              <h1 className="text-4xl sm:text-5xl lg:text-[3.4rem] font-black leading-[1.1] tracking-tight mb-5 text-slate-900 dark:text-white">
                 Transport biznesingizni{' '}
-                <span className="text-primary-600 dark:text-primary-400">
-                  aqlli boshqaring
-                </span>
+                <span className="text-primary-600 dark:text-primary-400">aqlli boshqaring</span>
               </h1>
 
-              <p className="text-base sm:text-lg text-slate-500 dark:text-slate-400 mb-3 max-w-lg mx-auto lg:mx-0 leading-relaxed">
+              <p className="text-base sm:text-lg text-slate-500 dark:text-slate-400 mb-2 max-w-md mx-auto lg:mx-0 leading-relaxed">
                 <strong className="text-slate-700 dark:text-slate-200">Web platforma orqali</strong> haydovchilar, mashinalar va reyslarni boshqaring. Moliyaviy hisob avtomatik.
               </p>
 
-              <div className="flex flex-wrap justify-center lg:justify-start gap-x-4 gap-y-1 text-sm text-emerald-600 dark:text-emerald-400 font-medium mb-8 sm:mb-10">
-                <span>✓ 2 ta mashina bepul</span>
-                <span>✓ Kredit karta kerak emas</span>
-                <span>✓ Hoziroq boshlang</span>
-              </div>
+              <p className="text-sm text-emerald-600 dark:text-emerald-400 font-semibold mb-8">
+                ✓ 2 ta mashina bepul &nbsp;·&nbsp; ✓ Kredit karta kerak emas &nbsp;·&nbsp; ✓ Hoziroq boshlang
+              </p>
 
               {/* CTAs */}
               <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                 <Link
                   to="/register"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-900 dark:bg-white hover:bg-slate-700 dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold text-sm rounded-xl shadow-lg transition-all duration-150 hover:scale-[1.02]"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-900 dark:bg-white hover:bg-slate-700 dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold text-sm rounded-xl shadow-md transition-all duration-150 hover:scale-[1.02]"
                 >
                   <Zap size={15} className="fill-white dark:fill-slate-900" />
                   Bepul boshlash
                 </Link>
                 <a
                   href="#how"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-sm rounded-xl hover:border-primary-500 hover:text-primary-600 dark:hover:border-primary-500 dark:hover:text-primary-400 transition-all duration-150"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-sm rounded-xl hover:border-primary-400 hover:text-primary-600 transition-all duration-150"
                 >
                   <ArrowRight size={15} />
                   Qanday ishlashini ko'ring
@@ -344,19 +339,17 @@ const Landing = () => {
               </div>
 
               {/* Social proof */}
-              <div className="mt-8 flex items-center justify-center lg:justify-start gap-2">
+              <div className="mt-8 flex items-center justify-center lg:justify-start gap-2.5">
                 <div className="flex -space-x-2">
-                  {['bg-blue-400', 'bg-emerald-400', 'bg-amber-400', 'bg-rose-400'].map((c, i) => (
+                  {['bg-blue-400','bg-emerald-400','bg-amber-400','bg-rose-400'].map((c,i) => (
                     <div key={i} className={`w-7 h-7 rounded-full ${c} border-2 border-white dark:border-slate-950 flex items-center justify-center`}>
-                      <span className="text-white text-[9px] font-bold">{String.fromCharCode(65 + i)}</span>
+                      <span className="text-white text-[9px] font-bold">{String.fromCharCode(65+i)}</span>
                     </div>
                   ))}
                 </div>
                 <div className="flex items-center gap-1.5">
                   <div className="flex gap-0.5">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={12} className="fill-amber-400 text-amber-400" />
-                    ))}
+                    {[...Array(5)].map((_,i) => <Star key={i} size={12} className="fill-amber-400 text-amber-400" />)}
                   </div>
                   <span className="text-xs text-slate-500 dark:text-slate-400">
                     <strong className="text-slate-700 dark:text-slate-200">50+</strong> kompaniya ishlatmoqda
@@ -365,119 +358,88 @@ const Landing = () => {
               </div>
             </div>
 
-            {/* ── Right: Phone mockup ── */}
-            <div className="flex-shrink-0 flex justify-center lg:justify-end relative">
-              {/* Glow behind phone */}
-              <div aria-hidden className="absolute inset-0 m-auto w-72 h-72 bg-primary-400/20 dark:bg-primary-500/15 rounded-full blur-3xl pointer-events-none" />
-
-              {/* Phone frame */}
-              <div className="relative w-[260px] sm:w-[290px]">
-                {/* Outer phone shell */}
-                <div className="relative bg-slate-900 rounded-[3rem] p-2.5 shadow-2xl shadow-slate-900/40 ring-1 ring-slate-800">
-                  {/* Screen */}
-                  <div className="bg-white dark:bg-slate-100 rounded-[2.4rem] overflow-hidden">
-                    {/* Status bar */}
-                    <div className="bg-white px-5 pt-3 pb-1 flex items-center justify-between">
-                      <span className="text-[10px] font-semibold text-slate-900">9:41</span>
-                      <div className="w-20 h-4 bg-slate-900 rounded-full mx-auto" />
-                      <div className="flex items-center gap-1">
-                        <div className="flex gap-0.5 items-end">
-                          {[3,4,5].map(h => <div key={h} className="w-1 bg-slate-900 rounded-sm" style={{height: h+'px'}} />)}
-                        </div>
-                        <div className="w-3.5 h-2 border border-slate-900 rounded-sm relative"><div className="absolute right-0 top-0 bottom-0 w-2.5 bg-emerald-500 rounded-sm" /></div>
+            {/* ── Right: Phone — right-edge anchored, overflows bottom ── */}
+            <div className="hidden lg:flex flex-shrink-0 items-start justify-end pt-10 pl-4">
+              {/* Phone shell */}
+              <div className="relative w-[300px] bg-slate-900 rounded-[3.2rem] p-[10px] shadow-2xl shadow-slate-900/30 ring-1 ring-slate-800/80">
+                <div className="bg-white rounded-[2.6rem] overflow-hidden">
+                  {/* Status bar */}
+                  <div className="bg-white px-5 pt-3 pb-1 flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-900">9:41</span>
+                    <div className="w-[90px] h-[18px] bg-slate-900 rounded-full mx-auto" />
+                    <div className="flex items-center gap-1">
+                      <div className="flex gap-[2px] items-end h-3">
+                        {[3,4,5,6].map(h => <div key={h} className="w-[3px] bg-slate-900 rounded-sm" style={{height: h+'px'}} />)}
+                      </div>
+                      <div className="w-4 h-[9px] border border-slate-900 rounded-[2px] relative ml-0.5">
+                        <div className="absolute right-0 top-0 bottom-0 w-3 bg-emerald-500 rounded-[2px]" />
                       </div>
                     </div>
+                  </div>
 
-                    {/* App header */}
-                    <div className="bg-white px-4 pt-1 pb-3 border-b border-slate-100">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 bg-primary-600 rounded-lg flex items-center justify-center">
-                          <Truck size={13} className="text-white" />
+                  {/* App topbar */}
+                  <div className="bg-white px-4 pt-1 pb-2.5 border-b border-slate-100 flex items-center gap-2">
+                    <div className="w-7 h-7 bg-primary-600 rounded-lg flex items-center justify-center shadow-sm">
+                      <Truck size={14} className="text-white" />
+                    </div>
+                    <span className="text-sm font-black text-slate-900 tracking-tight">Avtojon</span>
+                    <div className="ml-auto flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      <span className="text-[10px] text-slate-400">jonli</span>
+                    </div>
+                  </div>
+
+                  {/* Cards list */}
+                  <div className="bg-slate-50 px-3 py-3 space-y-2">
+                    {[
+                      { from:'TOSHKENT', to:'SAMARQAND', type:'Quruq yuk', price:'1,200,000', time:'bugun' },
+                      { from:'BUXORO',   to:'TOSHKENT',  type:'Meva',      price:'4,500,000', time:'bugun' },
+                      { from:'NAMANGAN', to:'TOSHKENT',  type:'Elektronika',price:'800,000',  time:'1s' },
+                      { from:'ANDIJON',  to:'QARSHI',    type:'Tekstil',   price:'2,100,000', time:'2s' },
+                      { from:'XORAZM',   to:'TOSHKENT',  type:'Shisha',    price:'1,800,000', time:'3s' },
+                    ].map((f,i) => (
+                      <div key={i} className="bg-white rounded-xl p-3 border border-slate-100 shadow-sm">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-1">
+                            <span className="text-[10px] font-bold text-primary-600">{f.from}</span>
+                            <ArrowRight size={8} className="text-slate-400" />
+                            <span className="text-[10px] font-bold text-primary-600">{f.to}</span>
+                          </div>
+                          <span className="text-[9px] text-slate-400">{f.time}</span>
                         </div>
-                        <span className="text-sm font-black text-slate-900">Avtojon</span>
-                        <div className="ml-auto flex items-center gap-1">
-                          <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                          <span className="text-[10px] text-slate-400">jonli</span>
+                        <p className="text-[9px] text-slate-400 mb-1.5">Yuklashga tayyor · {f.type}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[13px] font-black text-slate-900">UZS {f.price}</span>
+                          <div className="flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full">
+                            <Truck size={8} className="text-emerald-600" />
+                            <span className="text-[9px] text-emerald-700 font-semibold">1 ta</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-
-                    {/* Flight cards */}
-                    <div className="bg-slate-50 px-3 py-3 space-y-2 min-h-[360px]">
-                      {[
-                        { from: 'TOSHKENT', to: 'SAMARQAND', status: 'Yuklashga tayyor', type: 'Quruq yuk', price: "1,200,000", currency: 'UZS', time: 'bugun' },
-                        { from: 'BUXORO', to: 'TOSHKENT', status: 'Yuklashga tayyor', type: 'Meva', price: "4,500,000", currency: 'UZS', time: 'bugun' },
-                        { from: 'NAMANGAN', to: 'TOSHKENT', status: 'Yuklashga tayyor', type: 'Elektronika', price: "800,000", currency: 'UZS', time: '1s' },
-                        { from: 'ANDIJON', to: 'QARSHI', status: 'Yuklashga tayyor', type: 'Tekstil', price: "2,100,000", currency: 'UZS', time: '2s' },
-                      ].map((f, i) => (
-                        <div key={i} className="bg-white rounded-xl p-3 shadow-sm border border-slate-100">
-                          <div className="flex items-start justify-between mb-1.5">
-                            <div className="flex items-center gap-1">
-                              <span className="text-[10px] font-bold text-primary-600">{f.from}</span>
-                              <ArrowRight size={9} className="text-slate-400" />
-                              <span className="text-[10px] font-bold text-primary-600">{f.to}</span>
-                            </div>
-                            <span className="text-[9px] text-slate-400">{f.time}</span>
-                          </div>
-                          <p className="text-[9px] text-slate-400 mb-1.5">{f.status} · {f.type}</p>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-black text-slate-900">{f.currency} {f.price}</span>
-                            <div className="flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full">
-                              <Truck size={9} className="text-emerald-600" />
-                              <span className="text-[9px] text-emerald-700 font-semibold">1 ta</span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Bottom nav */}
-                    <div className="bg-white border-t border-slate-100 px-2 py-2 flex items-center justify-around">
-                      {[
-                        { icon: '🏠', label: 'Asosiy', active: true },
-                        { icon: '🔍', label: 'Qidirish', active: false },
-                        { icon: '➕', label: 'Reys', active: false, fab: true },
-                        { icon: '📋', label: 'Reyslar', active: false },
-                        { icon: '👤', label: 'Profil', active: false },
-                      ].map((item) => (
-                        <div key={item.label} className={`flex flex-col items-center gap-0.5 ${item.fab ? 'relative -mt-5' : ''}`}>
-                          {item.fab ? (
-                            <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center shadow-lg shadow-primary-500/40">
-                              <span className="text-white text-lg">+</span>
-                            </div>
-                          ) : (
-                            <span className="text-base">{item.icon}</span>
-                          )}
-                          <span className={`text-[8px] ${item.active ? 'text-primary-600 font-semibold' : 'text-slate-400'}`}>{item.label}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Home indicator */}
-                    <div className="bg-white pb-2 flex justify-center">
-                      <div className="w-24 h-1 bg-slate-900 rounded-full" />
-                    </div>
+                    ))}
                   </div>
-                </div>
 
-                {/* Floating badge */}
-                <div className="absolute -left-8 top-16 bg-white dark:bg-slate-800 shadow-xl rounded-xl px-3 py-2 border border-slate-100 dark:border-slate-700 flex items-center gap-2">
-                  <div className="w-7 h-7 bg-emerald-100 dark:bg-emerald-900/40 rounded-lg flex items-center justify-center">
-                    <TrendingUp size={14} className="text-emerald-600" />
+                  {/* Bottom nav */}
+                  <div className="bg-white border-t border-slate-100 px-3 py-2 flex items-center justify-around">
+                    {[
+                      { label:'Asosiy', active:true },
+                      { label:'Qidirish', active:false },
+                      { label:'Reys', fab:true },
+                      { label:'Reyslar', active:false },
+                      { label:'Profil', active:false },
+                    ].map(item => (
+                      <div key={item.label} className={`flex flex-col items-center gap-0.5 ${item.fab ? '-mt-4' : ''}`}>
+                        {item.fab
+                          ? <div className="w-9 h-9 bg-primary-600 rounded-full flex items-center justify-center shadow-lg shadow-primary-500/40"><span className="text-white font-bold text-lg leading-none">+</span></div>
+                          : <div className={`w-4 h-4 rounded ${item.active ? 'bg-primary-100' : 'bg-slate-100'}`} />
+                        }
+                        <span className={`text-[8px] ${item.active ? 'text-primary-600 font-semibold' : 'text-slate-400'}`}>{item.label}</span>
+                      </div>
+                    ))}
                   </div>
-                  <div>
-                    <p className="text-[9px] text-slate-400 leading-none">Bu oy</p>
-                    <p className="text-xs font-black text-slate-900 dark:text-white">+18.6M</p>
-                  </div>
-                </div>
-
-                <div className="absolute -right-6 bottom-24 bg-white dark:bg-slate-800 shadow-xl rounded-xl px-3 py-2 border border-slate-100 dark:border-slate-700 flex items-center gap-2">
-                  <div className="w-7 h-7 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex items-center justify-center">
-                    <Users size={14} className="text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-[9px] text-slate-400 leading-none">Haydovchilar</p>
-                    <p className="text-xs font-black text-slate-900 dark:text-white">12 ta aktiv</p>
+                  {/* Home indicator */}
+                  <div className="bg-white pb-2 pt-1 flex justify-center">
+                    <div className="w-20 h-[4px] bg-slate-900 rounded-full" />
                   </div>
                 </div>
               </div>
