@@ -292,12 +292,12 @@ const Landing = () => {
 
       {/* ── Hero ────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-white dark:bg-slate-950">
-        {/* Soft background blobs */}
-        <div aria-hidden className="absolute top-0 right-0 w-[55%] h-full bg-gradient-to-bl from-blue-50 via-sky-50/60 to-transparent dark:from-blue-950/30 dark:via-transparent pointer-events-none" />
-        <div aria-hidden className="absolute bottom-0 left-0 w-72 h-72 bg-primary-100/50 dark:bg-primary-900/10 rounded-full blur-3xl pointer-events-none" />
+        {/* Subtle radial glow — no hard split */}
+        <div aria-hidden className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[500px] h-[500px] bg-primary-100/40 dark:bg-primary-900/15 rounded-full blur-3xl pointer-events-none" />
+        <div aria-hidden className="absolute bottom-0 left-0 w-64 h-64 bg-sky-100/30 dark:bg-sky-900/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-11 py-14 sm:py-20 lg:py-24">
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 py-14 sm:py-20 lg:py-20">
 
             {/* ── Left: Text ── */}
             <div className="flex-1 text-center lg:text-left">
@@ -366,7 +366,7 @@ const Landing = () => {
             </div>
 
             {/* ── Right: Phone mockup ── */}
-            <div className="flex-1 flex justify-center lg:justify-end relative">
+            <div className="flex-shrink-0 flex justify-center lg:justify-end relative">
               {/* Glow behind phone */}
               <div aria-hidden className="absolute inset-0 m-auto w-72 h-72 bg-primary-400/20 dark:bg-primary-500/15 rounded-full blur-3xl pointer-events-none" />
 
