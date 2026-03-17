@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Truck, Users, BarChart3, MapPin, Shield, Zap, ArrowRight,
@@ -213,6 +213,22 @@ const FaqItem = ({ q, a }) => {
 const Landing = () => {
   const navigate = useNavigate();
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [activeSection, setActiveSection] = useState('');
+
+  useEffect(() => {
+    const sections = ['features', 'how', 'faq'];
+    const observers = sections.map(id => {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      const obs = new IntersectionObserver(
+        ([entry]) => { if (entry.isIntersecting) setActiveSection(id); },
+        { rootMargin: '-40% 0px -55% 0px' }
+      );
+      obs.observe(el);
+      return obs;
+    });
+    return () => observers.forEach(o => o?.disconnect());
+  }, []);
 
   const PHONE = '+998 88-863-36-63';
   const TELEGRAM = 'https://t.me/avtojon_support'; // TODO: replace
@@ -222,69 +238,100 @@ const Landing = () => {
 
       {/* ── Sticky Nav ──────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
+
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <img src="/icon.png" alt="Avtojon" className="w-9 h-9 object-contain" />
-            <span className="text-xl font-black tracking-tight">Avtojon</span>
+            <img src="/icon.png" alt="Avtojon" className="w-8 h-8 object-contain" />
+            <span className="text-[17px] font-black tracking-tight text-slate-900 dark:text-white">Avtojon</span>
           </div>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-slate-600 dark:text-slate-300">
-            <a href="#features" className="hover:text-primary-600 dark:hover:text-white transition-colors">Imkoniyatlar</a>
-            <a href="#how" className="hover:text-primary-600 dark:hover:text-white transition-colors">Qanday ishlaydi</a>
-            <a href="#faq" className="hover:text-primary-600 dark:hover:text-white transition-colors">Savol-javob</a>
+          <nav className="hidden md:flex items-center gap-1 text-sm font-medium">
+            {[
+              { href: '#features', label: 'Imkoniyatlar', id: 'features' },
+              { href: '#how',      label: 'Qanday ishlaydi', id: 'how' },
+              { href: '#faq',      label: 'Savol-javob', id: 'faq' },
+            ].map(({ href, label, id }) => (
+              <a
+                key={id}
+                href={href}
+                className={[
+                  'px-3 py-1.5 rounded-md transition-colors',
+                  activeSection === id
+                    ? 'text-primary-600 bg-primary-50 dark:bg-primary-900/30 dark:text-primary-400'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800',
+                ].join(' ')}
+              >
+                {label}
+              </a>
+            ))}
           </nav>
 
           {/* CTA */}
           <div className="hidden md:flex items-center gap-2">
             <Link
               to="/login"
-              className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-white transition-colors"
+              className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors rounded-md hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               Kirish
             </Link>
             <Link
               to="/register"
-              className="flex items-center gap-1.5 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-md shadow-primary-500/30"
+              className="flex items-center gap-1.5 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-md transition-colors shadow-sm"
             >
               Bepul boshlash
-              <ArrowRight size={15} />
+              <ArrowRight size={14} />
             </Link>
           </div>
 
-          {/* Mobile menu toggle */}
+          {/* Mobile toggle */}
           <button
-            className="md:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300"
+            className="md:hidden p-2 rounded-md text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             onClick={() => setMobileMenu(!mobileMenu)}
           >
-            {mobileMenu ? <X size={22} /> : <Menu size={22} />}
+            {mobileMenu ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
 
-        {/* Mobile menu */}
-        {mobileMenu && (
-          <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-4 flex flex-col gap-3">
-            {['#features', '#how', '#faq'].map((href, i) => (
+        {/* Mobile menu — animated */}
+        <div className={[
+          'md:hidden overflow-hidden transition-all duration-200 ease-in-out',
+          mobileMenu ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0',
+        ].join(' ')}>
+          <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-3 flex flex-col gap-1">
+            {[
+              { href: '#features', label: 'Imkoniyatlar' },
+              { href: '#how',      label: 'Qanday ishlaydi' },
+              { href: '#faq',      label: 'Savol-javob' },
+            ].map(({ href, label }) => (
               <a
                 key={href}
                 href={href}
                 onClick={() => setMobileMenu(false)}
-                className="text-sm font-medium text-slate-600 dark:text-slate-300 py-1"
+                className="text-sm font-medium text-slate-600 dark:text-slate-300 py-2 px-3 rounded-md hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
               >
-                {['Imkoniyatlar', 'Qanday ishlaydi', 'Savol-javob'][i]}
+                {label}
               </a>
             ))}
-            <div className="flex gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-              <Link to="/login" className="flex-1 text-center py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium">
+            <div className="flex gap-2 pt-2 mt-1 border-t border-slate-100 dark:border-slate-800">
+              <Link
+                to="/login"
+                onClick={() => setMobileMenu(false)}
+                className="flex-1 text-center py-2.5 border border-slate-200 dark:border-slate-700 rounded-md text-sm font-medium text-slate-700 dark:text-slate-300"
+              >
                 Kirish
               </Link>
-              <Link to="/register" className="flex-1 text-center py-2 bg-primary-600 text-white rounded-xl text-sm font-semibold">
+              <Link
+                to="/register"
+                onClick={() => setMobileMenu(false)}
+                className="flex-1 text-center py-2.5 bg-primary-600 text-white rounded-md text-sm font-semibold"
+              >
                 Bepul boshlash
               </Link>
             </div>
           </div>
-        )}
+        </div>
       </header>
 
       {/* ── Hero ────────────────────────────────────────────────── */}
