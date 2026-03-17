@@ -291,112 +291,204 @@ const Landing = () => {
       </header>
 
       {/* ── Hero ────────────────────────────────────────────────── */}
-      <section
-        className="relative overflow-hidden text-white"
-        style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #0c1a3a 100%)' }}
-      >
-        <div aria-hidden className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500/25 rounded-full blur-3xl" />
-        <div aria-hidden className="absolute -bottom-32 -left-32 w-80 h-80 bg-cyan-500/20 rounded-full blur-3xl" />
-        <div aria-hidden className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-600/10 rounded-full blur-3xl pointer-events-none" />
+      <section className="relative overflow-hidden bg-white dark:bg-slate-950">
+        {/* Soft background blobs */}
+        <div aria-hidden className="absolute top-0 right-0 w-[55%] h-full bg-gradient-to-bl from-blue-50 via-sky-50/60 to-transparent dark:from-blue-950/30 dark:via-transparent pointer-events-none" />
+        <div aria-hidden className="absolute bottom-0 left-0 w-72 h-72 bg-primary-100/50 dark:bg-primary-900/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 md:pt-24 pb-10 sm:pb-16 text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-blue-200 px-3 sm:px-4 py-1.5 rounded-full text-xs font-semibold mb-4 sm:mb-6 backdrop-blur-sm uppercase tracking-wide">
-            <Zap size={12} className="fill-blue-300 text-blue-300" />
-            Transport logistika platformasi · O'zbekiston
-          </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16 py-14 sm:py-20 lg:py-24">
 
-          {/* Headline */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight mb-4 sm:mb-5">
-            Transport biznesingizni{' '}
-            <span className="bg-gradient-to-r from-sky-300 via-blue-300 to-cyan-300 bg-clip-text text-transparent">
-              aqlli boshqaring
-            </span>
-          </h1>
-
-          <p className="text-sm sm:text-base md:text-lg text-slate-300 mb-3 max-w-2xl mx-auto leading-relaxed">
-            Haydovchilar, mashinalar va reyslarni bir platformada boshqaring.
-            Moliyaviy hisob avtomatik. Real vaqt GPS kuzatuv.
-          </p>
-          <p className="text-xs sm:text-sm text-emerald-400 font-semibold mb-6 sm:mb-10">
-            ✓ 2 ta mashinaga umrbot bepul · ✓ Kredit karta kerak emas · ✓ Hoziroq boshlang
-          </p>
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              to="/register"
-              className="inline-flex items-center justify-center gap-2 px-5 sm:px-7 py-2.5 sm:py-3.5 bg-primary-500 hover:bg-primary-400 text-white font-bold text-sm sm:text-base rounded-xl shadow-2xl shadow-primary-500/40 transition-all duration-150 hover:scale-105"
-            >
-              Bepul boshlash
-              <ArrowRight size={17} />
-            </Link>
-            <a
-              href="#how"
-              className="inline-flex items-center justify-center gap-2 px-5 sm:px-7 py-2.5 sm:py-3.5 bg-white/10 border border-white/25 text-white font-semibold text-sm sm:text-base rounded-xl hover:bg-white/20 transition-all duration-150 backdrop-blur-sm"
-            >
-              Qanday ishlashini ko'ring
-            </a>
-          </div>
-
-          {/* Social proof stars */}
-          <div className="mt-6 sm:mt-10 flex items-center justify-center gap-1 text-slate-300 text-xs sm:text-sm">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} size={14} className="fill-amber-400 text-amber-400" />
-            ))}
-            <span className="ml-2">
-              <strong className="text-white">50+</strong> transport kompaniyasi ishlatmoqda
-            </span>
-          </div>
-        </div>
-
-        {/* Dashboard mockup */}
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 pb-0 -mb-1">
-          <div className="bg-slate-800/70 backdrop-blur rounded-t-2xl border border-white/10 border-b-0 p-4 shadow-2xl">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-3 h-3 rounded-full bg-red-400/80" />
-              <div className="w-3 h-3 rounded-full bg-amber-400/80" />
-              <div className="w-3 h-3 rounded-full bg-green-400/80" />
-              <div className="ml-3 flex-1 bg-slate-700/60 rounded-md h-5 flex items-center px-3">
-                <span className="text-[10px] text-slate-400">avtojon.uz/dashboard</span>
+            {/* ── Left: Text ── */}
+            <div className="flex-1 text-center lg:text-left">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 border border-primary-200 dark:border-primary-800 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-4 py-1.5 rounded-full text-xs font-semibold mb-5 sm:mb-7">
+                <Zap size={11} className="fill-primary-500 text-primary-500" />
+                O'zbekistonda №1 transport boshqaruv platformasi
               </div>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-              {[
-                { c: 'from-blue-500/20 to-blue-700/20', label: 'Jami daromad', val: '18.6M' },
-                { c: 'from-green-500/20 to-green-700/20', label: 'Xarajatlar', val: '4.2M' },
-                { c: 'from-purple-500/20 to-purple-700/20', label: 'Foyda', val: '14.4M' },
-                { c: 'from-amber-500/20 to-orange-700/20', label: 'Haydovchi', val: '33K' },
-              ].map(({ c, label, val }) => (
-                <div
-                  key={label}
-                  className="h-16 rounded-xl flex flex-col justify-center px-3"
-                  style={{ background: `linear-gradient(135deg,${c.split(' ').join(',')})`, border: '1px solid rgba(255,255,255,0.07)' }}
+
+              {/* Headline */}
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.08] tracking-tight mb-5 text-slate-900 dark:text-white">
+                Transport biznesingizni{' '}
+                <span className="text-primary-600 dark:text-primary-400">
+                  aqlli boshqaring
+                </span>
+              </h1>
+
+              <p className="text-base sm:text-lg text-slate-500 dark:text-slate-400 mb-3 max-w-lg mx-auto lg:mx-0 leading-relaxed">
+                <strong className="text-slate-700 dark:text-slate-200">Web platforma orqali</strong> haydovchilar, mashinalar va reyslarni boshqaring. Moliyaviy hisob avtomatik.
+              </p>
+
+              <div className="flex flex-wrap justify-center lg:justify-start gap-x-4 gap-y-1 text-sm text-emerald-600 dark:text-emerald-400 font-medium mb-8 sm:mb-10">
+                <span>✓ 2 ta mashina bepul</span>
+                <span>✓ Kredit karta kerak emas</span>
+                <span>✓ Hoziroq boshlang</span>
+              </div>
+
+              {/* CTAs */}
+              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                <Link
+                  to="/register"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-900 dark:bg-white hover:bg-slate-700 dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold text-sm rounded-xl shadow-lg transition-all duration-150 hover:scale-[1.02]"
                 >
-                  <p className="text-[9px] text-slate-400 leading-none mb-1">{label}</p>
-                  <p className="text-sm font-bold text-white">{val}</p>
+                  <Zap size={15} className="fill-white dark:fill-slate-900" />
+                  Bepul boshlash
+                </Link>
+                <a
+                  href="#how"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-sm rounded-xl hover:border-primary-500 hover:text-primary-600 dark:hover:border-primary-500 dark:hover:text-primary-400 transition-all duration-150"
+                >
+                  <ArrowRight size={15} />
+                  Qanday ishlashini ko'ring
+                </a>
+              </div>
+
+              {/* Social proof */}
+              <div className="mt-8 flex items-center justify-center lg:justify-start gap-2">
+                <div className="flex -space-x-2">
+                  {['bg-blue-400', 'bg-emerald-400', 'bg-amber-400', 'bg-rose-400'].map((c, i) => (
+                    <div key={i} className={`w-7 h-7 rounded-full ${c} border-2 border-white dark:border-slate-950 flex items-center justify-center`}>
+                      <span className="text-white text-[9px] font-bold">{String.fromCharCode(65 + i)}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <div className="h-24 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center">
-              <div className="flex gap-2 items-end h-14 px-4">
-                {[40, 65, 45, 80, 55, 90, 70, 85, 60, 95, 75, 88].map((h, i) => (
-                  <div
-                    key={i}
-                    className="w-4 rounded-sm opacity-70"
-                    style={{ height: `${h}%`, background: i % 3 === 0 ? '#3b82f6' : i % 3 === 1 ? '#22c55e' : '#8b5cf6' }}
-                  />
-                ))}
+                <div className="flex items-center gap-1.5">
+                  <div className="flex gap-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} size={12} className="fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    <strong className="text-slate-700 dark:text-slate-200">50+</strong> kompaniya ishlatmoqda
+                  </span>
+                </div>
               </div>
             </div>
+
+            {/* ── Right: Phone mockup ── */}
+            <div className="flex-1 flex justify-center lg:justify-end relative">
+              {/* Glow behind phone */}
+              <div aria-hidden className="absolute inset-0 m-auto w-72 h-72 bg-primary-400/20 dark:bg-primary-500/15 rounded-full blur-3xl pointer-events-none" />
+
+              {/* Phone frame */}
+              <div className="relative w-[260px] sm:w-[290px]">
+                {/* Outer phone shell */}
+                <div className="relative bg-slate-900 rounded-[3rem] p-2.5 shadow-2xl shadow-slate-900/40 ring-1 ring-slate-800">
+                  {/* Screen */}
+                  <div className="bg-white dark:bg-slate-100 rounded-[2.4rem] overflow-hidden">
+                    {/* Status bar */}
+                    <div className="bg-white px-5 pt-3 pb-1 flex items-center justify-between">
+                      <span className="text-[10px] font-semibold text-slate-900">9:41</span>
+                      <div className="w-20 h-4 bg-slate-900 rounded-full mx-auto" />
+                      <div className="flex items-center gap-1">
+                        <div className="flex gap-0.5 items-end">
+                          {[3,4,5].map(h => <div key={h} className="w-1 bg-slate-900 rounded-sm" style={{height: h+'px'}} />)}
+                        </div>
+                        <div className="w-3.5 h-2 border border-slate-900 rounded-sm relative"><div className="absolute right-0 top-0 bottom-0 w-2.5 bg-emerald-500 rounded-sm" /></div>
+                      </div>
+                    </div>
+
+                    {/* App header */}
+                    <div className="bg-white px-4 pt-1 pb-3 border-b border-slate-100">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 bg-primary-600 rounded-lg flex items-center justify-center">
+                          <Truck size={13} className="text-white" />
+                        </div>
+                        <span className="text-sm font-black text-slate-900">Avtojon</span>
+                        <div className="ml-auto flex items-center gap-1">
+                          <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                          <span className="text-[10px] text-slate-400">jonli</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Flight cards */}
+                    <div className="bg-slate-50 px-3 py-3 space-y-2 min-h-[360px]">
+                      {[
+                        { from: 'TOSHKENT', to: 'SAMARQAND', status: 'Yuklashga tayyor', type: 'Quruq yuk', price: "1,200,000", currency: 'UZS', time: 'bugun' },
+                        { from: 'BUXORO', to: 'TOSHKENT', status: 'Yuklashga tayyor', type: 'Meva', price: "4,500,000", currency: 'UZS', time: 'bugun' },
+                        { from: 'NAMANGAN', to: 'TOSHKENT', status: 'Yuklashga tayyor', type: 'Elektronika', price: "800,000", currency: 'UZS', time: '1s' },
+                        { from: 'ANDIJON', to: 'QARSHI', status: 'Yuklashga tayyor', type: 'Tekstil', price: "2,100,000", currency: 'UZS', time: '2s' },
+                      ].map((f, i) => (
+                        <div key={i} className="bg-white rounded-xl p-3 shadow-sm border border-slate-100">
+                          <div className="flex items-start justify-between mb-1.5">
+                            <div className="flex items-center gap-1">
+                              <span className="text-[10px] font-bold text-primary-600">{f.from}</span>
+                              <ArrowRight size={9} className="text-slate-400" />
+                              <span className="text-[10px] font-bold text-primary-600">{f.to}</span>
+                            </div>
+                            <span className="text-[9px] text-slate-400">{f.time}</span>
+                          </div>
+                          <p className="text-[9px] text-slate-400 mb-1.5">{f.status} · {f.type}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-black text-slate-900">{f.currency} {f.price}</span>
+                            <div className="flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full">
+                              <Truck size={9} className="text-emerald-600" />
+                              <span className="text-[9px] text-emerald-700 font-semibold">1 ta</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Bottom nav */}
+                    <div className="bg-white border-t border-slate-100 px-2 py-2 flex items-center justify-around">
+                      {[
+                        { icon: '🏠', label: 'Asosiy', active: true },
+                        { icon: '🔍', label: 'Qidirish', active: false },
+                        { icon: '➕', label: 'Reys', active: false, fab: true },
+                        { icon: '📋', label: 'Reyslar', active: false },
+                        { icon: '👤', label: 'Profil', active: false },
+                      ].map((item) => (
+                        <div key={item.label} className={`flex flex-col items-center gap-0.5 ${item.fab ? 'relative -mt-5' : ''}`}>
+                          {item.fab ? (
+                            <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center shadow-lg shadow-primary-500/40">
+                              <span className="text-white text-lg">+</span>
+                            </div>
+                          ) : (
+                            <span className="text-base">{item.icon}</span>
+                          )}
+                          <span className={`text-[8px] ${item.active ? 'text-primary-600 font-semibold' : 'text-slate-400'}`}>{item.label}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Home indicator */}
+                    <div className="bg-white pb-2 flex justify-center">
+                      <div className="w-24 h-1 bg-slate-900 rounded-full" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating badge */}
+                <div className="absolute -left-8 top-16 bg-white dark:bg-slate-800 shadow-xl rounded-xl px-3 py-2 border border-slate-100 dark:border-slate-700 flex items-center gap-2">
+                  <div className="w-7 h-7 bg-emerald-100 dark:bg-emerald-900/40 rounded-lg flex items-center justify-center">
+                    <TrendingUp size={14} className="text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-slate-400 leading-none">Bu oy</p>
+                    <p className="text-xs font-black text-slate-900 dark:text-white">+18.6M</p>
+                  </div>
+                </div>
+
+                <div className="absolute -right-6 bottom-24 bg-white dark:bg-slate-800 shadow-xl rounded-xl px-3 py-2 border border-slate-100 dark:border-slate-700 flex items-center gap-2">
+                  <div className="w-7 h-7 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex items-center justify-center">
+                    <Users size={14} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-slate-400 leading-none">Haydovchilar</p>
+                    <p className="text-xs font-black text-slate-900 dark:text-white">12 ta aktiv</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
 
-      <div className="h-8 bg-slate-100 dark:bg-slate-900" />
-
       {/* ── Stats ───────────────────────────────────────────────── */}
-      <section className="py-8 sm:py-14 bg-slate-100 dark:bg-slate-900">
+      <section className="py-8 sm:py-14 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
             {stats.map(({ value, label }) => (
@@ -503,7 +595,7 @@ const Landing = () => {
                 className={[
                   'relative rounded-2xl border p-7 transition-all duration-200',
                   plan.highlight
-                    ? 'border-primary-500 shadow-2xl shadow-primary-500/15 scale-[1.03] bg-white dark:bg-slate-800'
+                    ? 'border-primary-500 shadow-2xl shadow-primary-500/15 bg-white dark:bg-slate-800 md:scale-[1.03]'
                     : 'border-slate-200 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-800',
                 ].join(' ')}
               >
@@ -733,7 +825,7 @@ const Landing = () => {
         href={TELEGRAM}
         target="_blank"
         rel="noreferrer"
-        className="fixed bottom-6 right-6 z-50 w-13 h-13 bg-sky-500 hover:bg-sky-400 text-white rounded-full shadow-2xl shadow-sky-500/40 flex items-center justify-center transition-all duration-200 hover:scale-110"
+        className="fixed bottom-6 right-6 z-50 w-12 h-12 bg-sky-500 hover:bg-sky-400 text-white rounded-full shadow-2xl shadow-sky-500/40 flex items-center justify-center transition-all duration-200 hover:scale-110"
         title="Telegram orqali bog'laning"
       >
         <MessageCircle size={24} />
