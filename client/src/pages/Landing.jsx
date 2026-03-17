@@ -421,21 +421,28 @@ const Landing = () => {
 
                   {/* Bottom nav */}
                   <div className="bg-white border-t border-slate-100 px-3 py-2 flex items-center justify-around">
-                    {[
-                      { label:'Asosiy', active:true },
-                      { label:'Qidirish', active:false },
-                      { label:'Reys', fab:true },
-                      { label:'Reyslar', active:false },
-                      { label:'Profil', active:false },
-                    ].map(item => (
-                      <div key={item.label} className={`flex flex-col items-center gap-0.5 ${item.fab ? '-mt-4' : ''}`}>
-                        {item.fab
-                          ? <div className="w-9 h-9 bg-primary-600 rounded-full flex items-center justify-center shadow-lg shadow-primary-500/40"><span className="text-white font-bold text-lg leading-none">+</span></div>
-                          : <div className={`w-4 h-4 rounded ${item.active ? 'bg-primary-100' : 'bg-slate-100'}`} />
-                        }
-                        <span className={`text-[8px] ${item.active ? 'text-primary-600 font-semibold' : 'text-slate-400'}`}>{item.label}</span>
+                    <div className="flex flex-col items-center gap-0.5">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="#2563eb" stroke="none"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                      <span className="text-[8px] text-primary-600 font-semibold">Asosiy</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-0.5">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                      <span className="text-[8px] text-slate-400">Qidirish</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-0.5 -mt-4">
+                      <div className="w-9 h-9 bg-primary-600 rounded-full flex items-center justify-center shadow-lg shadow-primary-500/40">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                       </div>
-                    ))}
+                      <span className="text-[8px] text-slate-400">Reys</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-0.5">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                      <span className="text-[8px] text-slate-400">Reyslar</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-0.5">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      <span className="text-[8px] text-slate-400">Profil</span>
+                    </div>
                   </div>
                   {/* Home indicator */}
                   <div className="bg-white pb-2 pt-1 flex justify-center">
@@ -673,41 +680,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ── CTA Banner ──────────────────────────────────────────── */}
-      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6" style={{ background: 'linear-gradient(135deg, #1e40af 0%, #1d4ed8 50%, #1e3a8a 100%)' }}>
-        <div className="max-w-3xl mx-auto text-center text-white">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/15 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-5">
-            <Truck size={24} className="text-white" />
-          </div>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black mb-3">
-            Bugundan boshlang — bepul
-          </h2>
-          <p className="text-blue-200 mb-2 max-w-xl mx-auto text-sm">
-            2 ta mashinagacha hech qanday to'lov talab qilinmaydi. Kredit karta shart emas.
-          </p>
-          <p className="text-blue-300 font-semibold mb-6 sm:mb-8 text-sm">
-            Tanishingizdan eshitdingizmi? Hoziroq ro'yxatdan o'ting!
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              to="/register"
-              className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-white text-primary-700 hover:bg-blue-50 font-bold text-sm sm:text-base rounded-xl transition-all duration-150 shadow-xl hover:scale-105"
-            >
-              Bepul ro'yxatdan o'tish
-              <ArrowRight size={17} />
-            </Link>
-            <a
-              href={TELEGRAM}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-white/10 border border-white/30 text-white font-semibold text-sm sm:text-base rounded-xl hover:bg-white/20 transition-all duration-150"
-            >
-              <MessageCircle size={18} />
-              Telegram orqali bog'lanish
-            </a>
-          </div>
-        </div>
-      </section>
 
       {/* ── Footer ──────────────────────────────────────────────── */}
       <footer className="bg-slate-900 text-slate-400 py-8 sm:py-12 px-4 sm:px-6">
