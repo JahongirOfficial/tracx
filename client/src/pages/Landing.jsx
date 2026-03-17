@@ -359,7 +359,7 @@ const Landing = () => {
             </div>
 
             {/* ── Right: Phone — right-edge anchored, overflows bottom ── */}
-            <div className="hidden lg:flex flex-shrink-0 items-start justify-end pt-10 pl-4">
+            <div className="flex flex-shrink-0 items-start justify-center lg:justify-end pt-4 pb-10 lg:pt-10 lg:pb-0 pl-0 lg:pl-4">
               {/* Phone shell */}
               <div className="relative w-[300px] bg-slate-900 rounded-[3.2rem] p-[10px] shadow-2xl shadow-slate-900/30 ring-1 ring-slate-800/80">
                 <div className="bg-white rounded-[2.6rem] overflow-hidden">
