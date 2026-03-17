@@ -297,7 +297,7 @@ const Landing = () => {
         <div aria-hidden className="absolute bottom-0 left-0 w-72 h-72 bg-primary-100/50 dark:bg-primary-900/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16 py-14 sm:py-20 lg:py-24">
+          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-11 py-14 sm:py-20 lg:py-24">
 
             {/* ── Left: Text ── */}
             <div className="flex-1 text-center lg:text-left">
