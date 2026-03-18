@@ -4,7 +4,7 @@ const createDriverSchema = z.object({
   username: z.string().min(3).max(50),
   password: z.string().min(8),
   fullName: z.string().min(2).max(100),
-  phone: z.string().optional(),
+  phone: z.string().max(20).optional().or(z.literal('')),
   paymentType: z.enum(['monthly', 'per_trip']).default('per_trip'),
   baseSalary: z.coerce.number().min(0).default(0),
   perTripRate: z.coerce.number().min(0).max(100).default(0),
@@ -12,7 +12,7 @@ const createDriverSchema = z.object({
 
 const updateDriverSchema = z.object({
   fullName: z.string().min(2).max(100).optional(),
-  phone: z.string().optional(),
+  phone: z.string().max(20).optional().or(z.literal('')),
   paymentType: z.enum(['monthly', 'per_trip']).optional(),
   baseSalary: z.coerce.number().min(0).optional(),
   perTripRate: z.coerce.number().min(0).max(100).optional(),

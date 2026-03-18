@@ -31,17 +31,35 @@ const DriverForm = ({ isOpen, onClose, driver = null }) => {
     perTripRate: driver?.perTripRate || '',
   });
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const { createDriver, updateDriver } = useDriverStore();
   const { addToast } = useUiStore();
 
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  const set = (k, v) => {
+    setForm((f) => ({ ...f, [k]: v }));
+    setErrors((e) => ({ ...e, [k]: undefined }));
+  };
 
-  const handleClose = () => { setStep(0); onClose(); };
+  const handleClose = () => { setStep(0); setErrors({}); onClose(); };
+
+  const validateStep0 = () => {
+    const errs = {};
+    if (!form.fullName.trim()) errs.fullName = "To'liq ism kiritilishi shart";
+    if (!isEdit) {
+      if (!form.username.trim()) errs.username = 'Username kiritilishi shart';
+      else if (form.username.trim().length < 3) errs.username = 'Username kamida 3 ta belgi';
+      if (!form.password) errs.password = 'Parol kiritilishi shart';
+      else if (form.password.length < 8) errs.password = 'Parol kamida 8 ta belgi';
+    }
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
 
   const canAdvance = () => {
     if (!form.fullName.trim()) return false;
-    if (!isEdit && (!form.username.trim() || !form.password.trim())) return false;
+    if (!isEdit && (!form.username.trim() || form.username.trim().length < 3)) return false;
+    if (!isEdit && (!form.password || form.password.length < 8)) return false;
     return true;
   };
 
@@ -50,6 +68,8 @@ const DriverForm = ({ isOpen, onClose, driver = null }) => {
     setLoading(true);
     try {
       const data = { ...form };
+      data.username = form.username.trim();
+      data.fullName = form.fullName.trim();
       data.baseSalary = form.baseSalary !== '' ? parseFloat(form.baseSalary) || 0 : 0;
       data.perTripRate = form.perTripRate !== '' ? parseFloat(form.perTripRate) || 0 : 0;
       if (!form.password) delete data.password;
@@ -63,7 +83,18 @@ const DriverForm = ({ isOpen, onClose, driver = null }) => {
       }
       handleClose();
     } catch (err) {
-      addToast(err.message || 'Xato', 'error');
+      // Server validatsiya xatolari (field-level)
+      if (err?.errors?.length) {
+        const serverErrs = {};
+        err.errors.forEach(({ field, message }) => { serverErrs[field] = message; });
+        setErrors(serverErrs);
+        // Agar 1-stepda xato bo'lsa, orqaga qaytish
+        const step0Fields = ['username', 'password', 'fullName', 'phone'];
+        if (err.errors.some((e) => step0Fields.includes(e.field))) setStep(0);
+        addToast('Maydonlarni tekshiring', 'error');
+      } else {
+        addToast(err?.message || 'Xato yuz berdi', 'error');
+      }
     } finally {
       setLoading(false);
     }
@@ -92,6 +123,7 @@ const DriverForm = ({ isOpen, onClose, driver = null }) => {
                     value={form.username}
                     onChange={(e) => set('username', e.target.value)}
                     placeholder="driver123"
+                    error={errors.username}
                   />
                   <Input
                     label="Parol"
@@ -101,6 +133,7 @@ const DriverForm = ({ isOpen, onClose, driver = null }) => {
                     value={form.password}
                     onChange={(e) => set('password', e.target.value)}
                     placeholder="Kamida 8 ta belgi"
+                    error={errors.password}
                   />
                 </div>
               </div>
@@ -119,18 +152,20 @@ const DriverForm = ({ isOpen, onClose, driver = null }) => {
                   value={form.fullName}
                   onChange={(e) => set('fullName', e.target.value)}
                   placeholder="Alisher Navoiy"
+                  error={errors.fullName}
                 />
                 <PhoneInput
                   label="Telefon"
                   value={form.phone}
                   onChange={(e) => set('phone', e.target.value)}
+                  error={errors.phone}
                 />
               </div>
             </div>
 
             <div className="flex gap-3">
               <Button type="button" variant="secondary" fullWidth onClick={handleClose}>Bekor qilish</Button>
-              <Button type="button" fullWidth disabled={!canAdvance()} onClick={() => setStep(1)}>
+              <Button type="button" fullWidth disabled={!canAdvance()} onClick={() => { if (validateStep0()) setStep(1); }}>
                 Keyingi <ChevronRight size={14} />
               </Button>
             </div>

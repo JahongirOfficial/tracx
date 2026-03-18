@@ -14,9 +14,11 @@ module.exports = {
       script: './server/src/server.js',
       cwd: '/var/www/tracx',
 
-      // Cluster mode for multi-core utilization
-      instances: 'max',
-      exec_mode: 'cluster',
+      // Socket.io xonalar sababli fork rejimda 1 ta instance
+      // Cluster rejimda socket xonalari boshqa workerlarga yetmaydi.
+      // Ko'p core kerak bo'lsa: @socket.io/redis-adapter qo'shing va instances: 'max' ga qaytaring.
+      instances: 1,
+      exec_mode: 'fork',
 
       // Restart policy
       watch: false,

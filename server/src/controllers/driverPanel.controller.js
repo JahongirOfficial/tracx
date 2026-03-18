@@ -2,6 +2,7 @@ const prisma = require('../config/database');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 const { convertToUZS } = require('../utils/currency');
+const { FUEL_TYPES, HEAVY_TYPES } = require('../validators/flight.validator');
 
 const getProfile = catchAsync(async (req, res, next) => {
   const driver = await prisma.driver.findUnique({
@@ -70,12 +71,8 @@ const addExpense = catchAsync(async (req, res, next) => {
     paidFromOwn = false,
   } = req.body;
 
-  // Determine expense class
-  const FUEL_TYPES = ['fuel', 'fuel_metan', 'fuel_propan', 'fuel_benzin', 'fuel_diesel'];
-  const HEAVY_TYPES = ['repair_major', 'tire', 'accident', 'insurance', 'oil', 'border_customs'];
-  const expenseClass = HEAVY_TYPES.includes(type) ? 'heavy'
-    : FUEL_TYPES.includes(type) ? 'light'
-    : 'light';
+  // Determine expense class (validatordan import qilingan FUEL_TYPES/HEAVY_TYPES)
+  const expenseClass = HEAVY_TYPES.includes(type) ? 'heavy' : 'light';
 
   const amountInUZS = convertToUZS(amount, currency, exchangeRate);
 

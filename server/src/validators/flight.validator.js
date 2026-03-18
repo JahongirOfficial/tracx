@@ -77,6 +77,8 @@ const updateExpenseSchema = z.object({
 const driverPaymentSchema = z.object({
   amount: z.number().positive(),
   paidAt: z.string().optional(),
+  note: z.string().max(500).optional(),
+  paymentType: z.enum(['cash', 'card', 'transfer']).optional(),
 });
 
 const flightFilterSchema = z.object({

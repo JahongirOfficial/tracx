@@ -15,35 +15,35 @@ import { Lock, Zap, Check, Star, Building2 } from 'lucide-react';
 import Button from '../ui/Button';
 import useUiStore from '../../stores/uiStore';
 
-/* Plan comparison data */
+/* Tarif ma'lumotlari — to'g'ri biznes model */
 const PLANS = [
   {
-    id: 'basic',
-    name: 'Basic',
+    id: 'free',
+    name: 'Bepul',
     icon: Building2,
-    price: "30 000 so'm",
-    period: 'mashina/oy',
+    price: "0 so'm",
+    period: 'umrbot',
     color: 'blue',
     features: [
+      "2 ta mashinagacha bepul",
       "Cheksiz reyslar",
-      "Haydovchi paneli",
+      "Cheksiz haydovchilar",
       "Moliyaviy hisobotlar",
-      "Moy kuzatuvi",
     ],
     highlight: false,
   },
   {
-    id: 'pro',
-    name: 'Pro',
+    id: 'paid',
+    name: "To'lovli",
     icon: Star,
     price: "50 000 so'm",
-    period: 'oy',
+    period: "qo'shimcha mashina/oy",
     color: 'purple',
     features: [
-      "Basic imkoniyatlari",
-      "Cheksiz mashina/haydovchi",
-      "Kengaytirilgan tahlillar",
-      "Ustuvor qo'llab-quvvatlash",
+      "Har qo'shimcha mashina uchun",
+      "3-mashina = 50 000 so'm/oy",
+      "5-mashina = 150 000 so'm/oy",
+      "10-mashina = 400 000 so'm/oy",
     ],
     highlight: true,
   },
@@ -183,9 +183,19 @@ const SubscriptionBlocker = () => {
         })}
       </div>
 
+      {/* Narx tushuntirish */}
+      <div className="w-full max-w-lg mb-6 rounded-xl bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-800/40 px-4 py-3 text-left">
+        <p className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-1">Qanday ishlaydi?</p>
+        <p className="text-xs text-amber-600 dark:text-amber-500 leading-relaxed">
+          Dastlabki 2 ta mashina <strong>umrbot bepul</strong>. 3-mashina va undan ortiq har bir
+          qo'shimcha mashina uchun <strong>50 000 so'm/oy</strong> hisoblanadi.
+          Balansni to'ldiring — tizim kunlik avtomatik yechib boradi.
+        </p>
+      </div>
+
       {/* ── CTA button ── */}
       <Button size="lg" pill className="px-8">
-        {t('subscription.upgrade')}
+        Balansni to'ldirish
       </Button>
 
       {/* Support note */}

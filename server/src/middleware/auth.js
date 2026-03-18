@@ -13,10 +13,14 @@ const protect = catchAsync(async (req, res, next) => {
 
   const token = authHeader.split(' ')[1];
 
-  // Check blacklist
-  const isBlacklisted = await redis.get(`blacklist:${token}`);
-  if (isBlacklisted) {
-    return next(new AppError('Token yaroqsiz. Iltimos, qayta kiring', 401));
+  // Check blacklist — Redis ishlamasa o'tkazib yubor (soft degradation)
+  try {
+    const isBlacklisted = await redis.get(`blacklist:${token}`);
+    if (isBlacklisted) {
+      return next(new AppError('Token yaroqsiz. Iltimos, qayta kiring', 401));
+    }
+  } catch {
+    // Redis mavjud emas yoki ulanmagan — blacklist tekshiruvisiz davom etamiz
   }
 
   let decoded;
