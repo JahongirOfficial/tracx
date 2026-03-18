@@ -17,6 +17,9 @@ const envSchema = z.object({
   PAYME_MERCHANT_ID: z.string().optional(),
   PAYME_KEY: z.string().optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),
+  ESKIZ_EMAIL: z.string().optional(),
+  ESKIZ_PASSWORD: z.string().optional(),
+  ESKIZ_FROM: z.string().default('4546'),
 });
 
 let env;

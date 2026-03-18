@@ -10,6 +10,7 @@ const logger = require('./utils/logger');
 
 // Routes
 const authRoutes = require('./routes/auth.routes');
+const otpRoutes  = require('./routes/otp.routes');
 const superAdminRoutes = require('./routes/superAdmin.routes');
 const driverRoutes = require('./routes/driver.routes');
 const driverPanelRoutes = require('./routes/driverPanel.routes');
@@ -46,6 +47,7 @@ app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/auth', otpRoutes);
 app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/driver', driverPanelRoutes);

@@ -320,3 +320,15 @@ model Employee {
 
   @@index([businessmanId])
 }
+
+model OtpCode {
+  id        String   @id @default(uuid())
+  phone     String
+  code      String
+  purpose   String   @default("register")
+  attempts  Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([phone])
+}
