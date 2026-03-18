@@ -151,11 +151,9 @@ const DashboardLayout = () => {
 
           {/* Mobile: Logo mark (desktop sidebar handles logo) */}
           <div className="lg:hidden flex items-center gap-2.5 mr-1">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center shadow-sm shadow-primary-500/30">
-              <Truck size={15} className="text-white" />
-            </div>
+            <img src="/icon.png" alt="Avtojon" className="w-8 h-8 object-contain shrink-0" />
             {!pageTitle && (
-              <span className="text-[15px] font-bold text-slate-900 dark:text-white">Tracx</span>
+              <span className="text-[15px] font-bold text-slate-900 dark:text-white">Avtojon</span>
             )}
           </div>
 
