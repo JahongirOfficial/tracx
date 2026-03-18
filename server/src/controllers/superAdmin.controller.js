@@ -279,10 +279,71 @@ const setBusinessmanBalance = catchAsync(async (req, res, next) => {
   res.json({ success: true, data: info });
 });
 
+/* ── PUT /super-admin/settings/password ── */
+const changePassword = catchAsync(async (req, res, next) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) throw new AppError('Joriy va yangi parol kerak', 400);
+  if (newPassword.length < 8) throw new AppError("Yangi parol kamida 8 ta belgi bo'lishi kerak", 400);
+
+  const admin = await prisma.superAdmin.findUnique({ where: { id: req.user.id } });
+  if (!admin) return next(new AppError('Admin topilmadi', 404));
+
+  const valid = await bcrypt.compare(currentPassword, admin.password);
+  if (!valid) return next(new AppError("Joriy parol noto'g'ri", 401));
+
+  const hashed = await bcrypt.hash(newPassword, 12);
+  await prisma.superAdmin.update({ where: { id: req.user.id }, data: { password: hashed } });
+
+  res.json({ success: true, message: 'Parol muvaffaqiyatli yangilandi' });
+});
+
+/* ── GET /super-admin/transactions ── */
+const getAllTransactions = catchAsync(async (req, res) => {
+  const { page = 1, limit = 20, type } = req.query;
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
+  const where = {};
+  if (type) where.type = type;
+
+  const [transactions, total] = await Promise.all([
+    prisma.balanceTransaction.findMany({
+      where,
+      skip,
+      take: parseInt(limit),
+      orderBy: { createdAt: 'desc' },
+      include: {
+        businessman: { select: { id: true, username: true, companyName: true } },
+      },
+    }),
+    prisma.balanceTransaction.count({ where }),
+  ]);
+
+  // Summary stats
+  const [incomeAgg, chargeAgg, topupCount, chargeCount] = await Promise.all([
+    prisma.balanceTransaction.aggregate({ _sum: { amount: true }, where: { amount: { gt: 0 } } }),
+    prisma.balanceTransaction.aggregate({ _sum: { amount: true }, where: { amount: { lt: 0 } } }),
+    prisma.balanceTransaction.count({ where: { type: 'topup' } }),
+    prisma.balanceTransaction.count({ where: { type: 'daily_charge' } }),
+  ]);
+
+  res.json({
+    success: true,
+    transactions,
+    meta: { total, page: parseInt(page), limit: parseInt(limit), pages: Math.ceil(total / parseInt(limit)) },
+    summary: {
+      totalIn:     parseFloat(incomeAgg._sum.amount || 0),
+      totalOut:    Math.abs(parseFloat(chargeAgg._sum.amount || 0)),
+      topupCount,
+      chargeCount,
+    },
+  });
+});
+
 module.exports = {
   getStats,
   getBusinessmen, getBusinessman, createBusinessman,
   updateBusinessman, deleteBusinessman, manageSubscription,
   getBusinessmanBalance, getBusinessmanTransactions,
   topUpBusinessmanBalance, setBusinessmanBalance,
+  changePassword, getAllTransactions,
 };

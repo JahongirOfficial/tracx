@@ -45,6 +45,8 @@ import DriverExpense from './pages/driver/DriverExpense';
 import SuperAdminDashboard         from './pages/superAdmin/SuperAdminDashboard';
 import SuperAdminBusinessmen       from './pages/superAdmin/SuperAdminBusinessmen';
 import SuperAdminBusinessmanDetail from './pages/superAdmin/SuperAdminBusinessmanDetail';
+import SuperAdminTransactions      from './pages/superAdmin/SuperAdminTransactions';
+import SuperAdminSettings          from './pages/superAdmin/SuperAdminSettings';
 
 const App = () => {
   const { initAuth, loading } = useAuthStore();
@@ -116,6 +118,8 @@ const App = () => {
           <Route index                  element={<SuperAdminDashboard />} />
           <Route path="businessmen"     element={<SuperAdminBusinessmen />} />
           <Route path="businessmen/:id" element={<SuperAdminBusinessmanDetail />} />
+          <Route path="transactions"    element={<SuperAdminTransactions />} />
+          <Route path="settings"        element={<SuperAdminSettings />} />
         </Route>
 
         {/* Role-based redirect */}

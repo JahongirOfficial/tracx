@@ -60,8 +60,8 @@ const SkeletonRows = () => (
 );
 
 /* ── Plan label helper ── */
-const planLabel = (p) => ({ trial: 'Trial', basic: 'Basic', pro: 'Pro' }[p] || p);
-const planColor = (p) => ({ trial: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400', basic: 'text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400', pro: 'text-violet-600 bg-violet-50 dark:bg-violet-900/20 dark:text-violet-400' }[p] || '');
+const planLabel = (p) => ({ free: 'Free', trial: 'Trial', basic: 'Basic', pro: 'Pro' }[p] || p);
+const planColor = (p) => ({ free: 'text-slate-600 bg-slate-100 dark:bg-slate-700 dark:text-slate-300', trial: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400', basic: 'text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400', pro: 'text-violet-600 bg-violet-50 dark:bg-violet-900/20 dark:text-violet-400' }[p] || 'text-slate-600 bg-slate-100 dark:bg-slate-700 dark:text-slate-300');
 
 /* ── Avatar gradient ── */
 const avatarColor = (name = '') => {

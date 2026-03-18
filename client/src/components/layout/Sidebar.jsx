@@ -105,49 +105,12 @@ const Sidebar = () => {
               }
               <span className={['transition-[opacity] duration-200 flex items-center justify-between w-full', sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none w-0'].join(' ')}>
                 <span>{t('nav.balance')}</span>
-                {!isActive && info && (
-                  <span className={[
-                    'text-[10px] font-bold px-1.5 py-0.5 rounded-md tabular-nums ml-1',
-                    isLow
-                      ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                      : isWarn
-                      ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
-                      : 'bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400',
-                  ].join(' ')}>
-                    {`${info.daysLeft ?? 0}k`}
-                  </span>
-                )}
               </span>
             </>
           )}
         </NavLink>}
       </nav>
 
-      {/* ── Balance mini widget (only when expanded, owner only) ── */}
-      {isOwner && sidebarOpen && info && (
-        <div className={[
-          'mx-2 mb-2 px-3 py-2.5 rounded-xl border',
-          isLow
-            ? 'bg-red-50 dark:bg-red-900/15 border-red-200 dark:border-red-800/30'
-            : isWarn
-            ? 'bg-amber-50 dark:bg-amber-900/15 border-amber-200 dark:border-amber-800/30'
-            : 'bg-slate-50 dark:bg-white/[0.04] border-slate-200 dark:border-white/[0.06]',
-        ].join(' ')}>
-          <div className="flex items-center justify-between mb-0.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Balans</span>
-            {isLow && <AlertTriangle size={11} className="text-red-500" />}
-          </div>
-          <p className={[
-            'text-sm font-bold tabular-nums leading-tight',
-            isLow ? 'text-red-600 dark:text-red-400' : isWarn ? 'text-amber-600 dark:text-amber-400' : 'text-slate-800 dark:text-slate-200',
-          ].join(' ')}>
-            {formatMoney(info.balance, 'UZS', true)}
-          </p>
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 tabular-nums">
-            ~{info.daysLeft} kun qoldi
-          </p>
-        </div>
-      )}
 
       {/* ── Collapse toggle ── */}
       <div className="shrink-0 px-2 pb-4 pt-3 border-t border-slate-200 dark:border-white/[0.06]">

@@ -6,6 +6,7 @@ const {
   updateBusinessman, deleteBusinessman, manageSubscription,
   getBusinessmanBalance, getBusinessmanTransactions,
   topUpBusinessmanBalance, setBusinessmanBalance,
+  changePassword, getAllTransactions,
 } = require('../controllers/superAdmin.controller');
 const { protect, superAdminOnly } = require('../middleware/auth');
 const validate = require('../middleware/validate');
@@ -44,5 +45,11 @@ router.get('/businessmen/:id/balance',       getBusinessmanBalance);
 router.get('/businessmen/:id/transactions',  getBusinessmanTransactions);
 router.post('/businessmen/:id/balance/topup', validate(topUpSchema), topUpBusinessmanBalance);
 router.post('/businessmen/:id/balance/set',   validate(setBalanceSchema), setBusinessmanBalance);
+
+/* ── Settings ── */
+router.put('/settings/password', changePassword);
+
+/* ── Global transactions ── */
+router.get('/transactions', getAllTransactions);
 
 module.exports = router;

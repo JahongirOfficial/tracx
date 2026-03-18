@@ -19,14 +19,18 @@ import {
   Moon,
   Menu,
   X,
+  Settings,
+  Receipt,
 } from 'lucide-react';
 import ToastContainer from '../ui/Toast';
 import useAuthStore from '../../stores/authStore';
 import useUiStore from '../../stores/uiStore';
 
 const NAV = [
-  { to: '/super-admin',              label: 'Boshqaruv paneli', icon: LayoutDashboard, end: true },
-  { to: '/super-admin/businessmen',  label: 'Biznesmenlar',      icon: Users },
+  { to: '/super-admin',                label: 'Boshqaruv paneli', icon: LayoutDashboard, end: true },
+  { to: '/super-admin/businessmen',    label: 'Biznesmenlar',     icon: Users },
+  { to: '/super-admin/transactions',   label: 'Tranzaksiyalar',   icon: Receipt },
+  { to: '/super-admin/settings',       label: 'Sozlamalar',       icon: Settings },
 ];
 
 /* ── Sidebar component ── */
@@ -55,9 +59,7 @@ const Sidebar = ({ open, onClose }) => {
     >
       {/* Logo */}
       <div className="h-16 flex items-center gap-3 px-5 border-b border-slate-200 dark:border-white/[0.06] shrink-0">
-        <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-md shadow-primary-500/25 shrink-0">
-          <ShieldCheck size={18} className="text-white" />
-        </div>
+        <img src="/icon.png" alt="Avtojon" className="w-9 h-9 object-contain shrink-0" />
         <div className="min-w-0">
           <p className="font-bold text-slate-900 dark:text-white text-sm leading-none">Avtojon Admin</p>
           <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">SuperAdmin Panel</p>
@@ -155,7 +157,7 @@ const SuperAdminLayout = () => {
             <Menu size={20} />
           </button>
           <div className="flex items-center gap-2">
-            <ShieldCheck size={16} className="text-primary-600" />
+            <img src="/icon.png" alt="Avtojon" className="w-6 h-6 object-contain" />
             <span className="font-semibold text-slate-800 dark:text-white text-sm">Avtojon Admin</span>
           </div>
         </header>
