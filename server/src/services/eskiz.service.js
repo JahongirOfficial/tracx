@@ -70,10 +70,37 @@ const sendSms = async (phone, message) => {
   return data;
 };
 
-/* ── Send OTP helper ── */
+/* ── Send OTP via Eskiz nick template ── */
 const sendOtp = async (phone, code) => {
-  const message = `Avtojon tasdiqlash kodi: ${code}\nKod 5 daqiqa amal qiladi.`;
-  return sendSms(phone, message);
+  const token = await getToken();
+
+  const normalized = phone.replace(/\D/g, '');
+  const to = normalized.startsWith('998') ? normalized : `998${normalized}`;
+
+  const form = new URLSearchParams();
+  form.append('mobile_phone', to);
+  form.append('message',      `Avtojon: ${code}`);
+  form.append('from',         env.ESKIZ_FROM || '4546');
+  form.append('callback_url', '');
+  form.append('nick',         env.ESKIZ_NICK || '');
+
+  const res = await fetch(`${BASE_URL}/message/sms/send`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+
+  if (!res.ok) {
+    if (res.status === 401) {
+      cachedToken   = null;
+      tokenExpiresAt = 0;
+      return sendOtp(phone, code);
+    }
+    const text = await res.text();
+    throw new Error(`Eskiz SMS failed: ${text}`);
+  }
+
+  return res.json();
 };
 
 module.exports = { sendSms, sendOtp };

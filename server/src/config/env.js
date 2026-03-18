@@ -20,6 +20,7 @@ const envSchema = z.object({
   ESKIZ_EMAIL: z.string().optional(),
   ESKIZ_PASSWORD: z.string().optional(),
   ESKIZ_FROM: z.string().default('4546'),
+  ESKIZ_NICK: z.string().optional(),
 });
 
 let env;
