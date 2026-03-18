@@ -22,6 +22,9 @@ const employeeRoutes = require('./routes/employee.routes');
 
 const app = express();
 
+// Trust Nginx proxy (required for rate limiting + real IP behind reverse proxy)
+app.set('trust proxy', 1);
+
 // Security
 app.use(helmet());
 app.use(cors({
