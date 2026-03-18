@@ -148,7 +148,7 @@ export default function Register() {
   const [gLoading, setGLoading] = useState(false);
   const [error, setError]       = useState('');
 
-  const [phone, setPhone]       = useState('');
+  const [phone, setPhone]       = useState('+998 ');
   const [otp, setOtp]           = useState('');
   const [verified, setVerified] = useState(false);
   const [form, setForm]         = useState({ fullName: '', companyName: '', password: '', confirmPassword: '' });
@@ -187,11 +187,33 @@ export default function Register() {
     return d.startsWith('998') ? d : `998${d}`;
   };
 
+  /* Format phone as: +998 XX XXX XX XX */
+  const formatPhone = (raw) => {
+    const digits = raw.replace(/\D/g, '');
+    // always keep 998 prefix
+    const local = digits.startsWith('998') ? digits.slice(3) : digits;
+    let result = '+998';
+    if (local.length > 0) result += ' ' + local.slice(0, 2);
+    if (local.length > 2) result += ' ' + local.slice(2, 5);
+    if (local.length > 5) result += ' ' + local.slice(5, 7);
+    if (local.length > 7) result += ' ' + local.slice(7, 9);
+    return result;
+  };
+
+  const handlePhoneChange = (e) => {
+    const raw = e.target.value;
+    // Don't allow deleting the +998 prefix
+    if (!raw.startsWith('+')) { setPhone('+998 '); return; }
+    setPhone(formatPhone(raw));
+    setError('');
+  };
+
   /* ── Step 1 → send OTP ── */
   const handleSendOtp = async (e) => {
     e.preventDefault();
     const digits = phone.replace(/\D/g, '');
-    if (digits.length < 9) return setError("To'liq telefon raqam kiriting");
+    const localDigits = digits.startsWith('998') ? digits.slice(3) : digits;
+    if (localDigits.length < 9) return setError("To'liq telefon raqam kiriting (9 ta raqam)");
     setLoading(true); setError('');
     try {
       await api.post('/auth/otp/send', { phone: normalizePhone(phone) });
@@ -409,11 +431,12 @@ export default function Register() {
                     icon={Phone}
                     type="tel"
                     value={phone}
-                    onChange={(e) => { setPhone(e.target.value); setError(''); }}
+                    onChange={handlePhoneChange}
                     placeholder="+998 90 123 45 67"
                     required
                     autoFocus
                     autoComplete="tel"
+                    maxLength={17}
                   />
 
                   <p className="text-[11px] text-slate-400">
