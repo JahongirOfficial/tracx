@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   login, register, googleAuth, getMe, refresh, logout,
   getSubscription, upgradeSubscriptionHandler, changePassword,
+  sendOtp, verifyOtp,
 } = require('../controllers/auth.controller');
 const { protect, businessOnly } = require('../middleware/auth');
 const validate = require('../middleware/validate');
@@ -20,5 +21,7 @@ router.post('/logout', protect, logout);
 router.get('/subscription', protect, businessOnly, getSubscription);
 router.post('/subscription/upgrade', protect, businessOnly, validate(upgradeSubscriptionSchema), upgradeSubscriptionHandler);
 router.post('/change-password', protect, sensitiveLimiter, validate(changePasswordSchema), changePassword);
+router.post('/otp/send',   loginLimiter, sendOtp);
+router.post('/otp/verify', loginLimiter, verifyOtp);
 
 module.exports = router;

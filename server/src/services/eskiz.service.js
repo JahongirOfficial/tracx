@@ -79,7 +79,7 @@ const sendOtp = async (phone, code) => {
 
   const form = new URLSearchParams();
   form.append('mobile_phone', to);
-  form.append('message',      `Avtojon tasdiqlash kodi: ${code}`);
+  form.append('message',      `Avtojon platformasiga kirish uchun tasdiqlash kodi: ${code}`);
   form.append('from',         env.ESKIZ_FROM || '4546');
   form.append('callback_url', '');
   form.append('nick',         env.ESKIZ_NICK || '');

@@ -65,6 +65,19 @@ const useAuthStore = create((set, get) => ({
     return role;
   },
 
+  sendOtp: async (phone) => {
+    await api.post('/auth/otp/send', { phone });
+  },
+
+  verifyOtp: async (phone, code) => {
+    const res = await api.post('/auth/otp/verify', { phone, code });
+    const { user, accessToken, refreshToken, role } = res.data;
+    localStorage.setItem('token', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+    set({ user, token: accessToken, refreshToken, role, isLoading: false });
+    return role;
+  },
+
   updateUser: (updates) => set((s) => ({ user: { ...s.user, ...updates } })),
 }));
 

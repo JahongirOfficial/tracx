@@ -263,4 +263,69 @@ const googleAuth = catchAsync(async (req, res, next) => {
   res.json({ success: true, data: { user: userData, accessToken, refreshToken, role: 'business' } });
 });
 
-module.exports = { login, register, googleAuth, getMe, refresh, logout, getSubscription, upgradeSubscriptionHandler, changePassword };
+/* ── OTP in-memory store ── */
+// { phone: { code, expiresAt, attempts } }
+const otpStore = new Map();
+const OTP_TTL_MS  = 5 * 60 * 1000; // 5 daqiqa
+const OTP_MAX_ATT = 5;
+
+const sendOtp = catchAsync(async (req, res, next) => {
+  const { phone } = req.body;
+  if (!phone) return next(new AppError('Telefon raqam kiritilishi shart', 400));
+
+  const normalized = phone.replace(/\D/g, '');
+  const fullPhone  = normalized.startsWith('998') ? normalized : `998${normalized}`;
+
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  otpStore.set(fullPhone, { code, expiresAt: Date.now() + OTP_TTL_MS, attempts: 0 });
+
+  const { sendOtp: sendSmsOtp } = require('../services/eskiz.service');
+  await sendSmsOtp(fullPhone, code);
+
+  res.json({ success: true, message: 'SMS yuborildi' });
+});
+
+const verifyOtp = catchAsync(async (req, res, next) => {
+  const { phone, code } = req.body;
+  if (!phone || !code) return next(new AppError('Telefon va kod kiritilishi shart', 400));
+
+  const normalized = phone.replace(/\D/g, '');
+  const fullPhone  = normalized.startsWith('998') ? normalized : `998${normalized}`;
+
+  const entry = otpStore.get(fullPhone);
+  if (!entry)                        return next(new AppError('Avval SMS kod yuboring', 400));
+  if (Date.now() > entry.expiresAt)  { otpStore.delete(fullPhone); return next(new AppError('Kod muddati tugagan', 400)); }
+  if (entry.attempts >= OTP_MAX_ATT) { otpStore.delete(fullPhone); return next(new AppError('Urinishlar soni tugadi, qayta yuboring', 429)); }
+
+  entry.attempts += 1;
+  if (entry.code !== String(code)) return next(new AppError("Kod noto'g'ri", 401));
+
+  otpStore.delete(fullPhone);
+
+  // Phone bo'yicha businessman qidirish (turli formatlar)
+  const businessman = await prisma.businessman.findFirst({
+    where: {
+      OR: [
+        { phone: fullPhone },
+        { phone: `+${fullPhone}` },
+        { phone: normalized },
+      ],
+      isActive: true,
+    },
+  });
+  if (!businessman) return next(new AppError("Bu raqamga bog'liq aktiv hisob topilmadi", 404));
+
+  const { accessToken, refreshToken } = await generateTokens(businessman.id, 'business');
+
+  const userData = {
+    id: businessman.id,
+    username: businessman.username,
+    role: 'business',
+    fullName: businessman.fullName,
+    companyName: businessman.companyName,
+  };
+
+  res.json({ success: true, data: { user: userData, accessToken, refreshToken, role: 'business' } });
+});
+
+module.exports = { login, register, googleAuth, getMe, refresh, logout, getSubscription, upgradeSubscriptionHandler, changePassword, sendOtp, verifyOtp };
