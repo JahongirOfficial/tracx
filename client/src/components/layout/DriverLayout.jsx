@@ -10,17 +10,11 @@
  * Dark mode: full support throughout.
  */
 
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { Home, Plane, LogOut } from 'lucide-react';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
 import ToastContainer from '../ui/Toast';
 import useAuthStore from '../../stores/authStore';
 import useSocket from '../../hooks/useSocket';
-
-/* Bottom nav definitions for drivers */
-const driverNavItems = [
-  { to: '/driver', icon: Home, label: 'Bosh sahifa', end: true },
-  { to: '/driver/expense', icon: Plane, label: 'Xarajatlar' },
-];
 
 /* Status badge colors */
 const statusConfig = {
@@ -116,56 +110,11 @@ const DriverLayout = () => {
       </header>
 
       {/* ── Page content ── */}
-      <main className="flex-1 overflow-y-auto pb-20">
+      <main className="flex-1 overflow-y-auto">
         <div className="page-enter">
           <Outlet />
         </div>
       </main>
-
-      {/* ── Bottom navigation (2 items) ── */}
-      <nav
-        className={[
-          'fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg z-40',
-          'bg-white dark:bg-slate-900',
-          'border-t border-slate-200/80 dark:border-slate-800',
-          'safe-bottom',
-          'shadow-[0_-4px_20px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_20px_-2px_rgba(0,0,0,0.4)]',
-        ].join(' ')}
-      >
-        <div className="flex h-16">
-          {driverNavItems.map(({ to, icon: Icon, label, end }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              className={({ isActive }) =>
-                [
-                  'flex-1 flex flex-col items-center justify-center gap-1 pt-2 pb-1.5 relative',
-                  'text-xs font-medium transition-colors duration-150',
-                  isActive
-                    ? 'text-primary-600 dark:text-primary-400'
-                    : 'text-slate-400 dark:text-slate-500',
-                ].join(' ')
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  {/* Larger icons for driver nav */}
-                  <Icon size={26} strokeWidth={isActive ? 2.2 : 1.8} />
-                  <span className="leading-none">{label}</span>
-                  {/* Active dot indicator */}
-                  {isActive && (
-                    <span
-                      aria-hidden="true"
-                      className="absolute bottom-1.5 w-1.5 h-1.5 rounded-full bg-primary-600 dark:bg-primary-400"
-                    />
-                  )}
-                </>
-              )}
-            </NavLink>
-          ))}
-        </div>
-      </nav>
 
       <ToastContainer />
     </div>
