@@ -4,7 +4,6 @@ import { useGoogleLogin } from '@react-oauth/google';
 import {
   Truck, Eye, EyeOff, ArrowRight, Shield, Zap,
   BarChart3, Users, TrendingUp, Star, Mail, Lock,
-  Phone, MessageSquare,
 } from 'lucide-react';
 import useAuthStore from '../stores/authStore';
 import useUiStore from '../stores/uiStore';
@@ -41,56 +40,16 @@ const Field = ({ label, icon: Icon, suffix, ...props }) => (
 
 /* ─── Component ───────────────────────────────────────────────── */
 const Login = () => {
-  const [tab, setTab]           = useState('password'); // 'password' | 'sms'
   const [form, setForm]         = useState({ username: '', password: '' });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading]   = useState(false);
   const [gLoading, setGLoading] = useState(false);
   const [error, setError]       = useState('');
-  // SMS OTP state
-  const [phone, setPhone]       = useState('');
-  const [otp, setOtp]           = useState('');
-  const [otpSent, setOtpSent]   = useState(false);
-  const [otpLoading, setOtpLoading] = useState(false);
-  const [countdown, setCountdown]   = useState(0);
-  const { login, googleLogin, sendOtp, verifyOtp, role } = useAuthStore();
+  const { login, googleLogin, role } = useAuthStore();
   const { addToast }            = useUiStore();
   const navigate                = useNavigate();
 
   const set_ = (k) => (e) => { setForm(f => ({ ...f, [k]: e.target.value })); setError(''); };
-
-  // Countdown timer
-  useEffect(() => {
-    if (countdown <= 0) return;
-    const t = setTimeout(() => setCountdown(c => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [countdown]);
-
-  const handleSendOtp = async () => {
-    if (!phone.trim()) { setError("Telefon raqam kiriting"); return; }
-    setOtpLoading(true); setError('');
-    try {
-      await sendOtp(phone.trim());
-      setOtpSent(true);
-      setCountdown(60);
-      addToast('SMS yuborildi', 'success');
-    } catch (err) {
-      setError(err.message || 'SMS yuborishda xatolik');
-    } finally { setOtpLoading(false); }
-  };
-
-  const handleOtpSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true); setError('');
-    try {
-      const userRole = await verifyOtp(phone.trim(), otp.trim());
-      if (userRole === 'business')    navigate('/dashboard');
-      else if (userRole === 'driver') navigate('/driver');
-      else if (userRole === 'super_admin') navigate('/super-admin');
-    } catch (err) {
-      setError(err.message || 'Kod noto\'g\'ri yoki muddati tugagan');
-    } finally { setLoading(false); }
-  };
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -248,31 +207,7 @@ const Login = () => {
             {/* Heading */}
             <div className="mb-5">
               <h2 className="text-xl font-black text-slate-900 mb-1">Tizimga kirish</h2>
-              <p className="text-sm text-slate-400">Qulay usulni tanlang</p>
-            </div>
-
-            {/* Tab switcher */}
-            <div className="flex bg-slate-100 rounded-lg p-1 mb-4">
-              <button
-                type="button"
-                onClick={() => { setTab('password'); setError(''); }}
-                className={[
-                  'flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold rounded-md transition-all',
-                  tab === 'password' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700',
-                ].join(' ')}
-              >
-                <Lock size={12} /> Login / Parol
-              </button>
-              <button
-                type="button"
-                onClick={() => { setTab('sms'); setError(''); }}
-                className={[
-                  'flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold rounded-md transition-all',
-                  tab === 'sms' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700',
-                ].join(' ')}
-              >
-                <Phone size={12} /> SMS kod
-              </button>
+              <p className="text-sm text-slate-400">Login va parolingizni kiriting</p>
             </div>
 
             {/* Error */}
@@ -283,173 +218,86 @@ const Login = () => {
               </div>
             )}
 
-            {tab === 'password' && (
-              <>
-                {/* Google button */}
-                <button
-                  type="button"
-                  onClick={() => handleGoogleLogin()}
-                  disabled={gLoading}
-                  className="w-full flex items-center justify-center gap-2.5 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-60 transition-all duration-150 shadow-sm mb-3"
-                >
-                  {gLoading ? (
-                    <svg className="animate-spin w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                    </svg>
-                  ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24">
-                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                    </svg>
-                  )}
-                  Google orqali kirish
-                </button>
-
-                {/* Divider */}
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="flex-1 h-px bg-slate-100" />
-                  <span className="text-xs text-slate-400 font-medium">yoki</span>
-                  <div className="flex-1 h-px bg-slate-100" />
-                </div>
-
-                {/* Password form */}
-                <form onSubmit={handleSubmit} className="space-y-3">
-                  <Field
-                    label="Foydalanuvchi nomi"
-                    icon={Mail}
-                    value={form.username}
-                    onChange={set_('username')}
-                    placeholder="username yoki email"
-                    required
-                    autoFocus
-                    autoComplete="username"
-                  />
-                  <Field
-                    label="Parol"
-                    icon={Lock}
-                    type={showPass ? 'text' : 'password'}
-                    value={form.password}
-                    onChange={set_('password')}
-                    placeholder="••••••••"
-                    required
-                    autoComplete="current-password"
-                    suffix={
-                      <button
-                        type="button"
-                        onClick={() => setShowPass(!showPass)}
-                        className="text-slate-400 hover:text-slate-600 transition-colors"
-                        aria-label={showPass ? 'Parolni yashirish' : "Parolni ko'rsatish"}
-                      >
-                        {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
-                      </button>
-                    }
-                  />
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <Field
+                label="Foydalanuvchi nomi"
+                icon={Mail}
+                value={form.username}
+                onChange={set_('username')}
+                placeholder="username yoki email"
+                required
+                autoFocus
+                autoComplete="username"
+              />
+              <Field
+                label="Parol"
+                icon={Lock}
+                type={showPass ? 'text' : 'password'}
+                value={form.password}
+                onChange={set_('password')}
+                placeholder="••••••••"
+                required
+                autoComplete="current-password"
+                suffix={
                   <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-white font-semibold text-sm rounded-lg shadow-sm transition-all duration-150 hover:shadow-md mt-1"
+                    type="button"
+                    onClick={() => setShowPass(!showPass)}
+                    className="text-slate-400 hover:text-slate-600 transition-colors"
+                    aria-label={showPass ? 'Parolni yashirish' : "Parolni ko'rsatish"}
                   >
-                    {loading ? (
-                      <>
-                        <svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                        </svg>
-                        Kirilmoqda...
-                      </>
-                    ) : (
-                      <> Kirish <ArrowRight size={15} /> </>
-                    )}
+                    {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
-                </form>
-              </>
-            )}
-
-            {tab === 'sms' && (
-              <form onSubmit={handleOtpSubmit} className="space-y-3">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-slate-500">Telefon raqam</label>
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                      <input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => { setPhone(e.target.value); setError(''); }}
-                        placeholder="+998 90 123 45 67"
-                        disabled={otpSent}
-                        className="w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border border-slate-200 bg-white text-slate-900 placeholder-slate-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all disabled:bg-slate-50 disabled:text-slate-400"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleSendOtp}
-                      disabled={otpLoading || (otpSent && countdown > 0)}
-                      className="px-3 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-white text-xs font-semibold rounded-lg whitespace-nowrap transition-all flex items-center gap-1.5"
-                    >
-                      {otpLoading ? (
-                        <svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                        </svg>
-                      ) : countdown > 0 ? (
-                        `${countdown}s`
-                      ) : (
-                        <><MessageSquare size={12} /> Yuborish</>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {otpSent && (
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-medium text-slate-500">
-                      SMS kod <span className="text-slate-400 font-normal">(6 ta raqam)</span>
-                    </label>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={6}
-                      value={otp}
-                      onChange={(e) => { setOtp(e.target.value.replace(/\D/g, '')); setError(''); }}
-                      placeholder="000000"
-                      autoFocus
-                      className="w-full px-3 py-2.5 text-sm rounded-lg border border-slate-200 bg-white text-slate-900 placeholder-slate-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all tracking-[0.3em] text-center font-mono text-base"
-                    />
-                    <p className="text-[11px] text-slate-400">
-                      Kod 5 daqiqa ichida yaroqli · {countdown > 0 ? `${countdown}s` : <button type="button" className="text-primary-600 font-medium" onClick={handleSendOtp}>Qayta yuborish</button>}
-                    </p>
-                  </div>
+                }
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-white font-semibold text-sm rounded-lg shadow-sm transition-all duration-150 hover:shadow-md mt-1"
+              >
+                {loading ? (
+                  <>
+                    <svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                    </svg>
+                    Kirilmoqda...
+                  </>
+                ) : (
+                  <> Kirish <ArrowRight size={15} /> </>
                 )}
+              </button>
+            </form>
 
-                {otpSent && (
-                  <button
-                    type="submit"
-                    disabled={loading || otp.length < 6}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-white font-semibold text-sm rounded-lg shadow-sm transition-all duration-150 hover:shadow-md"
-                  >
-                    {loading ? (
-                      <>
-                        <svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                        </svg>
-                        Tekshirilmoqda...
-                      </>
-                    ) : (
-                      <> Kirish <ArrowRight size={15} /> </>
-                    )}
-                  </button>
-                )}
+            {/* Divider */}
+            <div className="flex items-center gap-3 my-3">
+              <div className="flex-1 h-px bg-slate-100" />
+              <span className="text-xs text-slate-400 font-medium">yoki</span>
+              <div className="flex-1 h-px bg-slate-100" />
+            </div>
 
-                <p className="text-[11px] text-slate-400 text-center">
-                  Faqat biznesmenlar uchun · Telefon raqam hisobda ro'yxatdan o'tgan bo'lishi kerak
-                </p>
-              </form>
-            )}
+            {/* Google button */}
+            <button
+              type="button"
+              onClick={() => handleGoogleLogin()}
+              disabled={gLoading}
+              className="w-full flex items-center justify-center gap-2.5 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-60 transition-all duration-150 shadow-sm"
+            >
+              {gLoading ? (
+                <svg className="animate-spin w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+              )}
+              Google orqali kirish
+            </button>
 
             {/* Trust badges */}
             <div className="grid grid-cols-3 gap-2 mt-5">
