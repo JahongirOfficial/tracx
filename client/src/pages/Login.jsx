@@ -194,16 +194,6 @@ const Login = () => {
         <div className="flex-1 flex items-center justify-center px-5 py-6 overflow-y-auto">
           <div className="w-full max-w-[360px]">
 
-            {/* Desktop: top link */}
-            <div className="hidden lg:flex items-center justify-end mb-6">
-              <p className="text-sm text-slate-400">
-                Hisobingiz yo'qmi?{' '}
-                <Link to="/register" className="font-semibold text-primary-600 hover:underline">
-                  Ro'yxatdan o'tish
-                </Link>
-              </p>
-            </div>
-
             {/* Heading */}
             <div className="mb-5">
               <h2 className="text-xl font-black text-slate-900 mb-1">Tizimga kirish</h2>
@@ -298,20 +288,6 @@ const Login = () => {
               )}
               Google orqali kirish
             </button>
-
-            {/* Trust badges */}
-            <div className="grid grid-cols-3 gap-2 mt-5">
-              {[
-                { icon: Shield, label: 'Xavfsiz kirish' },
-                { icon: Zap,    label: 'Tez va oson' },
-                { icon: Users,  label: '50+ kompaniya' },
-              ].map(({ icon: Icon, label }) => (
-                <div key={label} className="flex flex-col items-center gap-1 py-2.5 bg-slate-50 rounded-lg border border-slate-100">
-                  <Icon size={14} className="text-slate-400" />
-                  <span className="text-[10px] text-slate-400 text-center leading-tight">{label}</span>
-                </div>
-              ))}
-            </div>
 
             {/* Register link */}
             <p className="text-center text-sm text-slate-400 mt-4">
