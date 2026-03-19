@@ -72,12 +72,13 @@ const getVehicle = catchAsync(async (req, res, next) => {
 });
 
 const createVehicle = catchAsync(async (req, res, next) => {
-  const { plateNumber, brand, model, year, color, currentOdometer, oilChangeIntervalKm, lastOilChangeKm } = req.body;
+  const { plateNumber, brand, model, year, color, fuelType, currentOdometer, oilChangeIntervalKm, lastOilChangeKm } = req.body;
 
   const vehicle = await prisma.vehicle.create({
     data: {
       businessmanId: getBizId(req),
       plateNumber, brand, model, year, color,
+      fuelType: fuelType || 'fuel_diesel',
       currentOdometer: currentOdometer || 0,
       oilChangeIntervalKm: oilChangeIntervalKm || 10000,
       lastOilChangeKm: lastOilChangeKm || 0,
@@ -102,7 +103,7 @@ const updateVehicle = catchAsync(async (req, res, next) => {
   });
   if (!existing) return next(new AppError('Mashina topilmadi', 404));
 
-  const allowed = ['brand', 'model', 'year', 'color', 'currentOdometer', 'oilChangeIntervalKm', 'lastOilChangeKm', 'status', 'isActive'];
+  const allowed = ['brand', 'model', 'year', 'color', 'fuelType', 'currentOdometer', 'oilChangeIntervalKm', 'lastOilChangeKm', 'status', 'isActive'];
   const data = {};
   allowed.forEach((key) => { if (req.body[key] !== undefined) data[key] = req.body[key]; });
 

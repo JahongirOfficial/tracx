@@ -85,6 +85,7 @@ model Vehicle {
   currentOdometer     Int              @default(0)
   oilChangeIntervalKm Int              @default(10000)
   lastOilChangeKm     Int              @default(0)
+  fuelType            String           @default("fuel_diesel")
   status              String           @default("normal")
   isActive            Boolean          @default(true)
   createdAt           DateTime         @default(now())

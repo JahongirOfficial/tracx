@@ -6,7 +6,14 @@ import StepHeader from '../ui/StepHeader';
 import { PlateInput } from '../ui/MaskedInput';
 import useVehicleStore from '../../stores/vehicleStore';
 import useUiStore from '../../stores/uiStore';
-import { Car, Wrench, ChevronRight } from 'lucide-react';
+import { Car, Wrench, ChevronRight, Fuel } from 'lucide-react';
+
+const FUEL_OPTIONS = [
+  { value: 'fuel_diesel', label: 'Dizel',  emoji: '⛽' },
+  { value: 'fuel_benzin', label: 'Benzin', emoji: '⛽' },
+  { value: 'fuel_metan',  label: 'Metan',  emoji: '🔵' },
+  { value: 'fuel_propan', label: 'Propan', emoji: '🟡' },
+];
 
 const STEPS = ['Mashina', 'Texnik'];
 
@@ -19,6 +26,7 @@ const VehicleForm = ({ isOpen, onClose, vehicle = null }) => {
     model: vehicle?.model || '',
     year: vehicle?.year || '',
     color: vehicle?.color || '',
+    fuelType: vehicle?.fuelType || 'fuel_diesel',
     currentOdometer: vehicle?.currentOdometer || '',
     oilChangeIntervalKm: vehicle?.oilChangeIntervalKm || '10000',
     lastOilChangeKm: vehicle?.lastOilChangeKm || '',
@@ -90,6 +98,30 @@ const VehicleForm = ({ isOpen, onClose, vehicle = null }) => {
                 <div className="grid grid-cols-2 gap-3">
                   <Input label="Yil" type="number" value={form.year} onChange={(e) => set('year', e.target.value)} placeholder="2020" />
                   <Input label="Rang" value={form.color} onChange={(e) => set('color', e.target.value)} placeholder="Oq" />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    <span className="flex items-center gap-1.5"><Fuel size={13} className="text-slate-400" /> Yoqilg'i turi</span>
+                  </label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {FUEL_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => set('fuelType', opt.value)}
+                        className={[
+                          'flex flex-col items-center gap-1 py-2.5 rounded-xl border text-[11px] font-semibold transition-all',
+                          form.fuelType === opt.value
+                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 shadow-sm'
+                            : 'border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-primary-300',
+                        ].join(' ')}
+                      >
+                        <span className="text-lg">{opt.emoji}</span>
+                        <span>{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

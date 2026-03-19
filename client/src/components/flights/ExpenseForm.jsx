@@ -24,12 +24,12 @@ const INITIAL = {
   paidFromOwn: false,
 };
 
-const LIGHT_TYPES = EXPENSE_TYPES.filter((t) => t.class === 'light');
-const HEAVY_TYPES = EXPENSE_TYPES.filter((t) => t.class === 'heavy');
+const ALL_LIGHT_TYPES = EXPENSE_TYPES.filter((t) => t.class === 'light');
+const HEAVY_TYPES     = EXPENSE_TYPES.filter((t) => t.class === 'heavy');
 
 const STEPS = ['Xarajat turi', "Ma'lumotlar"];
 
-const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false, expense = null }) => {
+const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false, expense = null, vehicleFuelType = null }) => {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState(INITIAL);
   const [loading, setLoading] = useState(false);
@@ -62,6 +62,11 @@ const ExpenseForm = ({ isOpen, onClose, flightId, onSuccess, isDriver = false, e
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const handleClose = () => { setStep(0); onClose(); };
+
+  // Mashina yoqilg'i turiga qarab faqat mos yoqilg'ini ko'rsatamiz
+  const LIGHT_TYPES = vehicleFuelType
+    ? ALL_LIGHT_TYPES.filter((t) => !FUEL_TYPES.includes(t.value) || t.value === vehicleFuelType)
+    : ALL_LIGHT_TYPES;
 
   const selectedType = EXPENSE_TYPES.find((t) => t.value === form.type);
   const isHeavy = selectedType?.class === 'heavy';

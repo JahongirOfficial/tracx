@@ -1,11 +1,14 @@
 const { z } = require('zod');
 
+const VEHICLE_FUEL_TYPES = ['fuel_diesel', 'fuel_benzin', 'fuel_metan', 'fuel_propan', 'fuel'];
+
 const createVehicleSchema = z.object({
   plateNumber: z.string().min(1).max(20),
   brand: z.string().optional(),
   model: z.string().optional(),
   year: z.number().int().min(1900).max(new Date().getFullYear() + 1).optional(),
   color: z.string().optional(),
+  fuelType: z.enum(VEHICLE_FUEL_TYPES).default('fuel_diesel'),
   currentOdometer: z.number().int().min(0).default(0),
   oilChangeIntervalKm: z.number().int().min(1000).default(10000),
   lastOilChangeKm: z.number().int().min(0).default(0),
@@ -16,6 +19,7 @@ const updateVehicleSchema = z.object({
   model: z.string().optional(),
   year: z.number().int().optional(),
   color: z.string().optional(),
+  fuelType: z.enum(VEHICLE_FUEL_TYPES).optional(),
   currentOdometer: z.number().int().min(0).optional(),
   oilChangeIntervalKm: z.number().int().min(1000).optional(),
   lastOilChangeKm: z.number().int().min(0).optional(),
