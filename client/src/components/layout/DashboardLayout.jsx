@@ -169,15 +169,6 @@ const DashboardLayout = () => {
           {/* Right controls */}
           <div className="flex items-center gap-1">
 
-            {/* Language — hidden on mobile (available in More sheet) */}
-            <button
-              onClick={() => setLang(lang === 'uz' ? 'ru' : 'uz')}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-150"
-              title="Tilni almashtirish"
-            >
-              <Globe size={14} />
-              {lang.toUpperCase()}
-            </button>
 
             {/* Theme toggle */}
             <button
@@ -383,15 +374,6 @@ const DashboardLayout = () => {
 
             {/* Settings row */}
             <div className="px-4 mt-3 flex gap-2">
-              {/* Language */}
-              <button
-                onClick={() => setLang(lang === 'uz' ? 'ru' : 'uz')}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-semibold transition-colors"
-              >
-                <Globe size={16} />
-                {lang === 'uz' ? "O'zbek" : 'Русский'}
-              </button>
-
               {/* Theme */}
               <button
                 onClick={toggleTheme}
