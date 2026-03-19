@@ -19,7 +19,7 @@ import useSocket from '../../hooks/useSocket';
 /* Bottom nav definitions for drivers */
 const driverNavItems = [
   { to: '/driver', icon: Home, label: 'Bosh sahifa', end: true },
-  { to: '/driver/flights', icon: Plane, label: 'Reyslar' },
+  { to: '/driver/expense', icon: Plane, label: 'Xarajatlar' },
 ];
 
 /* Status badge colors */
