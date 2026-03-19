@@ -28,8 +28,9 @@ const salaryPaymentSchema = z.object({
 const locationSchema = z.object({
   lat: z.number().min(-90).max(90),
   lng: z.number().min(-180).max(180),
-  speed: z.number().min(0).optional(),
-  heading: z.number().min(0).max(360).optional(),
+  // Browser GPS null qaytarishi mumkin (speed/heading yo'q bo'lsa) — nullish qabul qilamiz
+  speed: z.number().min(0).nullish(),
+  heading: z.number().min(0).max(360).nullish(),
 });
 
 module.exports = { createDriverSchema, updateDriverSchema, salaryPaymentSchema, locationSchema };
